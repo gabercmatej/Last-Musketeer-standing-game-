@@ -47,3 +47,6 @@ Thumbs.db
 .superpowers/
 .netlify/
 node_modules/
+
+# Playwright MCP screenshots/logs
+.playwright-mcp/
