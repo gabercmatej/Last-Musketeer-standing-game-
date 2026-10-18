@@ -77,3 +77,4 @@ Always keep a placeholder fallback when real art is missing, so the game never b
 - Matej is building his first multiplayer game. When you finish a step, tell him **exactly how to test it by hand**: which menu, which button, what he should see.
 - Keep summaries short: what changed, test results, anything you decided, and what to try next.
 - Commit to git at the end of each working feature, with a clear message, if the repo exists.
+- At the end of every session and after each working feature, commit and push to origin main.

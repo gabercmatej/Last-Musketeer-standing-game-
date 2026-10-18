@@ -26,7 +26,7 @@ namespace Musketeers.Sim
             return log;
         }
 
-        // One tick: plans[i][tick] is the action of plans[i].Slot. Missing slots Catch Breath.
+        // One tick: plans[i][tick] is the action of plans[i].Slot. Missing slots Idle.
         public static void ResolveTick(GameState s, TurnPlan[] plans, int tick, GameConfig cfg, EventLog log)
         {
             if (s.RoundOver)

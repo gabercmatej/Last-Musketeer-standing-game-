@@ -14,6 +14,7 @@ namespace Musketeers.Sim
             Target = target;
         }
 
+        public static PlannedAction Idle() => new PlannedAction(ActionType.Idle);
         public static PlannedAction CatchBreath() => new PlannedAction(ActionType.CatchBreath);
         public static PlannedAction Move(Dir d) => new PlannedAction(ActionType.Move, d);
         public static PlannedAction Dash(Dir d) => new PlannedAction(ActionType.Dash, d);

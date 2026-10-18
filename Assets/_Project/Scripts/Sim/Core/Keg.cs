@@ -7,7 +7,8 @@ namespace Musketeers.Sim
         public int Owner;        // slot of the thrower, -1 for map/scenario kegs
         public Int2 Pos;
         public int Fuse;         // ticks until it explodes on its own
-        public bool Detonating;  // set when a shot hits it; Phase 5 (Day 2) explodes it
+        public bool Detonating;  // hit by a shot (or landed on something): explodes in Phase 5 this tick
+        public int DetonatedBy = -1;  // first shooter (initiative order) to hit it; takes the kill credit
 
         public Keg Clone() => (Keg)MemberwiseClone();
 
@@ -19,6 +20,7 @@ namespace Musketeers.Sim
             h.Add(Pos.Y);
             h.Add(Fuse);
             h.Add(Detonating);
+            h.Add(DetonatedBy);
         }
 
         public override string ToString() => $"Keg#{Id} owner={Owner} {Pos} fuse{Fuse}{(Detonating ? " detonating" : "")}";

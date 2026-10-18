@@ -8,6 +8,7 @@ namespace Musketeers.Sim.Tests
     // Shorthand for plans in tests: Act.Fire(Dir.E).
     public static class Act
     {
+        public static PlannedAction Idle() => PlannedAction.Idle();
         public static PlannedAction CatchBreath() => PlannedAction.CatchBreath();
         public static PlannedAction Move(Dir d) => PlannedAction.Move(d);
         public static PlannedAction Dash(Dir d) => PlannedAction.Dash(d);
@@ -17,6 +18,7 @@ namespace Musketeers.Sim.Tests
         public static PlannedAction Shove(Dir d) => PlannedAction.Shove(d);
         public static PlannedAction Keg(int x, int y) => PlannedAction.ThrowKeg(new Int2(x, y));
         public static PlannedAction Signature(Dir d) => PlannedAction.Signature(d);
+        public static PlannedAction Sig(Dir d) => PlannedAction.Signature(d);
     }
 
     // TECH_DESIGN §6 ASCII scenario helper. A–D are units in slots 0–3 standing on floor, K is a keg
@@ -113,6 +115,21 @@ namespace Musketeers.Sim.Tests
         public Scenario WithGrit(char c, int grit) { Unit(c).Grit = grit; return Snapshot(); }
         public Scenario WithLoaded(char c, bool loaded) { Unit(c).Loaded = loaded; return Snapshot(); }
         public Scenario WithTurn(int turn) { State.Turn = turn; return Snapshot(); }
+        public Scenario WithAbility(char c, Ability a) { Unit(c).Ability = a; return Snapshot(); }
+        public Scenario Parrying(char c) { Unit(c).Parrying = true; return Snapshot(); }
+
+        // Kegs are numbered in id order, which for 'K' symbols is reading order (top row first).
+        public Keg Keg(int index) => State.Kegs[index];
+        public Scenario WithKegFuse(int index, int fuse) { State.Kegs[index].Fuse = fuse; return Snapshot(); }
+        public Scenario WithKegOwner(int index, char owner) { State.Kegs[index].Owner = Slot(owner); return Snapshot(); }
+
+        // Runs §6 Turn start for the current State.Turn (Grit, crumble, falls).
+        public Scenario TurnStart()
+        {
+            _before = Render();
+            Log = Sim.TurnStart.Begin(State, Config);
+            return this;
+        }
 
         public Scenario WithLastAttacker(char victim, char attacker, int turn)
         {
@@ -211,6 +228,37 @@ namespace Musketeers.Sim.Tests
         }
 
         public Scenario AssertDead(char c) => AssertAlive(c, false);
+
+        public Scenario AssertKegAt(int x, int y)
+        {
+            if (State.KegAt(new Int2(x, y)) == null)
+                Fail($"Expected a keg at ({x},{y}).");
+            return this;
+        }
+
+        public Scenario AssertNoKegs()
+        {
+            if (State.Kegs.Count != 0)
+                Fail($"Expected no kegs, found {State.Kegs.Count}.");
+            return this;
+        }
+
+        public Scenario AssertTile(int x, int y, TileType t)
+        {
+            if (State.Board.Get(new Int2(x, y)) != t)
+                Fail($"Expected {t} at ({x},{y}) but found {State.Board.Get(new Int2(x, y))}.");
+            return this;
+        }
+
+        public Scenario AssertFizzle(char c, FizzleReason reason)
+        {
+            var e = Find(SimEventKind.Fizzled, c);
+            if (e == null)
+                Fail($"Expected {c} to fizzle ({reason}).");
+            else if (e.Value.Reason != (byte)reason)
+                Fail($"Expected {c} to fizzle with {reason}, got {(FizzleReason)e.Value.Reason}.");
+            return this;
+        }
 
         public Scenario AssertEvent(SimEventKind kind, char unit = '\0')
         {

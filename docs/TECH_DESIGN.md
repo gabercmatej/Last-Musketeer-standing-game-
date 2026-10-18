@@ -53,9 +53,9 @@ Assets/_Project/
       Core/        Int2, Dir, Tile, Board, Unit, Keg, GameState (Clone, ComputeHash), DeterministicRng
       Actions/     ActionType, PlannedAction, TurnPlan
       Rules/       TurnResolver (partial: Phase0Validate, Phase2Movement, Phase2bAbilities,
-                   Phase3Shoves, Phase4Shots, Phase5Kegs, Phase6Deaths), TurnStart (grit, crumble)
+                   Phase3Shoves, Phase4Shots, Phase5Kegs, Phase6Deaths), TurnStart (grit, crumble), Crumble
       Events/      SimEvent (struct, Kind enum + fields), EventLog
-      Match/       MatchState, Scoring, Crown, Awards, MatchStats
+      Match/       MatchState, MatchRunner (Match → Round → Turn), Scoring (+ Crown), MatchStats
       Maps/        MapParser (ASCII → Board + spawns)
       Bots/        BotPlanner (simple heuristic bot, deterministic given rng)
       Config/      GameConfig (all numbers from GAME_DESIGN §11)
@@ -93,7 +93,7 @@ Assets/_Project/
 ```csharp
 // Pure C#. No UnityEngine.
 public enum Dir : byte { N, E, S, W }
-public enum ActionType : byte { CatchBreath, Move, Dash, Fire, Reload, Parry, Shove, Keg, Signature }
+public enum ActionType : byte { Idle, CatchBreath, Move, Dash, Fire, Reload, Parry, Shove, Keg, Signature }  // Idle = 0 = unplanned
 public enum Ability : byte { Grappin, Switcheroo, DoubleCharge, BullRush }
 
 public struct PlannedAction { public ActionType Type; public Dir Dir; public Int2 Target; }
@@ -142,7 +142,7 @@ All RPCs use NGO 2.x universal RPCs (`[Rpc(SendTo.Server)]`, `[Rpc(SendTo.Client
 
 - **Bots are planned on the host** and included in `ResolveTurnRpc`, so clients never run bot AI.
 - **Timer:** the host is authoritative. Clients show a local countdown from `durationMs`, and the host adds 0.5 s of grace for latency.
-- **Disconnected player:** the host submits an empty plan for them (all Catch Breath).
+- **Disconnected player:** the host submits `TurnPlan.AllCatchBreath(slot)` for them (GAME_DESIGN §9). An empty plan would be all Idle.
 
 ### Sessions code (Multiplayer Services **2.4.1**, verified on Day 0 in `Assets/_Sandbox/Scripts/NetSmokeServices.cs`)
 ```csharp

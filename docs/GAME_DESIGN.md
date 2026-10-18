@@ -121,7 +121,7 @@ Characters are unique in a lobby. Each player picks a different one, and bots ta
 
 ## 5. Actions
 
-Each turn you plan **3 actions**, one per tick. Unplanned ticks become **Catch Breath**.
+Each turn you plan **3 actions**, one per tick. Unplanned ticks become **Idle**: nothing happens and you gain no Grit. Catch Breath only happens when you plan it.
 
 | # | Action | Target | Cost | Effect |
 |---|---|---|---|---|
@@ -133,6 +133,7 @@ Each turn you plan **3 actions**, one per tick. Unplanned ticks become **Catch B
 | 6 | **Shove** | direction | 0 | Push whatever is on the adjacent tile 1 tile away. Against a **parrying** unit: **Guard Break**, which pushes 2 tiles. Shoving a keg **kicks** it (it slides up to 3 tiles). |
 | 7 | **Powder Keg** | tile within 3 (Manhattan) | 2 Grit | Lob a keg. It lands this tick and **explodes 3 ticks later** (the same tick slot next turn). Max 1 active keg per player. |
 | 8 | **Catch Breath** | none | 0 | +1 Grit (it can be spent from the next tick on). |
+| – | **Idle** | none | 0 | Does nothing. Every tick you didn't plan is Idle. |
 | Q | **Signature** | depends | 3 Grit | See below. |
 
 ### The core triangle
@@ -175,6 +176,7 @@ For every living unit, look at its action for this tick. Check the cost and requ
 2. **Head-on collisions (Bonk):**
    - If two or more units want the **same tile**, none of them move, and each takes **1 damage**.
    - If two units try to **swap tiles**, neither moves, and both take **1 damage**.
+   - **Crossing paths** count as a swap: if two units' paths cross or pass through each other in the same tick (they would both enter the same tile at any point of their move, or cross the same edge in opposite directions), neither moves, and both take **1 damage**. Examples: two dashes toward each other, a dash through a unit that is moving the opposite way, or a walker stepping into the tile a dash passes through.
 3. **Blocked:** if a mover's destination is occupied by a unit that ends up not moving, the mover stays put and takes no damage. Repeat this check until nothing changes, so chains of blocked units resolve. Rotations of 3 or more units all succeed.
 4. Apply the moves. If a unit ends on a pit, it **falls** and dies instantly.
 

@@ -6,6 +6,7 @@ namespace Musketeers.Sim
         static void Phase0Validate(TickContext c)
         {
             c.Log.Phase = SimPhase.Validate;
+            var cfg = c.Cfg;
             var units = c.S.Units;
             for (int i = 0; i < units.Length; i++)
             {
@@ -23,8 +24,8 @@ namespace Musketeers.Sim
                 switch (a.Type)
                 {
                     case ActionType.Dash:
-                        if (u.Grit < c.Cfg.DashCost) reason = FizzleReason.NotEnoughGrit;
-                        else u.Grit -= c.Cfg.DashCost;
+                        if (u.Grit < cfg.DashCost) reason = FizzleReason.NotEnoughGrit;
+                        else u.Grit -= cfg.DashCost;
                         break;
                     case ActionType.Fire:
                         // Firing "costs" the load; paid here so Phase 4 only traces.
@@ -32,19 +33,32 @@ namespace Musketeers.Sim
                         else u.Loaded = false;
                         break;
                     case ActionType.Parry:
-                        if (u.Grit < c.Cfg.ParryCost) reason = FizzleReason.NotEnoughGrit;
+                        if (u.Grit < cfg.ParryCost) reason = FizzleReason.NotEnoughGrit;
                         else
                         {
-                            u.Grit -= c.Cfg.ParryCost;
+                            u.Grit -= cfg.ParryCost;
                             u.Parrying = true;
                             // Parrying is cleared at tick end, so playback needs this to show the guard.
                             c.Log.Add(SimEventKind.ParryRaised, unit: i, to: u.Pos);
                         }
                         break;
                     case ActionType.Keg:
+                        // §5 Powder Keg: 2 Grit, max 1 active per player, target within Manhattan 3.
+                        if (u.Grit < cfg.KegCost) reason = FizzleReason.NotEnoughGrit;
+                        else if (ActiveKegs(c.S, i) >= cfg.MaxKegsPerPlayer) reason = FizzleReason.KegLimit;
+                        else if (!c.S.Board.InBounds(a.Target) || u.Pos.Manhattan(a.Target) > cfg.KegThrowRange) reason = FizzleReason.OutOfRange;
+                        else u.Grit -= cfg.KegCost;
+                        break;
                     case ActionType.Signature:
-                        // Day 2: kegs (Phase 5) and signature abilities (Phase 2b / Double Charge).
-                        reason = FizzleReason.NotYetImplemented;
+                        // §4: every signature costs 3 Grit; Double Charge also needs (and spends) the load.
+                        if (u.Grit < cfg.SignatureCost) reason = FizzleReason.NotEnoughGrit;
+                        else if (u.Ability == Ability.DoubleCharge && !u.Loaded) reason = FizzleReason.NotLoaded;
+                        else
+                        {
+                            u.Grit -= cfg.SignatureCost;
+                            if (u.Ability == Ability.DoubleCharge)
+                                u.Loaded = false;
+                        }
                         break;
                 }
 
@@ -53,6 +67,17 @@ namespace Musketeers.Sim
                 else
                     c.Active[i] = true;
             }
+        }
+
+        public static int ActiveKegs(GameState s, int owner)
+        {
+            int n = 0;
+            for (int k = 0; k < s.Kegs.Count; k++)
+            {
+                if (s.Kegs[k].Owner == owner)
+                    n++;
+            }
+            return n;
         }
     }
 }

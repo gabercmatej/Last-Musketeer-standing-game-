@@ -47,6 +47,7 @@ namespace Musketeers.Sim
         public int WallSlamDamage = 1;        // §6 Phase 3.4
         public int SqueezeDamage = 1;         // §6 Phase 3.3
         public int KegDamage = 1;             // §6 Phase 5.3
+        public int KegPush = 1;               // §6 Phase 5.3: orthogonal neighbours pushed 1 outward
         public int DoubleChargePierce = 2;    // §4 Double Charge
         public int KillCreditTurns = 1;       // §6 Kill credit: last attacker counts this turn or last turn
     }

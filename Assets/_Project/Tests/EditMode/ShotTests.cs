@@ -81,13 +81,15 @@ namespace Musketeers.Sim.Tests
         }
 
         [Test]
-        public void Keg_HitByShot_IsMarkedForDetonation_AndBlocks()
+        public void Keg_HitByShot_BlocksTheShot_AndExplodesThisTick()
         {
-            var s = Scenario.From("A.K.B")
+            // B is 2 tiles past the keg: outside the 3×3, so neither the bullet nor the blast reaches.
+            var s = Scenario.From("A.K..B")
                 .Plan('A', Act.Fire(Dir.E))
                 .ResolveTick()
-                .AssertHp('B', 3);
-            Assert.That(s.State.Kegs[0].Detonating, Is.True);
+                .AssertHp('B', 3)
+                .AssertEvent(SimEventKind.KegExploded);
+            Assert.That(s.State.Kegs, Is.Empty);
         }
 
         [Test]

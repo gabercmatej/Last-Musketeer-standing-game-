@@ -19,22 +19,29 @@ namespace Musketeers.Sim
             for (int i = 0; i < units.Length; i++)
                 units[i].Parrying = false;
 
+            CheckRoundOver(s, c.Log);
+        }
+
+        // §6 Phase 6 / Turn start: the round ends when 1 or fewer units are alive (0 = draw).
+        internal static void CheckRoundOver(GameState s, EventLog log)
+        {
+            if (s.RoundOver)
+                return;
             int alive = 0;
             int last = SimEvent.None;
-            for (int i = 0; i < units.Length; i++)
+            for (int i = 0; i < s.Units.Length; i++)
             {
-                if (units[i].Alive)
+                if (s.Units[i].Alive)
                 {
                     alive++;
                     last = i;
                 }
             }
-            if (alive <= 1)
-            {
-                s.RoundOver = true;
-                s.RoundWinner = alive == 1 ? last : SimEvent.None;   // nobody left: a draw
-                c.Log.Add(SimEventKind.RoundEnded, unit: s.RoundWinner);
-            }
+            if (alive > 1)
+                return;
+            s.RoundOver = true;
+            s.RoundWinner = alive == 1 ? last : SimEvent.None;   // nobody left: a draw
+            log.Add(SimEventKind.RoundEnded, unit: s.RoundWinner);
         }
     }
 }

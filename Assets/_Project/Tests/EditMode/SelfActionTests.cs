@@ -110,28 +110,49 @@ namespace Musketeers.Sim.Tests
                 .AssertEventCount(SimEventKind.Fizzled, 1);
         }
 
-        [TestCase(ActionType.Keg)]
-        [TestCase(ActionType.Signature)]
-        public void KegAndSignature_FizzleUntilDay2_AtNoCost(ActionType type)
+        [Test]
+        public void UnplannedTicks_AreIdle_NoGrit_AndTurnAdvances()
         {
+            // Rule change 2026-10-18: unplanned ticks Idle; only a planned Catch Breath gives Grit.
             var s = Scenario.From("A..B")
-                .WithGrit('A', 5)
-                .Plan('A', new PlannedAction(type, Dir.E, new Int2(2, 0)))
-                .ResolveTick()
-                .AssertGrit('A', 5);
-            Assert.That(s.Find(SimEventKind.Fizzled, 'A').Value.Reason, Is.EqualTo((byte)FizzleReason.NotYetImplemented));
-            Assert.That(s.State.Kegs, Is.Empty);
+                .ResolveTurn()
+                .AssertGrit('A', 2)
+                .AssertGrit('B', 2)
+                .AssertEventCount(SimEventKind.CaughtBreath, 0)
+                .AssertEventCount(SimEventKind.Fizzled, 0);
+            Assert.That(s.State.Turn, Is.EqualTo(2));
         }
 
         [Test]
-        public void UnplannedTicks_AreCatchBreath_AndTurnAdvances()
+        public void DefaultPlannedAction_IsIdle()
         {
-            var s = Scenario.From("A..B")
-                .ResolveTurn()
-                .AssertGrit('A', 5)
-                .AssertGrit('B', 5)
-                .AssertEventCount(SimEventKind.CaughtBreath, 6);
-            Assert.That(s.State.Turn, Is.EqualTo(2));
+            Assert.That(default(PlannedAction).Type, Is.EqualTo(ActionType.Idle));
+            Assert.That(new TurnPlan(2)[1].Type, Is.EqualTo(ActionType.Idle));
+        }
+
+        [Test]
+        public void Idle_DoesNothing_EvenWhenPlannedNextToCatchBreath()
+        {
+            Scenario.From("A..B")
+                .WithGrit('A', 1).WithGrit('B', 1)
+                .Plan('A', Act.Idle())
+                .Plan('B', Act.CatchBreath())
+                .ResolveTick()
+                .AssertGrit('A', 1)
+                .AssertGrit('B', 2)
+                .AssertNoEvent(SimEventKind.CaughtBreath, 'A')
+                .AssertEvent(SimEventKind.CaughtBreath, 'B')
+                .AssertPos('A', 0, 0);
+        }
+
+        [Test]
+        public void AllCatchBreathPlan_GivesGritEveryTick()
+        {
+            // §9: disconnected players Catch Breath every tick; the host sends this plan for them.
+            var s = Scenario.From("A..B").WithGrit('A', 0);
+            TurnResolver.ResolveTurn(s.State, new[] { TurnPlan.AllCatchBreath(0), new TurnPlan(1) }, s.Config);
+            Assert.That(s.Unit('A').Grit, Is.EqualTo(3));
+            Assert.That(s.Unit('B').Grit, Is.EqualTo(2));
         }
 
         [Test]

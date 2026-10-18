@@ -16,6 +16,15 @@ namespace Musketeers.Sim
         public readonly List<Int2> Crates = new List<Int2>();
         public readonly List<int> CrateShooters = new List<int>();
         public readonly List<Keg> Kegs = new List<Keg>();
+        public readonly List<int> KegShooters = new List<int>();
+
+        public void AddKeg(Keg keg, int shooter)
+        {
+            if (Kegs.Contains(keg))
+                return;   // first shooter in initiative order keeps the credit
+            Kegs.Add(keg);
+            KegShooters.Add(shooter);
+        }
     }
 
     public static partial class TurnResolver
@@ -33,8 +42,12 @@ namespace Musketeers.Sim
             foreach (int i in c.Order)
             {
                 var u = units[i];
-                if (c.Active[i] && u.Alive && c.Act[i].Type == ActionType.Fire)
+                if (!c.Active[i] || !u.Alive)
+                    continue;
+                if (c.Act[i].Type == ActionType.Fire)
                     TraceShot(c, i, u.Pos, c.Act[i].Dir, c.Cfg.FireRange, true, buf);
+                else if (c.Act[i].Type == ActionType.Signature && u.Ability == Ability.DoubleCharge)
+                    TraceDoubleCharge(c, i, u.Pos, c.Act[i].Dir, buf);
             }
 
             for (int k = 0; k < buf.Crates.Count; k++)
@@ -46,9 +59,12 @@ namespace Musketeers.Sim
                 c.Log.Add(SimEventKind.CrateDestroyed, unit: buf.CrateShooters[k], to: p);
             }
 
-            // Phase 5 (Day 2) explodes these.
-            foreach (var keg in buf.Kegs)
-                keg.Detonating = true;
+            // §6 Phase 4.1: a keg hit by a shot explodes this tick, in Phase 5.
+            for (int k = 0; k < buf.Kegs.Count; k++)
+            {
+                buf.Kegs[k].Detonating = true;
+                buf.Kegs[k].DetonatedBy = buf.KegShooters[k];
+            }
 
             // Hits are recorded in shooter initiative order; the first one on each target gets the kill credit.
             var credited = new bool[units.Length];
@@ -93,8 +109,7 @@ namespace Musketeers.Sim
                 {
                     c.Log.Add(kind, unit: owner, from: origin, to: p, dir: dir);
                     c.Log.Add(SimEventKind.ShotHit, other: owner, keg: keg.Id, to: p, dir: dir);
-                    if (!buf.Kegs.Contains(keg))
-                        buf.Kegs.Add(keg);
+                    buf.AddKeg(keg, owner);
                     return;
                 }
                 var target = s.UnitAt(p);
@@ -122,6 +137,58 @@ namespace Musketeers.Sim
             }
             // Out of range or off the board: the shot ends on the last tile it reached.
             c.Log.Add(kind, unit: owner, from: origin, to: p, dir: dir);
+        }
+
+        // §4 Double Charge: range 7, hits up to DoubleChargePierce units (stopping at the last one),
+        // ignores Parry (no block, no reflection). Pillars stop it; a crate is destroyed and stops it;
+        // a keg is detonated and stops it, like a musket shot.
+        static void TraceDoubleCharge(TickContext c, int owner, Int2 origin, Dir dir, ShotBuffer buf)
+        {
+            var s = c.S;
+            Int2 d = dir.ToInt2();
+            Int2 p = origin;
+            Keg hitKeg = null;
+            var victims = new List<Unit>(c.Cfg.DoubleChargePierce);
+            for (int step = 1; step <= c.Cfg.DoubleChargeRange; step++)
+            {
+                Int2 next = p + d;
+                if (!s.Board.InBounds(next))
+                    break;
+                p = next;
+
+                var tile = s.Board.Get(p);
+                if (tile == TileType.Pillar)
+                    break;
+                if (tile == TileType.Crate)
+                {
+                    buf.Crates.Add(p);
+                    buf.CrateShooters.Add(owner);
+                    break;
+                }
+                hitKeg = s.KegAt(p);
+                if (hitKeg != null)
+                    break;
+                var target = s.UnitAt(p);
+                if (target != null)
+                {
+                    victims.Add(target);
+                    if (victims.Count >= c.Cfg.DoubleChargePierce)
+                        break;
+                }
+            }
+
+            // Same event order as a musket shot: the tracer first, then what it hit.
+            c.Log.Add(SimEventKind.ShotFired, unit: owner, from: origin, to: p, dir: dir, reason: (byte)ShotKind.DoubleCharge);
+            foreach (var v in victims)
+            {
+                buf.Hits.Add(new ShotHitRecord { Target = v.Slot, Attacker = owner, Kind = DamageKind.DoubleCharge });
+                c.Log.Add(SimEventKind.ShotHit, unit: v.Slot, other: owner, to: v.Pos, dir: dir);
+            }
+            if (hitKeg != null)
+            {
+                c.Log.Add(SimEventKind.ShotHit, other: owner, keg: hitKeg.Id, to: p, dir: dir);
+                buf.AddKeg(hitKeg, owner);
+            }
         }
     }
 }

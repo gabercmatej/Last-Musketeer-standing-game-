@@ -3,7 +3,7 @@ using System;
 namespace Musketeers.Sim
 {
     // A player's 3 actions for one turn. Fixed-size struct so it's cheap to send and copy;
-    // unplanned ticks stay default, which is Catch Breath (§5).
+    // unplanned ticks stay default, which is Idle (§5).
     public struct TurnPlan
     {
         public const int Length = 3;
@@ -19,6 +19,14 @@ namespace Musketeers.Sim
             A0 = default;
             A1 = default;
             A2 = default;
+        }
+
+        // §9: a disconnected player's musketeer Catches Breath every tick (an empty plan would Idle).
+        public static TurnPlan AllCatchBreath(int slot)
+        {
+            var p = new TurnPlan(slot);
+            p.A0 = p.A1 = p.A2 = PlannedAction.CatchBreath();
+            return p;
         }
 
         public PlannedAction this[int tick]
