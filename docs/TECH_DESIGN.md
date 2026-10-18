@@ -144,27 +144,37 @@ All RPCs use NGO 2.x universal RPCs (`[Rpc(SendTo.Server)]`, `[Rpc(SendTo.Client
 - **Timer:** the host is authoritative. Clients show a local countdown from `durationMs`, and the host adds 0.5 s of grace for latency.
 - **Disconnected player:** the host submits an empty plan for them (all Catch Breath).
 
-### Sessions code (Multiplayer Services 1.2+: verify against the installed package version)
+### Sessions code (Multiplayer Services **2.4.1**, verified on Day 0 in `Assets/_Sandbox/Scripts/NetSmokeServices.cs`)
 ```csharp
 var init = new InitializationOptions();
 init.SetProfile(MakeProfileName());                       // see "Auth profiles" below
 await UnityServices.InitializeAsync(init);
 await AuthenticationService.Instance.SignInAnonymouslyAsync();
 
-// Host
+// Both roles: sessions set the relay server data but NOT UseWebSockets, and UnityTransport
+// errors if the two disagree. Match it to the protocol before create/join.
+var utp = NetworkManager.Singleton.GetComponent<UnityTransport>();
+utp.UseWebSockets = RelayProtocol.Default == RelayProtocol.WSS;
+utp.DisconnectTimeoutMS = 60000;                          // survive a quick tab-switch (§7)
+
+// Host. The old RelayNetworkOptions(protocol, …) ctor is obsolete in 2.4.x:
+// the protocol goes through WithNetworkOptions instead.
 var opts = new SessionOptions { MaxPlayers = 4, IsPrivate = true }
-    .WithRelayNetwork(new RelayNetworkOptions(RelayProtocol.Default, null, false));
+    .WithRelayNetwork()
+    .WithNetworkOptions(new NetworkOptions { RelayProtocol = RelayProtocol.Default });
 ISession session = await MultiplayerService.Instance.CreateSessionAsync(opts);
 string code = session.Code;                               // show this in the lobby
 
-// Client
-ISession session = await MultiplayerService.Instance.JoinSessionByCodeAsync(code);
+// Client: joiners can pick a protocol too in 2.4.x, so pass the same one.
+var joinOpts = new JoinSessionOptions()
+    .WithNetworkOptions(new NetworkOptions { RelayProtocol = RelayProtocol.Default });
+ISession session = await MultiplayerService.Instance.JoinSessionByCodeAsync(code, joinOpts);
 ```
-The session sets up Relay and starts NGO host/client for you. The `NetworkManager` needs a `UnityTransport` component, and Relay is configured by the session.
+The session sets up Relay and starts NGO host/client for you. The `NetworkManager` needs a `UnityTransport` component, and Relay is configured by the session (except `UseWebSockets`, above).
 
 **Relay protocol: keep everyone on the same one.**
-- `RelayProtocol.Default` picks per platform: **WSS in Web builds**, and UDP/DTLS in the Editor.
-- In current package versions, joiners can't choose a protocol with `JoinSessionByCodeAsync`, so they always use their platform default.
+- `RelayProtocol.Default` picks per build target: **WSS in Web builds, and also in the Editor while the active build target is Web** (verified Day 0), otherwise UDP/DTLS.
+- In 2.4.x joiners pass a protocol through `JoinSessionOptions.WithNetworkOptions`; we always pass `RelayProtocol.Default`.
 - So test **Editor ↔ Editor** (Multiplayer Play Mode) or **browser ↔ browser**. Never mix them.
 - In the Web build, log the transport's `UseWebSockets` and the relay connection type at startup, and confirm it's WSS.
 - (`RelayProtocol.WSS` exists for forcing it, but forcing it only on the host causes a mismatch with Editor joiners.)
