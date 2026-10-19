@@ -49,3 +49,5 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 8bfa5cbd8ef1b4e7aa1c117a5ce79134, type: 2}
   - {fileID: 11400000, guid: e10be1847a6c24bb09ee318dde92e66c, type: 2}
   - {fileID: 11400000, guid: 3f7ca8d39c28b4cfda3d5406cee051a6, type: 2}
+  Musket: {fileID: 11400000, guid: 4404ef11cf9564de19a00e2fe3ddad4f, type: 2}
+  Rapier: {fileID: 11400000, guid: e7a7f13e8420e405e86d0da50b2d409c, type: 2}

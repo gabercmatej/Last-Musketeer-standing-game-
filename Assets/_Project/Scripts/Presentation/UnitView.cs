@@ -145,6 +145,7 @@ namespace Musketeers.Presentation
         public void Rest() => _rig.Rest();
         public void Recoil(float seconds) => _rig.Recoil(seconds);
         public void FlashPose(PoseKind pose, float seconds) { if (_alive) _rig.FlashPose(pose, seconds); }
+        public void HoldMusket(float seconds) { if (_alive) _rig.HoldMusket(seconds); }
         public void SetPose(PoseKind pose) => _rig.SetPose(pose);
 
         public void SetSelected(bool selected) => _select.enabled = selected && _alive;

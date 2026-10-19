@@ -345,6 +345,7 @@ namespace Musketeers.Presentation
                     At(delay, () =>
                     {
                         u.SetLoaded(true);
+                        u.HoldMusket(S(0.6f));
                         _fx.Popup("reload", u.transform.localPosition + Vector3.up * 0.3f, new Color(0.9f, 0.9f, 0.8f), S(0.6f));
                     });
                     Sfx(delay, "SFX/actions/reload");

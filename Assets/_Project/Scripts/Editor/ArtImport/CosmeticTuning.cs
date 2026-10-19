@@ -15,27 +15,80 @@ namespace Musketeers.EditorTools.ArtImport
     {
         const string DefaultsPath = "Assets/_Project/Scripts/Editor/ArtImport/FitDefaults.json";
 
+        // Public so the round-trip test can build one; the file format is just JsonUtility on these.
         [Serializable]
-        sealed class Defaults
+        public sealed class Defaults
         {
             public List<CharDefaults> Characters = new List<CharDefaults>();
             public List<ItemDefaults> Items = new List<ItemDefaults>();
+            public List<WeaponDefaults> Weapons = new List<WeaponDefaults>();
         }
 
         [Serializable]
-        sealed class CharDefaults
+        public sealed class CharDefaults
         {
             public string Id;
             public List<PoseFit> Poses = new List<PoseFit>();
         }
 
         [Serializable]
-        sealed class ItemDefaults
+        public sealed class ItemDefaults
         {
             public string Id;
             public bool Enabled = true;
             public ItemFit Fit;
             public List<FitOverride> Overrides = new List<FitOverride>();
+            public ItemMasks Masks = new ItemMasks();
+            public int Checked;
+        }
+
+        [Serializable]
+        public sealed class WeaponDefaults
+        {
+            public string Id;
+            public FitSet Rest;
+            public FitSet Active;
+        }
+
+        // Same data in gives the same bytes out: JsonUtility writes fields in declaration order and the lists
+        // keep the catalog's order.
+        public static string ToJson(Defaults d) => JsonUtility.ToJson(d, true);
+        public static Defaults FromJson(string json) => JsonUtility.FromJson<Defaults>(json);
+
+        static BezierPath CloneOrEmpty(BezierPath p) => p != null ? p.Clone() : new BezierPath();
+
+        public static ItemMasks CloneMasks(ItemMasks m)
+        {
+            var r = new ItemMasks { Base = CloneOrEmpty(m?.Base) };
+            if (m?.PerPose != null)
+            {
+                foreach (var pm in m.PerPose)
+                {
+                    if (pm != null)
+                        r.PerPose.Add(new PoseMask { Pose = pm.Pose, Path = CloneOrEmpty(pm.Path) });
+                }
+            }
+            return r;
+        }
+
+        static List<FitOverride> CloneOverrides(List<FitOverride> list)
+        {
+            var r = new List<FitOverride>();
+            if (list == null)
+                return r;
+            foreach (var o in list)
+            {
+                if (o != null)
+                    r.Add(new FitOverride { Character = o.Character ?? "", AnyPose = o.AnyPose, Pose = o.Pose, Fit = o.Fit });
+            }
+            return r;
+        }
+
+        public static FitSet CloneSet(FitSet f)
+        {
+            if (f == null)
+                return null;
+            return new FitSet { Name = f.Name, Fit = f.Fit, FitOverrides = CloneOverrides(f.FitOverrides), ItemMasks = CloneMasks(f.ItemMasks), Checked = f.Checked };
         }
 
         static Defaults _defaults;
@@ -61,12 +114,9 @@ namespace Musketeers.EditorTools.ArtImport
         {
             var d = Load().Items.Find(i => i.Id == def.Id);
             def.Global = d != null ? d.Fit : SlotDefaults[def.Slot];
-            def.Overrides = new List<FitOverride>();
-            if (d != null)
-            {
-                foreach (var o in d.Overrides)
-                    def.Overrides.Add(new FitOverride { Character = o.Character ?? "", AnyPose = o.AnyPose, Pose = o.Pose, Fit = o.Fit });
-            }
+            def.Overrides = CloneOverrides(d?.Overrides);
+            def.Masks = CloneMasks(d?.Masks);
+            def.CheckedMask = d != null ? d.Checked : 0;
             def.EnabledInV1 = d == null || d.Enabled;
             def.Tuned = false;
         }
@@ -84,11 +134,28 @@ namespace Musketeers.EditorTools.ArtImport
             return true;
         }
 
+        // The committed fit sets for one weapon (deep copies), if the JSON has the weapon.
+        public static bool TryWeapon(string id, out FitSet rest, out FitSet active)
+        {
+            rest = active = null;
+            var w = Load().Weapons.Find(x => x.Id == id);
+            if (w == null || w.Rest == null || w.Active == null)
+                return false;
+            rest = CloneSet(w.Rest);
+            active = CloneSet(w.Active);
+            return true;
+        }
+
         [MenuItem("Tools/Musketeers/Save Fits as Import Defaults")]
         public static void SaveDefaults()
         {
             var roster = AssetDatabase.LoadAssetAtPath<CharacterRoster>("Assets/_Project/Data/CharacterRoster.asset");
             var catalog = AssetDatabase.LoadAssetAtPath<CosmeticCatalog>("Assets/_Project/Data/CosmeticCatalog.asset");
+            if (roster == null || catalog == null)
+            {
+                Debug.LogWarning("[Fitting] Nothing saved: CharacterRoster or CosmeticCatalog is missing (run Import Art).");
+                return;
+            }
             var d = new Defaults();
             foreach (var c in roster.Characters)
             {
@@ -106,10 +173,15 @@ namespace Musketeers.EditorTools.ArtImport
             foreach (var item in catalog.Items)
             {
                 if (item != null)
-                    d.Items.Add(new ItemDefaults { Id = item.Id, Enabled = item.EnabledInV1, Fit = item.Global, Overrides = item.Overrides });
+                    d.Items.Add(new ItemDefaults { Id = item.Id, Enabled = item.EnabledInV1, Fit = item.Global, Overrides = item.Overrides, Masks = item.Masks, Checked = item.CheckedMask });
+            }
+            foreach (var w in new[] { catalog.Musket, catalog.Rapier })
+            {
+                if (w != null)
+                    d.Weapons.Add(new WeaponDefaults { Id = w.Id, Rest = w.Rest, Active = w.Active });
             }
             string path = Path.Combine(Directory.GetParent(Application.dataPath).FullName, DefaultsPath);
-            File.WriteAllText(path, JsonUtility.ToJson(d, true));
+            File.WriteAllText(path, ToJson(d));
             _defaults = null;
             AssetDatabase.ImportAsset(DefaultsPath);
             Debug.Log("[Fitting] Saved the current fits as Import Art defaults: " + DefaultsPath);

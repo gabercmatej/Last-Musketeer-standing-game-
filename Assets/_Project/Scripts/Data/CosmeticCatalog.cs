@@ -9,6 +9,8 @@ namespace Musketeers.Data
     public sealed class CosmeticCatalog : ScriptableObject
     {
         public List<CosmeticDef> Items = new List<CosmeticDef>();
+        public WeaponDef Musket;   // the weapons live here so the runtime rig and the editor find the same assets
+        public WeaponDef Rapier;
 
         public CosmeticDef Get(string id)
         {

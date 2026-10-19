@@ -21,6 +21,7 @@ namespace Musketeers.EditorTools.ArtImport
         {
             var gameArt = WireGameArt(log);
             var catalog = WireCosmetics(reset, log);
+            WireWeapons(catalog, reset, log);
             WireCharacters(reset, log);
             WireMaps(log);
             WireAudio(log);
@@ -94,6 +95,61 @@ namespace Musketeers.EditorTools.ArtImport
             }
             log.Add($"Cosmetics: {catalog.Items.Count} items ({string.Join(", ", catalog.Items.Select(i => i.Id))})");
             return catalog;
+        }
+
+        // ---------- weapons ----------
+
+        [MenuItem("Tools/Musketeers/Wire Weapons")]
+        static void WireWeaponsMenu()
+        {
+            var catalog = AssetDatabase.LoadAssetAtPath<CosmeticCatalog>($"{Data}/CosmeticCatalog.asset");
+            if (catalog == null)
+            {
+                Debug.LogWarning("[Weapons] No CosmeticCatalog yet: run Import Art first.");
+                return;
+            }
+            var log = new List<string>();
+            WireWeapons(catalog, false, log);
+            AssetDatabase.SaveAssets();
+            Debug.Log("[Weapons] " + string.Join("; ", log));
+        }
+
+        // Creates Data/Weapons/musket.asset and rapier.asset, refreshes their sprites every run and writes the
+        // fits only when the asset is new or on a reset (so Studio work survives a re-import).
+        public static void WireWeapons(CosmeticCatalog catalog, bool reset, List<string> log)
+        {
+            var ga = AssetDatabase.LoadAssetAtPath<GameArt>($"{Data}/GameArt.asset");
+            var roster = AssetDatabase.LoadAssetAtPath<CharacterRoster>($"{Data}/CharacterRoster.asset");
+            var matej = roster != null ? roster.Characters.FirstOrDefault(c => c != null && c.Id == "matej") : null;
+            catalog.Musket = WireWeapon("musket", true, ga != null ? ga.Get(GameArt.Musket) : null, matej?.Fit, reset, log);
+            catalog.Rapier = WireWeapon("rapier", false, ga != null ? ga.Get(GameArt.Rapier) : null, matej?.Fit, reset, log);
+            EditorUtility.SetDirty(catalog);
+        }
+
+        static WeaponDef WireWeapon(string id, bool musket, Sprite sprite, CharacterFit matejFit, bool reset, List<string> log)
+        {
+            string path = $"{Data}/Weapons/{id}.asset";
+            bool fresh = AssetDatabase.LoadAssetAtPath<WeaponDef>(path) == null;
+            var w = Ensure<WeaponDef>(path);
+            w.Id = id;
+            w.Musket = musket;
+            if (sprite != null)
+                w.Sprite = sprite;
+            if (fresh || reset)
+            {
+                if (CosmeticTuning.TryWeapon(id, out var rest, out var active))
+                {
+                    w.Rest = rest;
+                    w.Active = active;
+                }
+                else
+                {
+                    WeaponDefaults.Fill(w, matejFit);
+                }
+                log.Add($"Weapon {id}: fits written");
+            }
+            EditorUtility.SetDirty(w);
+            return w;
         }
 
         // ---------- characters ----------

@@ -6,6 +6,9 @@
         "Musketeers.Game",
         "Musketeers.Data",
         "Musketeers.UI",
+        "Musketeers.Presentation",
+        "Musketeers.EditorTools",
+        "PrimeTween.Runtime",
         "UnityEngine.TestRunner",
         "UnityEditor.TestRunner"
     ],
