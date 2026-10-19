@@ -69,7 +69,7 @@ Top row is y = 8.
 ```
 With 2 or 3 players, use the spawns in slot order.
 
-### Map 2: "The Bridge" (Day 6, if there's time)
+### Map 2: "The Bridge"
 ```
 ~~~...~~~
 ~1.....2~
@@ -82,7 +82,7 @@ With 2 or 3 players, use the spawns in slot order.
 ~~~...~~~
 ```
 
-Maps are plain-text files, so new maps (your hangout spots) are easy to add.
+Maps are plain-text files, so new maps (your hangout spots) are easy to add. The board size comes from the map file (any rectangle; the camera fits up to 13×13), and each map picks a tileset and background.
 
 ### The Cardinal's Guard closes in (shrinking arena)
 Each tile has a **ring index**: `min(x, y, W-1-x, H-1-y)`. The outer ring is 0, and the center is 4.
@@ -264,9 +264,22 @@ Ranked by fun-per-hour-of-work. Days 5–6 of the build plan.
 
 ---
 
-## 9. Lobby and online flow
+## 9. Screen flow, lobby and online
 
-- **Main menu:** name field (remembered), **Host**, **Join** (code field), Settings, Fullscreen.
+### Screens (one scene; the UI switches between them)
+1. **Main menu:** splash art and logo, name field (remembered), **Play vs Bots**, **Host**, **Join** (code field), **Settings** (Music / SFX / Voice volume, credits), Fullscreen.
+2. **Lobby** (Among Us style): the musketeers stand on a tavern stage.
+   - Character picker: 4 portraits, taken characters greyed out.
+   - **Wardrobe** panel with **Hat / Face / Cape / Boots** tabs and a live preview on the stage. Your outfit is saved per character (PlayerPrefs). Bots wear random outfits.
+   - Map choice: **Courtyard** or **Bridge**. Add Bot / Remove Bot (2–4 players). **Start**.
+3. **Loading screen:** splash art, a random gameplay tip and a bar, for a few seconds.
+4. **Arena:** the match. Emotes on **Z / X / C / V**.
+5. **Scoreboard** between rounds (points with reasons, portraits).
+6. **Results:** the winner in their victory pose, everyone's portraits, final points and badges. Then back to the **Lobby** for the next match.
+
+Offline (vs bots) the lobby is local; online (Day 5) the same lobby is shared and adds the items below.
+
+### Online additions
 - **Invite link:** the site URL with `?join=CODE`, for example `https://tlms.netlify.app/?join=K7Q2PX`. Opening it fills in the code, so the friend only types a name and presses Join.
 - **Lobby:**
   - Shows the join code big at the top, with **Copy code** and **Copy invite link** buttons.
@@ -286,11 +299,11 @@ Ranked by fun-per-hour-of-work. Days 5–6 of the build plan.
 
 - `CharacterDef` assets hold everything for each friend:
   - name, color and portrait
-  - model/sprite prefab
+  - body poses (idle, hurt, victory, lunge) with cosmetic anchors, and a default outfit
   - signature ability
   - victory line, death lines and emote set
   - announcer callouts that mention them
-- Cosmetic slots: **Hat, Cape, Boots, Musket skin**. They come from `CosmeticDef` assets, and the prefab has attachment anchors for each slot. The lobby gets a "Wardrobe" tab later.
+- Cosmetic slots: **Hat, Face, Cape, Boots** (musket skins later). They come from `CosmeticDef` assets (slot, side sprite, front sprite for the victory pose, offset, scale, sort order; capes draw behind the body). Each `CharacterDef` pose has **HeadTop, Face, Back, Feet** (and Hand, for the musket) anchors, so one item fits all four musketeers. Tune them in **Musketeers/Wardrobe Preview**. The lobby's Wardrobe panel equips them.
 - Maps can be your hangout spots, as new map text files plus a tileset.
 - Death messages and award names can be your inside jokes. They're all text in data assets, with no code changes needed.
 

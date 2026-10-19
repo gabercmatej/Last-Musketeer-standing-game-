@@ -4,7 +4,9 @@ Goal: play a full match with all four of you on **Saturday, Oct 24**.
 
 Each day has a goal, a **Definition of Done (DoD)**, and a **prompt** to paste into Claude Code from this folder. Do the days in order: each one builds on the last, and the riskiest parts (rules, then networking) come first.
 
-> **Milestone after Day 4: "Playable with friends."** It has ugly cubes, but it's a full game online. If the week goes badly, you still play on Saturday.
+> **Milestone after Day 5: "Playable with friends."** It's a full game online, with your art. If the week goes badly, you still play on Saturday.
+>
+> *Reordered on Day 4 (Oct 19):* the art and audio arrived early, so Day 4 integrates them and builds the full screen flow; online moves to Day 5, the old Days 5 and 6 merge into Day 6, and Day 7 is balance plus the friend test.
 
 | Day | Focus | Hours (you) | Risk |
 |---|---|---|---|
@@ -12,10 +14,10 @@ Each day has a goal, a **Definition of Done (DoD)**, and a **prompt** to paste i
 | 1 | Sim: board, movement, shoves, shots | 2–3 | medium |
 | 2 | Sim: kegs, abilities, rounds, scoring, bots | 2–3 | medium |
 | 3 | Visuals + planning UI + offline vs bots | 3 | medium |
-| 4 | **Online:** sessions, lobby, turn loop | 3–4 | **high** |
-| 5 | Game feel: reveal, juice, kill-cam, emotes | 2–3 | low |
-| 6 | Meta: awards, rematch, Hall of Fame, map 2, balance | 2–3 | low |
-| 7 | Your art, builds, test with one friend, fixes | 3+ | low |
+| 4 | **Your art + audio**, full screen flow (menu, lobby, wardrobe, loading, results) | 3 | medium |
+| 5 | **Online:** sessions, lobby, turn loop, cosmetics in LobbySlot | 3–4 | **high** |
+| 6 | Game feel + meta: reveal, juice, kill-cam, awards, rematch, Hall of Fame | 2–3 | low |
+| 7 | Balance (incl. bigger maps), friend test, fixes, deploy | 3+ | low |
 
 ---
 
@@ -163,7 +165,21 @@ Tell me exactly how to test it by hand.
 
 ---
 
-## Day 4: Online (the important day)
+## Day 4: Your art, audio and the full screen flow
+
+**Goal:** every playtest from now on looks and sounds like the real game. No networking.
+
+**DoD:**
+- `Tools/Musketeers/Import Art` turns the source `Art/` and `Audio/` folders into cleaned, sliced, scaled copies in `Assets/_Project/` and wires them into the data assets (re-runnable; your nudged offsets survive).
+- Characters wear cosmetics through anchors; the **Musketeers/Wardrobe Preview** window shows all 4 wearing an item.
+- Courtyard + Bridge tilesets, props, FX sprites, UI skin, fonts, icons, badges, emotes.
+- Screen flow: Menu → Lobby (stage, character pick, Wardrobe, map) → Loading → Arena → Scoreboard → Results → Lobby. Emotes on Z/X/C/V.
+- Music per screen, SFX and voice lines on events, volume sliders.
+- Version 0.2.0 deployed. Plan: `docs/plans/004-day4-art-audio-screens.md`.
+
+---
+
+## Day 5: Online (the important day)
 
 **Goal:** you host, friends join with a code, pick characters, ready up and play a full match online.
 
@@ -176,7 +192,7 @@ Tell me exactly how to test it by hand.
 
 **Prompt:**
 ```
-Read CLAUDE.md and docs/TECH_DESIGN.md §2 and §5 carefully. Day 4: networking.
+Read CLAUDE.md and docs/TECH_DESIGN.md §2 and §5 carefully. Day 5: networking.
 Create asmdef Musketeers.Net. Implement ServicesBootstrap (init + anonymous sign-in,
 unique auth profile per Multiplayer Play Mode player), SessionService using the
 Multiplayer Services Sessions API with WithRelayNetwork (check the installed package
@@ -190,7 +206,7 @@ implementing IMatchTransport so MatchController is unchanged. Lobby UI in UI Too
 join code big with Copy code + Copy invite link (Clipboard.jslib), ?join=CODE prefill
 from Application.absoluteURL, player list, 4 character portraits, ready, host controls,
 Start, and a "keep this tab visible" hint for the host. Raise the transport disconnect
-timeout to ~60 s. Enable Host/Join in the main menu. Test with Multiplayer Play Mode
+timeout to ~60 s. Enable Host/Join in the main menu. Sync each player's cosmetic loadout (the Loadout string) in LobbySlot so everyone sees everyone's outfit. Test with Multiplayer Play Mode
 (host + 2 virtual players) and fix everything. Then build for Web, test 3 browser tabs
 locally (Build And Run), and deploy with tools/deploy-web.sh.
 ```
@@ -201,11 +217,20 @@ locally (Build And Run), and deploy with tools/deploy-web.sh.
 
 ---
 
-## Day 5: Game feel (juice)
+## Day 6: Game feel and meta (old Days 5 + 6 merged)
 
-**Goal:** turns feel dramatic and readable.
+**Goal:** turns feel dramatic and readable, and you finish a match wanting another one.
 
 **DoD:**
+- Reveal phase, remaining juice (hit-stop, flashes, tracer polish), kill-cam.
+- Awards on the results screen with names from a data asset, Rematch vote, Hall of Fame.
+- (Done on Day 4: art, sounds, announcer voice lines and banner, emotes offline, map 2, Crown icon.)
+
+### Old Day 5 prompt (game feel), still valid minus what Day 4 did
+
+Goal: turns feel dramatic and readable.
+
+DoD:
 - A reveal phase.
 - Impact feedback: hit-stop, shake, flashes, particles for shots, smoke, explosions and falls.
 - Announcer banners (GAME_DESIGN §8.2).
@@ -233,11 +258,11 @@ and emotes (Z/X/C/V, EmoteRpc, speech bubble). Timer pulses red for the last 5 s
 
 ---
 
-## Day 6: Make it addictive, then balance
+### Old Day 6 prompt (meta). The balance report moves to Day 7
 
-**Goal:** you finish a match and immediately want another one.
+Goal: you finish a match and immediately want another one.
 
-**DoD:**
+DoD:
 - A results screen with awards.
 - Rematch with everyone voting.
 - The Crown is visible.
@@ -263,17 +288,11 @@ outside 20–30% win rate, and log changes in docs/DECISIONS.md.
 
 ---
 
-## Day 7: Your art, builds and the real test
-
-**Goal:** it looks like *your* game, and everyone has a working build.
+## Day 7: Balance, the friend test, fixes, deploy
 
 **Steps:**
-1. Drop your generated assets in following `docs/ART_AND_AUDIO.md`, then ask Claude to wire them in. Prompt:
-   ```
-   Wire in the art in Assets/_Project/Art/<folder> per docs/ART_AND_AUDIO.md:
-   assign to CharacterDefs, tiles, FX, UI. Keep placeholders as fallback.
-   ```
-2. Personalize: names, colors, death lines, award names, announcer lines and the game logo on the menu.
+1. Run the balance report (2,000 bot matches, category `Balance`) and tweak GameConfig. Try **bigger maps** (11×11, 13×13): the camera already fits any map up to 13×13, and maps are just text files in `Assets/_Project/Data/Maps/`.
+2. Personalize: death lines, award names, announcer lines.
 3. Bump the version, build for Web, and deploy. Then post the link in the group chat.
 4. **Friday-night smoke test** with at least one friend, online, for a full match. Try a Windows PC and Safari on a Mac if anyone uses them.
 5. Fix only what breaks. No new features after Friday.
