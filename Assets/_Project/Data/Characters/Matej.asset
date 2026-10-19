@@ -1,0 +1,21 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: afa8430467e9248dfb1afec6ba2feb2e, type: 3}
+  m_Name: Matej
+  m_EditorClassIdentifier: Musketeers.Data::Musketeers.Data.CharacterDef
+  DisplayName: Matej
+  Color: {r: 0.2, g: 0.52, b: 1, a: 1}
+  Ability: 0
+  AbilityName: Grappin
+  AbilityDescription: Hook the first thing in a line (5). Units get yanked to you; walls pull you in.
+  Body: {fileID: 0}
+  Portrait: {fileID: 0}

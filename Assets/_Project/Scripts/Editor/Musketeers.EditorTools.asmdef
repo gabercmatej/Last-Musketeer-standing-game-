@@ -1,0 +1,14 @@
+{
+    "name": "Musketeers.EditorTools",
+    "rootNamespace": "Musketeers.EditorTools",
+    "references": ["Musketeers.Sim", "Musketeers.Game", "Musketeers.Data", "Musketeers.Presentation", "Musketeers.UI", "Unity.InputSystem", "UnityEngine.UI"],
+    "includePlatforms": ["Editor"],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

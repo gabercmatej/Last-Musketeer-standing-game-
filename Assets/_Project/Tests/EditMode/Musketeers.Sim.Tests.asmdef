@@ -3,6 +3,7 @@
     "rootNamespace": "Musketeers.Sim.Tests",
     "references": [
         "Musketeers.Sim",
+        "Musketeers.Game",
         "UnityEngine.TestRunner",
         "UnityEditor.TestRunner"
     ],

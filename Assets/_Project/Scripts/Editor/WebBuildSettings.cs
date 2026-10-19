@@ -33,6 +33,8 @@ namespace Musketeers.EditorTools
             PlayerSettings.SetManagedStrippingLevel(NamedBuildTarget.WebGL, ManagedStrippingLevel.Minimal);
             PlayerSettings.defaultWebScreenWidth = 1600;
             PlayerSettings.defaultWebScreenHeight = 900;
+            // Custom template: full-window canvas, dark background, loading bar, Fullscreen button.
+            PlayerSettings.WebGL.template = "PROJECT:Musketeers";
 
             AssetDatabase.SaveAssets();
             Debug.Log("[WebBuildSettings] Applied TECH_DESIGN §7 Web player settings. Version " + PlayerSettings.bundleVersion);

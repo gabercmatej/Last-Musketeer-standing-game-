@@ -1,0 +1,21 @@
+html, body { margin: 0; padding: 0; height: 100%; overflow: hidden; background: #17141b; color: #eee6d6;
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
+#game { position: fixed; inset: 0 0 28px 0; }
+#unity-canvas { width: 100%; height: 100%; display: block; background: #17141b; outline: none; }
+#loader { position: fixed; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center;
+  background: #17141b; z-index: 2; transition: opacity 0.3s; }
+#loader.done { opacity: 0; pointer-events: none; }
+#title { font-size: 34px; font-weight: 800; color: #e8b648; letter-spacing: 0.5px; margin-bottom: 6px; text-align: center; }
+#subtitle { font-size: 14px; color: #aaa091; margin-bottom: 26px; }
+#bar { width: min(420px, 80vw); height: 10px; border-radius: 5px; background: #2e2832; overflow: hidden; }
+#bar-fill { width: 0%; height: 100%; background: #e8b648; transition: width 0.15s; }
+#status { margin-top: 10px; font-size: 13px; color: #aaa091; }
+#footer { position: fixed; left: 0; right: 0; bottom: 0; height: 28px; display: flex; align-items: center;
+  justify-content: space-between; padding: 0 12px; box-sizing: border-box; font-size: 12px; color: #aaa091;
+  background: #0f0d11; border-top: 1px solid rgba(255, 240, 210, 0.08); }
+#footer b { color: #e8b648; }
+#fullscreen { background: #3a3340; color: #eee6d6; border: 1px solid rgba(255, 240, 210, 0.15); border-radius: 4px;
+  padding: 2px 10px; font-size: 12px; cursor: pointer; }
+#fullscreen:hover { background: #4a4250; }
+#warning { position: fixed; left: 50%; top: 40%; transform: translate(-50%, -50%); display: none; z-index: 3;
+  background: #2e1f22; border: 1px solid #f05a50; padding: 14px 18px; border-radius: 8px; max-width: 80vw; }

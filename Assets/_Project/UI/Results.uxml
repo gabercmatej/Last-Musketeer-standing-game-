@@ -1,0 +1,14 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements">
+    <ui:VisualElement name="results" class="screen screen--dim">
+        <ui:VisualElement class="card results-card">
+            <ui:Label text="The last musketeer standing" class="kicker" />
+            <ui:Label name="winner" text="Matej" class="winner" />
+            <ui:Label name="winner-line" text="" class="subtitle" />
+            <ui:VisualElement name="final" class="totals" />
+            <ui:VisualElement class="menu-row menu-row--center">
+                <ui:Button name="again" text="Play again" class="btn btn--primary btn--big" />
+                <ui:Button name="menu" text="Menu" class="btn btn--big" />
+            </ui:VisualElement>
+        </ui:VisualElement>
+    </ui:VisualElement>
+</ui:UXML>

@@ -1,0 +1,14 @@
+{
+    "name": "Musketeers.Presentation",
+    "rootNamespace": "Musketeers.Presentation",
+    "references": ["Musketeers.Sim", "Musketeers.Game", "Musketeers.Data", "PrimeTween.Runtime", "Unity.InputSystem"],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

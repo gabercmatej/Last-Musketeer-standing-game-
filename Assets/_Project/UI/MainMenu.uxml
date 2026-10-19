@@ -1,0 +1,41 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements">
+    <ui:VisualElement name="menu" class="screen screen--dim">
+        <ui:VisualElement class="card menu-card">
+            <ui:Label text="The Last Musketeer Standing" class="title" />
+            <ui:Label text="Plan in secret. Everything resolves at once. Be the last one standing." class="subtitle" />
+
+            <ui:VisualElement class="menu-row">
+                <ui:VisualElement class="menu-col">
+                    <ui:Label text="Your name" class="section-label" />
+                    <ui:TextField name="name-field" max-length="16" class="field" />
+                </ui:VisualElement>
+                <ui:VisualElement class="menu-col menu-col--narrow">
+                    <ui:Label text="Players" class="section-label" />
+                    <ui:VisualElement name="player-count" class="segmented">
+                        <ui:Button name="players-2" text="2" class="btn seg" />
+                        <ui:Button name="players-3" text="3" class="btn seg" />
+                        <ui:Button name="players-4" text="4" class="btn seg" />
+                    </ui:VisualElement>
+                </ui:VisualElement>
+            </ui:VisualElement>
+
+            <ui:Label text="Your musketeer" class="section-label" />
+            <ui:VisualElement name="characters" class="char-grid" />
+
+            <ui:Button name="play-bots" text="Play vs Bots" class="btn btn--primary btn--big" />
+            <ui:VisualElement class="menu-row menu-row--center">
+                <ui:Button name="host" text="Host  (Day 4)" class="btn btn--ghost" />
+                <ui:Button name="join" text="Join  (Day 4)" class="btn btn--ghost" />
+            </ui:VisualElement>
+
+            <ui:VisualElement name="dev-row" class="menu-row dev-row">
+                <ui:Label text="DEV" class="badge badge--dev" />
+                <ui:Label text="Seed" class="dev-label" />
+                <ui:TextField name="seed-field" max-length="10" class="field field--seed" />
+                <ui:Label text="blank = random. F2 in a match: plan every unit." class="dev-label" />
+            </ui:VisualElement>
+
+            <ui:Label class="help" text="1 Move  2 Dash  3 Fire  4 Reload  5 Parry  6 Shove  7 Keg  8 Catch Breath  Q Signature&#10;WASD or arrows aim. Backspace undoes. Space locks in." />
+        </ui:VisualElement>
+    </ui:VisualElement>
+</ui:UXML>

@@ -303,6 +303,7 @@ Ranked by fun-per-hour-of-work. Days 5–6 of the build plan.
 | BoardSize | 9 |
 | MaxHp | 3 |
 | StartGrit / MaxGrit / GritPerTurn | 2 / 5 / 1 |
+| StartLoaded (muskets start loaded, §4) | true |
 | TicksPerTurn | 3 |
 | PlanningSeconds | 25 |
 | RevealSeconds | 1.5 |

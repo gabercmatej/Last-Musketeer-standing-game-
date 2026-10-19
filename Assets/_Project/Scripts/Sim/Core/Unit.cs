@@ -25,7 +25,7 @@ namespace Musketeers.Sim
                 Pos = pos,
                 Hp = cfg.MaxHp,
                 Grit = cfg.StartGrit,
-                Loaded = true,   // §4: musket starts loaded
+                Loaded = cfg.StartLoaded,   // §4: musket starts loaded (GameConfig.StartLoaded)
                 Alive = true,
             };
         }

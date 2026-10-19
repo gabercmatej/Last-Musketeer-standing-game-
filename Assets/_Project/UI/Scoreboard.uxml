@@ -1,0 +1,11 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements">
+    <ui:VisualElement name="scoreboard" class="screen screen--dim">
+        <ui:VisualElement class="card score-card">
+            <ui:Label name="score-title" text="Round 1" class="title title--small" />
+            <ui:Label name="score-subtitle" text="" class="subtitle" />
+            <ui:VisualElement name="gains" class="gains" />
+            <ui:VisualElement name="totals" class="totals" />
+            <ui:Button name="continue" text="Next round" class="btn btn--primary btn--big" />
+        </ui:VisualElement>
+    </ui:VisualElement>
+</ui:UXML>

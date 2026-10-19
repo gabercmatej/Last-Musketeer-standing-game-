@@ -1,0 +1,19 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6a70cbe33ee39467fab5490be12c524c, type: 3}
+  m_Name: CharacterRoster
+  m_EditorClassIdentifier: Musketeers.Data::Musketeers.Data.CharacterRoster
+  Characters:
+  - {fileID: 11400000, guid: 194d48adf26444aa58840ffa3de7ded7, type: 2}
+  - {fileID: 11400000, guid: 9cc9a164a6c53474d96729873f615ffd, type: 2}
+  - {fileID: 11400000, guid: b0b9979c9eb75408489abcf0214fe906, type: 2}
+  - {fileID: 11400000, guid: a63dfbe02700f4476b9c7bdf94bf1ff0, type: 2}

@@ -13,6 +13,7 @@ namespace Musketeers.Sim
         public int StartGrit = 2;
         public int MaxGrit = 5;
         public int GritPerTurn = 1;
+        public bool StartLoaded = true;       // §4 musket starts loaded; false = everyone starts unloaded (Matej's test knob)
         public int TicksPerTurn = 3;
         public int PlanningSeconds = 25;
         public int RevealMs = 1500;           // §11 says 1.5 s; the sim is integer-only, so milliseconds
