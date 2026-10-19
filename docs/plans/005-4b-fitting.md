@@ -15,7 +15,7 @@ Spec: `docs/playtest/FIXES_v0.2.md` §1 (everything tagged [4B]).
 - [x] Screenshots: 4 × poses in (a) tall boots + plumed hat + cape, (b) each face item, (c) musket + rapier
 - [x] Tests (layout precedence, anchor scale, masks, catalog filter, no bot cosmetics, wiring), 0 console errors
 - [x] Docs: DECISIONS, GAME_DESIGN §9/§10 wording
-- [ ] Version 0.2.1, Web build, deploy, commit, push
+- [x] Version 0.2.1, Web build, deploy, commit, push
 
 ## Non-goals
 - 4C screens/UX/audio and 4D arena/gameplay items, including the new menu/results/tile art (reported only)
