@@ -23,7 +23,7 @@ namespace Musketeers.Data
         public PoseArt Victory = new PoseArt { Front = true };
         public PoseArt Lunge = new PoseArt();
 
-        [Header("Anchors and masks per pose (Musketeers/Fitting Editor)")]
+        [Header("Anchors and masks per pose (Musketeers/Wardrobe Studio)")]
         public CharacterFit Fit;
 
         [Header("Default outfit (cosmetic ids, empty = none)")]

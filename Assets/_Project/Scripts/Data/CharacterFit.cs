@@ -110,7 +110,7 @@ namespace Musketeers.Data
             }
         }
 
-        // Copies everything but the pose id (the Fitting Editor's "copy anchors from pose X").
+        // Copies everything but the pose id (the Wardrobe Studio's "copy anchors from pose X").
         public void CopyFrom(PoseFit o)
         {
             HeadTop = o.HeadTop; Face = o.Face; Back = o.Back; FootBack = o.FootBack; FootFront = o.FootFront;
@@ -124,7 +124,7 @@ namespace Musketeers.Data
     }
 
     // One per musketeer (Data/Fits/<id>.asset). Import Art creates it once and never overwrites it, so
-    // the Fitting Editor's work survives re-imports.
+    // the Wardrobe Studio's work survives re-imports.
     [CreateAssetMenu(menuName = "Musketeers/Character Fit", fileName = "CharacterFit")]
     public sealed class CharacterFit : ScriptableObject
     {

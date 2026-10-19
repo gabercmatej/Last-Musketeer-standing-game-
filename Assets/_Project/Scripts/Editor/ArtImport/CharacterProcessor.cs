@@ -5,7 +5,7 @@ namespace Musketeers.EditorTools.ArtImport
 {
     // Puts a character pose on the ART_GUIDE §3 canvas: 512×512, feet centre at (256, 64) so the sprite
     // pivot (0.5, 0.125) is the feet, every musketeer's idle body the same height. Also estimates the
-    // cosmetic anchors from the silhouette as a first guess (Matej fits them in the Fitting Editor).
+    // cosmetic anchors from the silhouette as a first guess (Matej fits them in the Wardrobe Studio).
     public static class CharacterProcessor
     {
         public const int Canvas = 512;

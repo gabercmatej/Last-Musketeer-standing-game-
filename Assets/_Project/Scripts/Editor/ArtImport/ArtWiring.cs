@@ -9,7 +9,7 @@ namespace Musketeers.EditorTools.ArtImport
 {
     // Second half of Import Art: points the data assets at the processed files. Creates what's missing,
     // updates sprites every run, and only fills anchors/offsets that aren't set yet (or on a reset), so
-    // Matej's Fitting Editor work survives re-imports.
+    // Matej's Wardrobe Studio work survives re-imports.
     public static class ArtWiring
     {
         const string Art = "Assets/_Project/Art";
@@ -233,7 +233,7 @@ namespace Musketeers.EditorTools.ArtImport
                 else if (Estimate(c.Id, kind, out var est))
                 {
                     pose.CopyFrom(est);
-                    log.Add($"Fit {c.Id}/{kind}: silhouette estimate (fit it in Musketeers/Fitting Editor)");
+                    log.Add($"Fit {c.Id}/{kind}: silhouette estimate (fit it in Musketeers/Wardrobe Studio)");
                 }
             }
             EditorUtility.SetDirty(fit);

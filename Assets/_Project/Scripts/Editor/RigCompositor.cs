@@ -11,7 +11,7 @@ namespace Musketeers.EditorTools
 {
     // Draws a musketeer pose wearing items into an image on the CPU, with the same CosmeticLayout and
     // layer order CharacterRig uses at runtime (boot masks, darker back boot, musket behind the body,
-    // rapier with the front hand redrawn over it). Powers the Fitting Editor and the check sheets without
+    // rapier with the front hand redrawn over it). Powers the Wardrobe Studio and the check sheets without
     // needing a scene or a camera.
     public static class RigCompositor
     {

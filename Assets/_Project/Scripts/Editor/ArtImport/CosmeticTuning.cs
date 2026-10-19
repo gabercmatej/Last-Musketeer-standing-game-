@@ -9,7 +9,7 @@ namespace Musketeers.EditorTools.ArtImport
 {
     // The importer's starting fits: FitDefaults.json next to this file holds every item's fit and every
     // pose's anchors and masks (the committed first pass). Import Art applies them to new items/poses and
-    // on a reset; once Matej fits something in the Fitting Editor it's marked Tuned and keeps his values.
+    // on a reset; once Matej fits something in the Wardrobe Studio it's marked Tuned and keeps his values.
     // "Save Fits as Import Defaults" writes the current assets back into the JSON.
     public static class CosmeticTuning
     {

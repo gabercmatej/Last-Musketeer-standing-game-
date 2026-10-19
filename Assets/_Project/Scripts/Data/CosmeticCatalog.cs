@@ -4,7 +4,7 @@ using UnityEngine;
 namespace Musketeers.Data
 {
     // Every wardrobe item, in display order. Built by Tools/Musketeers/Import Art. Items with
-    // EnabledInV1 off stay here (the Fitting Editor still shows them) but never reach a player.
+    // EnabledInV1 off stay here (the Wardrobe Studio still shows them) but never reach a player.
     [CreateAssetMenu(menuName = "Musketeers/Cosmetic Catalog", fileName = "CosmeticCatalog")]
     public sealed class CosmeticCatalog : ScriptableObject
     {
@@ -48,7 +48,7 @@ namespace Musketeers.Data
             return l;
         }
 
-        // A random outfit from the enabled items (the wardrobe's dice and the Fitting Editor's outfit test):
+        // A random outfit from the enabled items (the wardrobe's dice and the Wardrobe Studio's outfit test):
         // always a hat and boots, a cape or face item about half the time. Cosmetic only, so Unity's RNG.
         public Loadout RandomLoadout(bool enabledOnly = true)
         {

@@ -18,7 +18,7 @@ namespace Musketeers.Data
     }
 
     // The one place that decides where an item or weapon sits on a pose. CharacterRig (runtime) and the
-    // Fitting Editor (editor) both use it, so what Matej fits is exactly what the game draws. Facing left
+    // Wardrobe Studio (editor) both use it, so what Matej fits is exactly what the game draws. Facing left
     // mirrors the whole rig, so placements are always computed facing right.
     public static class CosmeticLayout
     {

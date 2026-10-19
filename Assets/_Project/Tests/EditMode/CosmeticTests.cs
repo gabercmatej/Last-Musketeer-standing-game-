@@ -149,7 +149,7 @@ namespace Musketeers.Sim.Tests
             var off = Item(CosmeticSlot.Hat, sprite); off.Id = "hat_off"; off.EnabledInV1 = false;
             catalog.Items.Add(on); catalog.Items.Add(off);
 
-            Assert.That(catalog.BySlot(CosmeticSlot.Hat).Count, Is.EqualTo(2), "the Fitting Editor sees everything");
+            Assert.That(catalog.BySlot(CosmeticSlot.Hat).Count, Is.EqualTo(2), "the Wardrobe Studio sees everything");
             Assert.That(catalog.BySlot(CosmeticSlot.Hat, true), Is.EqualTo(new[] { on }), "the wardrobe sees enabled items");
             Assert.That(catalog.Sanitize(new Loadout { Hat = "hat_off" }).Hat, Is.EqualTo(""));
             Assert.That(catalog.Sanitize(new Loadout { Hat = "hat_on" }).Hat, Is.EqualTo("hat_on"));
