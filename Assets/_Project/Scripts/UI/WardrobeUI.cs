@@ -76,7 +76,7 @@ namespace Musketeers.UI
             _grid.Add(Tile(null, current));
             if (_art.Cosmetics != null)
             {
-                foreach (var item in _art.Cosmetics.BySlot(_slot))
+                foreach (var item in _art.Cosmetics.BySlot(_slot, enabledOnly: true))
                     _grid.Add(Tile(item, current));
             }
             var on = _art.Cosmetics != null ? _art.Cosmetics.Get(current) : null;

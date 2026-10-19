@@ -9,7 +9,7 @@ namespace Musketeers.EditorTools.ArtImport
 {
     // Second half of Import Art: points the data assets at the processed files. Creates what's missing,
     // updates sprites every run, and only fills anchors/offsets that aren't set yet (or on a reset), so
-    // Matej's Wardrobe Preview nudges survive re-imports.
+    // Matej's Fitting Editor work survives re-imports.
     public static class ArtWiring
     {
         const string Art = "Assets/_Project/Art";
@@ -125,13 +125,16 @@ namespace Musketeers.EditorTools.ArtImport
                 Sprite S(string n) => AssetDatabase.LoadAssetAtPath<Sprite>($"{dir}/{n}.png");
                 c.Portrait = S("portrait") ?? c.Portrait;
                 c.Idle = c.Idle ?? new PoseArt();
+                c.IdleB = c.IdleB ?? new PoseArt();
                 c.Hurt = c.Hurt ?? new PoseArt();
                 c.Victory = c.Victory ?? new PoseArt();
                 c.Lunge = c.Lunge ?? new PoseArt();
-                SetPose(c, c.Idle, S("body"), "body", false, reset);
-                SetPose(c, c.Hurt, S("hurt"), "hurt", false, reset);
-                SetPose(c, c.Victory, S("victory"), "victory", true, reset);
-                SetPose(c, c.Lunge, S("lunge"), "lunge", false, reset);
+                SetPose(c.Idle, S("body"), false);
+                SetPose(c.IdleB, S("idle_b"), false);
+                SetPose(c.Hurt, S("hurt"), false);
+                SetPose(c.Victory, S("victory"), true);
+                SetPose(c.Lunge, S("lunge"), false);
+                WireFit(c, reset, log);
                 if (ArtColors.TryGetValue(c.Id, out var col) && (reset || IsDay3Color(c.Color)))
                     c.Color = col;
                 if (reset || string.IsNullOrEmpty(c.DefaultLoadout.Hat))
@@ -152,32 +155,48 @@ namespace Musketeers.EditorTools.ArtImport
             return false;
         }
 
-        static void SetPose(CharacterDef c, PoseArt pose, Sprite sprite, string key, bool front, bool reset)
+        static void SetPose(PoseArt pose, Sprite sprite, bool front)
         {
             pose.Sprite = sprite;
             pose.Front = front;
-            if (sprite == null || (pose.AnchorsSet && !reset))
-                return;
-            // Hand-tuned values win over the silhouette estimate.
-            if (CosmeticTuning.TryAnchors(c.Id, key, out var tuned))
+        }
+
+        // Data/Fits/<id>.asset: created once; a pose without a fit gets the committed default (FitDefaults.json)
+        // or, for a pose nobody has fitted yet, the silhouette estimate. Existing fits are only replaced on a reset.
+        static void WireFit(CharacterDef c, bool reset, List<string> log)
+        {
+            var fit = Ensure<CharacterFit>($"{Data}/Fits/{c.Id}.asset");
+            c.Fit = fit;
+            foreach (PoseKind kind in System.Enum.GetValues(typeof(PoseKind)))
             {
-                pose.Anchors = tuned;
-                pose.AnchorsSet = true;
-                return;
+                if (!c.HasPose(kind) || (fit.Get(kind) != null && !reset))
+                    continue;
+                var pose = fit.GetOrAdd(kind);
+                if (CosmeticTuning.TryPose(c.Id, kind, out var seed))
+                    pose.CopyFrom(seed);
+                else if (Estimate(c.Id, kind, out var est))
+                {
+                    pose.CopyFrom(est);
+                    log.Add($"Fit {c.Id}/{kind}: silhouette estimate (fit it in Musketeers/Fitting Editor)");
+                }
             }
-            if (!ArtImporter.AnchorsFound.TryGetValue(c.Id, out var poses) || !poses.TryGetValue(key, out var a))
-                return;
+            EditorUtility.SetDirty(fit);
+        }
+
+        static bool Estimate(string id, PoseKind kind, out PoseFit fit)
+        {
+            fit = null;
+            string key = kind == PoseKind.Idle ? "body" : kind == PoseKind.IdleB ? "idle_b" : kind.ToString().ToLowerInvariant();
+            if (!ArtImporter.AnchorsFound.TryGetValue(id, out var poses) || !poses.TryGetValue(key, out var a))
+                return false;
             Vector2 U(Vector2 px) => new Vector2((px.x - CharacterProcessor.FeetX) / Ppu, (px.y - CharacterProcessor.FeetY) / Ppu);
-            pose.Anchors = new PoseAnchors
-            {
-                HeadTop = U(a.HeadTop),
-                Face = U(a.Face),
-                Back = U(a.Back),
-                Feet = Vector2.zero,
-                Hand = U(a.Hand),
-                HeadAngle = a.HeadAngle,
-            };
-            pose.AnchorsSet = true;
+            fit = new PoseFit { Pose = kind };
+            fit.HeadTop = new Anchor(U(a.HeadTop).x, U(a.HeadTop).y, a.HeadAngle);
+            fit.Face = new Anchor(U(a.Face).x, U(a.Face).y, a.HeadAngle);
+            fit.Back = new Anchor(U(a.Back).x, U(a.Back).y);
+            fit.HandBack = new Anchor(U(a.Hand).x - 0.35f, U(a.Hand).y, -38f, 0.72f);
+            fit.HandFront = new Anchor(U(a.Hand).x, U(a.Hand).y, -70f, 0.72f);
+            return true;
         }
 
         // ---------- maps and themes ----------
@@ -273,7 +292,9 @@ namespace Musketeers.EditorTools.ArtImport
             var a = AssetDatabase.LoadAssetAtPath<T>(path);
             if (a != null)
                 return a;
-            Directory.CreateDirectory(Path.GetDirectoryName(path));
+            string dir = Path.GetDirectoryName(path).Replace('\\', '/');
+            if (!AssetDatabase.IsValidFolder(dir))
+                AssetDatabase.CreateFolder(Path.GetDirectoryName(dir).Replace('\\', '/'), Path.GetFileName(dir));
             a = ScriptableObject.CreateInstance<T>();
             AssetDatabase.CreateAsset(a, path);
             return a;

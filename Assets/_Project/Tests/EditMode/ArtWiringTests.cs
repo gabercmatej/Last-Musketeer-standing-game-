@@ -23,17 +23,24 @@ namespace Musketeers.Sim.Tests
             foreach (var c in roster.Characters)
             {
                 Assert.That(c.Portrait, Is.Not.Null, c.Id + " portrait");
-                foreach (var pose in new[] { c.Idle, c.Hurt, c.Victory, c.Lunge })
+                Assert.That(c.Fit, Is.Not.Null, c.Id + " fit asset");
+                foreach (var kind in new[] { PoseKind.Idle, PoseKind.Hurt, PoseKind.Victory, PoseKind.Lunge })
                 {
-                    Assert.That(pose.Sprite, Is.Not.Null, c.Id + " pose");
-                    Assert.That(pose.AnchorsSet, Is.True, c.Id + " anchors");
+                    Assert.That(c.Art(kind).Sprite, Is.Not.Null, $"{c.Id} {kind} pose");
+                    var fit = c.Fit.Get(kind);
+                    Assert.That(fit, Is.Not.Null, $"{c.Id} {kind} anchors");
+                    Assert.That(PolygonMask.Valid(fit.BootMaskBack) && PolygonMask.Valid(fit.BootMaskFront), Is.True, $"{c.Id} {kind} boot masks");
+                    Assert.That(PolygonMask.Valid(fit.HandMask), Is.True, $"{c.Id} {kind} hand mask");
                 }
                 Assert.That(c.Victory.Front, Is.True, "the victory pose faces the camera");
                 foreach (var slot in Loadout.Slots)
                 {
                     string id = c.DefaultLoadout.Get(slot);
                     if (id != "")
+                    {
                         Assert.That(catalog.Get(id), Is.Not.Null, $"{c.Id} default {slot} {id}");
+                        Assert.That(catalog.Get(id).EnabledInV1, Is.True, $"{c.Id} default {slot} {id} is enabled in v1");
+                    }
                 }
             }
         }

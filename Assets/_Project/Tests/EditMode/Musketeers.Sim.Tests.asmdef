@@ -5,6 +5,7 @@
         "Musketeers.Sim",
         "Musketeers.Game",
         "Musketeers.Data",
+        "Musketeers.UI",
         "UnityEngine.TestRunner",
         "UnityEditor.TestRunner"
     ],

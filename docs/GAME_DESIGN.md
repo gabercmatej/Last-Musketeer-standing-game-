@@ -270,7 +270,7 @@ Ranked by fun-per-hour-of-work. Days 5–6 of the build plan.
 1. **Main menu:** splash art and logo, name field (remembered), **Play vs Bots**, **Host**, **Join** (code field), **Settings** (Music / SFX / Voice volume, credits), Fullscreen.
 2. **Lobby** (Among Us style): the musketeers stand on a tavern stage.
    - Character picker: 4 portraits, taken characters greyed out.
-   - **Wardrobe** panel with **Hat / Face / Cape / Boots** tabs and a live preview on the stage. Your outfit is saved per character (PlayerPrefs). Bots wear random outfits.
+   - **Wardrobe** panel with **Hat / Face / Cape / Boots** tabs and a live preview on the stage. Your outfit is saved per character (PlayerPrefs). Bots wear no cosmetics. Only items enabled for v1 are shown.
    - Map choice: **Courtyard** or **Bridge**. Add Bot / Remove Bot (2–4 players). **Start**.
 3. **Loading screen:** splash art, a random gameplay tip and a bar, for a few seconds.
 4. **Arena:** the match. Emotes on **Z / X / C / V**.
@@ -299,11 +299,11 @@ Offline (vs bots) the lobby is local; online (Day 5) the same lobby is shared an
 
 - `CharacterDef` assets hold everything for each friend:
   - name, color and portrait
-  - body poses (idle, hurt, victory, lunge) with cosmetic anchors, and a default outfit
+  - body poses (idle, optional idle_b, hurt, victory, lunge) with per-pose anchors, and a default outfit
   - signature ability
   - victory line, death lines and emote set
   - announcer callouts that mention them
-- Cosmetic slots: **Hat, Face, Cape, Boots** (musket skins later). They come from `CosmeticDef` assets (slot, side sprite, front sprite for the victory pose, offset, scale, sort order; capes draw behind the body). Each `CharacterDef` pose has **HeadTop, Face, Back, Feet** (and Hand, for the musket) anchors, so one item fits all four musketeers. Tune them in **Musketeers/Wardrobe Preview**. The lobby's Wardrobe panel equips them.
+- Cosmetic slots: **Hat, Face, Cape, Boots** (musket skins later). They come from `CosmeticDef` assets (slot, side sprite, front sprite for the victory pose, fit, overrides, EnabledInV1; capes draw behind the body). Each pose has **HeadTop, Face, Back, FootBack, FootFront, HandBack** (musket) and **HandFront** (rapier) anchors (position, rotation, scale) plus boot-mask and hand-mask polygons, stored per musketeer in a `CharacterFit` asset, so one item fits all four musketeers. Items have an offset, rotation and scale with optional per-musketeer and per-pose overrides, and an `EnabledInV1` toggle. Footwear is one boot drawn on both feet, and it hides the body's own boots. Tune everything in **Musketeers/Fitting Editor**. The lobby's Wardrobe panel equips them.
 - Maps can be your hangout spots, as new map text files plus a tileset.
 - Death messages and award names can be your inside jokes. They're all text in data assets, with no code changes needed.
 

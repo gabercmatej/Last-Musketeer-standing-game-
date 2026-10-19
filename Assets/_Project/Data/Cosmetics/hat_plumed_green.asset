@@ -17,9 +17,16 @@ MonoBehaviour:
   Slot: 0
   Sprite: {fileID: 21300000, guid: 2b78f29dd4537457a80b6d805fa8373d, type: 3}
   FrontSprite: {fileID: 21300000, guid: 146176d8b855147e08262b9046373182, type: 3}
+  EnabledInV1: 1
   Offset: {x: 0, y: 0.06}
-  Scale: 1.1
-  FrontOffset: {x: 0, y: 0.06}
-  FrontScale: 1
-  SortOrder: 20
+  Scale: 1.35
+  Rotation: 0
+  Overrides:
+  - Character: 
+    AnyPose: 0
+    Pose: 2
+    Fit:
+      Offset: {x: 0, y: 0.06}
+      Rotation: 0
+      Scale: 1.3
   Tuned: 0

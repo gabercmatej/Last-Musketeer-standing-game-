@@ -6,31 +6,29 @@ namespace Musketeers.Data
     public enum CosmeticSlot { Hat, Face, Cape, Boots }
 
     // The body poses a musketeer has (ART_GUIDE §4.1). Lunge is Matej's extra pose (shove, bull rush).
-    public enum PoseKind { Idle, Hurt, Victory, Lunge }
+    // IdleB is the optional breathing frame; it's appended so serialized pose values stay stable.
+    public enum PoseKind { Idle, Hurt, Victory, Lunge, IdleB }
 
-    // Where cosmetics attach on one pose, in world units from the sprite's pivot (the feet), for the
-    // character facing right. HeadAngle tilts the hat and face with the head (the hurt pose leans).
+    // FIXES_v0.2 §1.2: the seven attachment points every pose has.
+    public enum AnchorId { HeadTop, Face, Back, FootBack, FootFront, HandBack, HandFront }
+
+    // A point on a pose, in world units from the sprite's pivot (the feet), for the character facing
+    // right. Rotation is degrees counter-clockwise. Scale is the local size (HeadTop's is the head size),
+    // so an item fitted on one musketeer scales to the others. 0 counts as 1 (an unset struct).
     [Serializable]
-    public struct PoseAnchors
+    public struct Anchor
     {
-        public Vector2 HeadTop;   // hat
-        public Vector2 Face;      // face items
-        public Vector2 Back;      // cape (drawn behind the body)
-        public Vector2 Feet;      // boots
-        public Vector2 Hand;      // musket grip
-        public float HeadAngle;   // degrees, counter-clockwise
-        public float FeetStretch; // widens the boots for a wider stance (0 = 1 = as drawn)
-        public bool HideBoots;    // stance too wide for a pair of boots (the lunge): the body's own boots show
+        public Vector2 Position;
+        public float Rotation;
+        public float Scale;
 
-        public Vector2 For(CosmeticSlot slot)
+        public float S => Scale > 0f ? Scale : 1f;
+
+        public Anchor(float x, float y, float rotation = 0f, float scale = 1f)
         {
-            switch (slot)
-            {
-                case CosmeticSlot.Hat: return HeadTop;
-                case CosmeticSlot.Face: return Face;
-                case CosmeticSlot.Cape: return Back;
-                default: return Feet;
-            }
+            Position = new Vector2(x, y);
+            Rotation = rotation;
+            Scale = scale;
         }
     }
 
@@ -39,7 +37,5 @@ namespace Musketeers.Data
     {
         public Sprite Sprite;
         public bool Front;          // drawn facing the camera (the victory pose): cosmetics use their front sprites
-        public PoseAnchors Anchors;
-        public bool AnchorsSet;     // false until the importer (or Matej) placed them; re-imports keep set anchors
     }
 }

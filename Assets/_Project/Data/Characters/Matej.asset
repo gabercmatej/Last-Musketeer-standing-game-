@@ -22,55 +22,19 @@ MonoBehaviour:
   Idle:
     Sprite: {fileID: 21300000, guid: 1dd8c825ec4fd4fc697fb4f0f6e9c77b, type: 3}
     Front: 0
-    Anchors:
-      HeadTop: {x: -0.02, y: 1.18}
-      Face: {x: 0.17, y: 1}
-      Back: {x: -0.2, y: 0.7}
-      Feet: {x: 0, y: 0}
-      Hand: {x: 0.1, y: 0.4}
-      HeadAngle: 0
-      FeetStretch: 0
-      HideBoots: 0
-    AnchorsSet: 1
+  IdleB:
+    Sprite: {fileID: 0}
+    Front: 0
   Hurt:
     Sprite: {fileID: 21300000, guid: 597ae40e329d34ebab3a6fb2a860bd6f, type: 3}
     Front: 0
-    Anchors:
-      HeadTop: {x: 0.264, y: 1.173}
-      Face: {x: 0.36, y: 0.93}
-      Back: {x: -0.12, y: 0.8}
-      Feet: {x: 0, y: 0}
-      Hand: {x: 0.121, y: 0.465}
-      HeadAngle: -25
-      FeetStretch: 1.4
-      HideBoots: 0
-    AnchorsSet: 1
   Victory:
     Sprite: {fileID: 21300000, guid: 5d8562e1578dc411a9b549ec8bd418ff, type: 3}
     Front: 1
-    Anchors:
-      HeadTop: {x: 0, y: 1.23}
-      Face: {x: 0, y: 1.06}
-      Back: {x: 0, y: 0.76}
-      Feet: {x: 0, y: 0}
-      Hand: {x: 0.145, y: 0.465}
-      HeadAngle: 0
-      FeetStretch: 1.3
-      HideBoots: 0
-    AnchorsSet: 1
   Lunge:
     Sprite: {fileID: 21300000, guid: ba359514c2b4c4eeca28f4b2e9150c08, type: 3}
     Front: 0
-    Anchors:
-      HeadTop: {x: 0.01, y: 1.18}
-      Face: {x: 0.2, y: 1}
-      Back: {x: -0.12, y: 0.72}
-      Feet: {x: 0, y: 0}
-      Hand: {x: 0.45, y: 0.68}
-      HeadAngle: 0
-      FeetStretch: 0
-      HideBoots: 1
-    AnchorsSet: 1
+  Fit: {fileID: 11400000, guid: b3d2e15d78fa14f54892948a793c4391, type: 2}
   DefaultLoadout:
     Hat: hat_plumed_purple
     Face: 

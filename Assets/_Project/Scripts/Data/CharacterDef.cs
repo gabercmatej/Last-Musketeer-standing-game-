@@ -18,27 +18,48 @@ namespace Musketeers.Data
 
         [Header("Poses (side view facing right; null = placeholder)")]
         public PoseArt Idle = new PoseArt();
+        public PoseArt IdleB = new PoseArt();  // optional breathing frame
         public PoseArt Hurt = new PoseArt();
         public PoseArt Victory = new PoseArt { Front = true };
         public PoseArt Lunge = new PoseArt();
+
+        [Header("Anchors and masks per pose (Musketeers/Fitting Editor)")]
+        public CharacterFit Fit;
 
         [Header("Default outfit (cosmetic ids, empty = none)")]
         public Loadout DefaultLoadout;
 
         public Sprite Body => Idle != null ? Idle.Sprite : null;
 
-        // The requested pose, or Idle when that pose has no art yet.
-        public PoseArt Pose(PoseKind kind)
+        public PoseArt Art(PoseKind kind)
         {
-            PoseArt p;
             switch (kind)
             {
-                case PoseKind.Hurt: p = Hurt; break;
-                case PoseKind.Victory: p = Victory; break;
-                case PoseKind.Lunge: p = Lunge; break;
-                default: p = Idle; break;
+                case PoseKind.IdleB: return IdleB;
+                case PoseKind.Hurt: return Hurt;
+                case PoseKind.Victory: return Victory;
+                case PoseKind.Lunge: return Lunge;
+                default: return Idle;
             }
-            return p != null && p.Sprite != null ? p : Idle;
+        }
+
+        public bool HasPose(PoseKind kind)
+        {
+            var p = Art(kind);
+            return p != null && p.Sprite != null;
+        }
+
+        // The pose actually drawn for `kind`: Idle when that pose has no art yet.
+        public PoseKind Resolve(PoseKind kind) => HasPose(kind) ? kind : PoseKind.Idle;
+
+        public PoseArt Pose(PoseKind kind) => Art(Resolve(kind));
+
+        // The fit for the pose actually drawn; an unfitted pose borrows Idle's, then the defaults.
+        public PoseFit FitFor(PoseKind kind)
+        {
+            var k = Resolve(kind);
+            var f = Fit != null ? Fit.Get(k) ?? Fit.Get(PoseKind.Idle) : null;
+            return f ?? new PoseFit { Pose = k };
         }
     }
 }

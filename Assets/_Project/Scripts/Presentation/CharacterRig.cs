@@ -3,34 +3,52 @@ using Musketeers.Data;
 using Musketeers.Sim;
 using PrimeTween;
 using UnityEngine;
+using UnityEngine.Rendering;
 
 namespace Musketeers.Presentation
 {
-    // A musketeer drawn as a paper doll (ART_GUIDE §0): body pose + cosmetics placed by CosmeticLayout,
-    // plus the musket held at the hand anchor (aims, recoils) and the rapier for parries. The rig's
-    // origin is the feet. Facing left mirrors the whole rig. Without art it falls back to a tinted circle.
+    // A musketeer drawn as a paper doll (ART_GUIDE §0, FIXES_v0.2 §1.2): body pose plus cosmetics placed
+    // by CosmeticLayout, one boot drawn at each foot, the musket in the back hand (behind the body, aims
+    // and recoils) and the rapier in the front hand with the hand redrawn over its grip. The rig's origin
+    // is the feet; facing left mirrors the whole rig. Without art it falls back to a tinted circle.
+    //
+    // Masks: equipped footwear hides the body's own boots (SpriteMasks from the pose's boot polygons),
+    // and the front-hand overlay is the body sprite shown only inside the hand polygon. SpriteMasks ignore
+    // SortingGroups, so every rig sorts its renderers inside its own group from a unique order base and
+    // each mask's custom range covers just its own target renderer.
     public sealed class CharacterRig : MonoBehaviour
     {
-        const float MusketScale = 0.72f;
-        const float RapierScale = 0.72f;
-        const float RestAngle = -38f;      // musket held low, barrel forward and down
+        const float RaisedAngle = 62f;    // rapier up for a parry
+        const float BreathX = 0.008f / 3f; // FIXES_v0.2 §1.3: a third of the Day 4 breathing
+        const float BreathY = 0.018f / 3f;
+        const int BaseSlots = 30;
+
+        static int _nextBase;
 
         ArtLibrary _art;
         CharacterDef _def;
+        int _base;
         Transform _mirror;      // flips for facing
         Transform _breath;      // idle breathing squash (pivot = feet)
         SpriteRenderer _body;
+        SpriteRenderer _hand;   // front-hand overlay (body sprite inside the hand mask)
+        SpriteMask _handMask;
+        SpriteMask _bootMaskBack, _bootMaskFront;
         Transform _musketPivot;
         SpriteRenderer _musket;
         SpriteRenderer _rapier;
-        readonly Dictionary<CosmeticSlot, SpriteRenderer> _items = new Dictionary<CosmeticSlot, SpriteRenderer>();
+        readonly Dictionary<RigPart, SpriteRenderer> _parts = new Dictionary<RigPart, SpriteRenderer>();
         readonly Dictionary<CosmeticSlot, CosmeticDef> _equipped = new Dictionary<CosmeticSlot, CosmeticDef>();
         readonly List<SpriteRenderer> _all = new List<SpriteRenderer>();
+        readonly Dictionary<SpriteRenderer, float> _shade = new Dictionary<SpriteRenderer, float>();
         Color _tint = Color.white;
         Color _placeholderColor = Color.white;
         bool _placeholder;
         bool _facingRight = true;
-        float _aimAngle = RestAngle;
+        bool _weapons = true;
+        bool _raised;
+        bool _breathB;          // showing the IdleB breathing frame
+        float? _aimAngle;       // null = resting at the hand anchor's angle
         PoseKind _pose = PoseKind.Idle;
         Tween _poseTimer;
         Tween _breathTween;
@@ -44,34 +62,60 @@ namespace Musketeers.Presentation
             _art = art;
             _def = def;
             _placeholderColor = color;
+            _base = -15000 + (_nextBase++ % BaseSlots) * 1000;
+            var group = gameObject.GetComponent<SortingGroup>();
+            if (group == null)
+                group = gameObject.AddComponent<SortingGroup>();
+            group.sortingOrder = 0;
             _mirror = new GameObject("Mirror").transform;
             _mirror.SetParent(transform, false);
             _breath = new GameObject("Breath").transform;
             _breath.SetParent(_mirror, false);
 
             _placeholder = def == null || def.Body == null;
-            _body = Add("Body", _breath, null, 0);
-            foreach (var slot in Loadout.Slots)
-                _items[slot] = Add(slot.ToString(), _breath, null, CosmeticDef.DefaultOrder(slot));
+            _body = Add("Body", _breath, null, RigPart.Body);
+            _parts[RigPart.Cape] = Add("Cape", _breath, null, RigPart.Cape);
+            _parts[RigPart.BootBack] = Add("BootBack", _breath, null, RigPart.BootBack);
+            _parts[RigPart.BootFront] = Add("BootFront", _breath, null, RigPart.BootFront);
+            _parts[RigPart.Face] = Add("Face", _breath, null, RigPart.Face);
+            _parts[RigPart.Hat] = Add("Hat", _breath, null, RigPart.Hat);
 
             _musketPivot = new GameObject("MusketPivot").transform;
             _musketPivot.SetParent(_breath, false);
-            _musket = Add("Musket", _musketPivot, art.Sprite(GameArt.Musket, PlaceholderArt.Musket), 30);
-            _musket.transform.localScale = Vector3.one * (art.Has(GameArt.Musket) ? MusketScale : 0.5f);
-            _rapier = Add("Rapier", _musketPivot, art.Sprite(GameArt.Rapier, null), 31);
-            _rapier.transform.localScale = Vector3.one * RapierScale;
-            _rapier.enabled = false;
+            _musket = Add("Musket", _musketPivot, art.Sprite(GameArt.Musket, PlaceholderArt.Musket), RigPart.Musket);
+            _rapier = Add("Rapier", _breath, art.Sprite(GameArt.Rapier, null), RigPart.Rapier);
+            _hand = Add("FrontHand", _breath, null, RigPart.Hand);
+            _hand.maskInteraction = SpriteMaskInteraction.VisibleInsideMask;
+            _handMask = Mask("HandMask", Order(RigPart.Hand));
+            _bootMaskBack = Mask("BootMaskBack", Order(RigPart.Body));
+            _bootMaskFront = Mask("BootMaskFront", Order(RigPart.Body));
 
             SetLoadout(loadout);
             SetPose(PoseKind.Idle);
             StartBreathing();
         }
 
-        SpriteRenderer Add(string name, Transform parent, Sprite sprite, int order)
+        int Order(RigPart part) => _base + CosmeticLayout.Order(part);
+
+        SpriteRenderer Add(string name, Transform parent, Sprite sprite, RigPart part)
         {
-            var sr = _art.MakeRenderer(name, parent, sprite, Color.white, order);
+            var sr = _art.MakeRenderer(name, parent, sprite, Color.white, Order(part));
             _all.Add(sr);
+            _shade[sr] = 1f;
             return sr;
+        }
+
+        // A mask that only affects renderers sorted exactly at `order` (this rig's own target).
+        SpriteMask Mask(string name, int order)
+        {
+            var m = new GameObject(name).AddComponent<SpriteMask>();
+            m.transform.SetParent(_breath, false);
+            m.isCustomRangeActive = true;
+            m.frontSortingOrder = order;
+            m.backSortingOrder = order - 1;
+            m.alphaCutoff = 0.5f;
+            m.enabled = false;
+            return m;
         }
 
         void OnDestroy()
@@ -109,6 +153,9 @@ namespace Musketeers.Presentation
             _poseTimer = Tween.Delay(this, Mathf.Max(0.05f, seconds), r => { if (r._pose == mine) r.SetPose(PoseKind.Idle); });
         }
 
+        // The pose actually drawn: Idle alternates with IdleB while breathing, when that art exists.
+        PoseKind Drawn => _pose == PoseKind.Idle && _breathB && _def.HasPose(PoseKind.IdleB) ? PoseKind.IdleB : _def.Resolve(_pose);
+
         void Layout()
         {
             if (_body == null)
@@ -118,36 +165,85 @@ namespace Musketeers.Presentation
                 _body.sprite = PlaceholderArt.Circle;
                 _body.transform.localPosition = new Vector3(0f, 0.38f, 0f);
                 _body.transform.localScale = Vector3.one * 0.74f;
-                foreach (var sr in _items.Values)
+                foreach (var sr in _parts.Values)
                     sr.enabled = false;
+                _hand.enabled = false;
+                _rapier.enabled = false;
+                _musket.enabled = _weapons;
+                _musket.transform.localScale = Vector3.one * 0.5f;
                 _musketPivot.localPosition = new Vector3(0.3f, 0.2f, 0f);
+                _musketPivot.localRotation = Quaternion.Euler(0, 0, _aimAngle ?? -38f);
                 ApplyTint();
                 return;
             }
-            var pose = _def.Pose(_pose);
-            _body.sprite = pose.Sprite;
-            _body.transform.localPosition = Vector3.zero;
-            _body.transform.localScale = Vector3.one;
-            foreach (var slot in Loadout.Slots)
+            var kind = Drawn;
+            var art = _def.Art(kind);
+            var fit = _def.FitFor(kind);
+            _body.sprite = art.Sprite;
+
+            Item(RigPart.Cape, art, fit, kind, CosmeticSlot.Cape, false);
+            Item(RigPart.Face, art, fit, kind, CosmeticSlot.Face, false);
+            Item(RigPart.Hat, art, fit, kind, CosmeticSlot.Hat, false);
+            bool back = Item(RigPart.BootBack, art, fit, kind, CosmeticSlot.Boots, true);
+            bool front = Item(RigPart.BootFront, art, fit, kind, CosmeticSlot.Boots, false);
+
+            // Footwear on: hide the body's own boots so the new ones never sit on top of them.
+            bool masked = SetMask(_bootMaskBack, back || front ? fit.BootMaskBack : null);
+            masked |= SetMask(_bootMaskFront, back || front ? fit.BootMaskFront : null);
+            _body.maskInteraction = masked ? SpriteMaskInteraction.VisibleOutsideMask : SpriteMaskInteraction.None;
+
+            // Musket: back hand, behind the body (its own hand covers the grip).
+            var m = CosmeticLayout.Weapon(fit, _musket.sprite, true);
+            _musket.enabled = _weapons && m.Valid;
+            if (m.Valid)
             {
-                var sr = _items[slot];
-                var p = CosmeticLayout.Place(pose, _equipped[slot]);
-                sr.enabled = p.Valid;
-                if (!p.Valid)
-                    continue;
-                sr.sprite = p.Sprite;
-                sr.sortingOrder = p.Order;
-                sr.transform.localPosition = p.Position;
-                sr.transform.localRotation = Quaternion.Euler(0, 0, p.Angle);
-                sr.transform.localScale = new Vector3(p.Scale * p.ScaleX, p.Scale, 1f);
+                _musketPivot.localPosition = m.Position;
+                _musket.transform.localScale = new Vector3(m.Scale.x, m.Scale.y, 1f);
             }
-            _musketPivot.localPosition = pose.Anchors.Hand;
-            // The victory pose has both hands busy (fist up, hand on hip): no weapon.
-            bool armed = !pose.Front;
-            _musket.enabled = armed && !_rapier.enabled;
-            if (!armed) _rapier.enabled = false;
+            // Rapier: front hand, in front of the body, with the hand overlay over its grip.
+            var r = CosmeticLayout.Weapon(fit, _rapier.sprite, false, _raised ? RaisedAngle : (float?)null);
+            _rapier.enabled = _weapons && r.Valid;
+            if (r.Valid)
+                Put(_rapier, r);
+            _hand.sprite = art.Sprite;
+            bool hand = _rapier.enabled && SetMask(_handMask, fit.HandMask);
+            if (!_rapier.enabled)
+                SetMask(_handMask, null);
+            _hand.enabled = hand;
             ApplyAim();
             ApplyTint();
+        }
+
+        bool Item(RigPart part, PoseArt art, PoseFit fit, PoseKind kind, CosmeticSlot slot, bool backFoot)
+        {
+            var sr = _parts[part];
+            var p = CosmeticLayout.Place(art, fit, _def.Id, kind, _equipped[slot], backFoot);
+            sr.enabled = p.Valid;
+            _shade[sr] = p.Valid ? p.Shade : 1f;
+            if (p.Valid)
+                Put(sr, p);
+            return p.Valid;
+        }
+
+        void Put(SpriteRenderer sr, LayerPlacement p)
+        {
+            sr.sprite = p.Sprite;
+            sr.sortingOrder = _base + p.Order;
+            sr.transform.localPosition = p.Position;
+            sr.transform.localRotation = Quaternion.Euler(0, 0, p.Angle);
+            sr.transform.localScale = new Vector3(p.Scale.x, p.Scale.y, 1f);
+        }
+
+        static bool SetMask(SpriteMask mask, Vector2[] poly)
+        {
+            var sprite = PolygonMask.Sprite(poly, out var origin);
+            mask.enabled = sprite != null;
+            if (sprite != null)
+            {
+                mask.sprite = sprite;
+                mask.transform.localPosition = origin;
+            }
+            return sprite != null;
         }
 
         // ---------- facing and weapons ----------
@@ -175,14 +271,16 @@ namespace Musketeers.Presentation
 
         public void Rest()
         {
-            _aimAngle = RestAngle;
+            _aimAngle = null;
             ApplyAim();
         }
 
         void ApplyAim()
         {
-            if (_musketPivot != null)
-                _musketPivot.localRotation = Quaternion.Euler(0, 0, _rapier != null && _rapier.enabled ? 62f : _aimAngle);
+            if (_musketPivot == null || _placeholder)
+                return;
+            var fit = _def.FitFor(Drawn);
+            _musketPivot.localRotation = Quaternion.Euler(0, 0, _aimAngle ?? fit.HandBack.Rotation);
         }
 
         public void Recoil(float duration)
@@ -196,20 +294,17 @@ namespace Musketeers.Presentation
                 .Chain(Tween.LocalPosition(t, Vector3.zero, duration * 0.7f, Ease.OutBack));
         }
 
-        // Parry: rapier up instead of the musket.
+        // Parry: the rapier comes up (the musket stays in the back hand).
         public void SetRapier(bool on)
         {
-            if (_rapier == null)
-                return;
-            _rapier.enabled = on && _rapier.sprite != null && _def != null && !_placeholder && !_def.Pose(_pose).Front;
-            _musket.enabled = !_rapier.enabled && !(_def != null && _def.Pose(_pose).Front);
-            ApplyAim();
+            _raised = on;
+            Layout();
         }
 
         public void ShowWeapons(bool show)
         {
-            if (_musketPivot != null)
-                _musketPivot.gameObject.SetActive(show);
+            _weapons = show;
+            Layout();
         }
 
         // ---------- look ----------
@@ -229,7 +324,9 @@ namespace Musketeers.Presentation
                 if (sr == null)
                     continue;
                 var baseColor = _placeholder && sr == _body ? _placeholderColor : Color.white;
-                sr.color = baseColor * _tint;
+                float shade = _shade.TryGetValue(sr, out var s) ? s : 1f;
+                var c = baseColor * _tint;
+                sr.color = new Color(c.r * shade, c.g * shade, c.b * shade, c.a);
             }
         }
 
@@ -250,11 +347,18 @@ namespace Musketeers.Presentation
             _breathTween.Stop();
             _breath.localScale = Vector3.one;
             float phase = Random.value;
+            bool hasB = _def != null && _def.HasPose(PoseKind.IdleB);
             _breathTween = Tween.Custom(0f, 1f, 1.4f, t =>
             {
                 if (_breath == null) return;
                 float s = Mathf.Sin((t + phase) * Mathf.PI * 2f);
-                _breath.localScale = new Vector3(1f - s * 0.008f, 1f + s * 0.018f, 1f);
+                _breath.localScale = new Vector3(1f - s * BreathX, 1f + s * BreathY, 1f);
+                if (hasB && (s < 0f) != _breathB)
+                {
+                    _breathB = s < 0f;
+                    if (_pose == PoseKind.Idle)
+                        Layout();
+                }
             }, Ease.Linear, -1);
         }
     }

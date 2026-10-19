@@ -25,6 +25,8 @@ MonoBehaviour:
     Sprite: {fileID: 21300000, guid: 689dd2452c8914525b2d5fe65c3ce05e, type: 3}
   - Key: Weapons/rapier
     Sprite: {fileID: 21300000, guid: adacb93dcb02f4735b11cbbd3de84de5, type: 3}
+  - Key: FX/bull_rush
+    Sprite: {fileID: 21300000, guid: 0383702dedf2a4eacbada162141937ca, type: 3}
   - Key: FX/dust
     Sprite: {fileID: 21300000, guid: ca068660f343e425da261f4f71a95a95, type: 3}
   - Key: FX/explosion
@@ -41,6 +43,8 @@ MonoBehaviour:
     Sprite: {fileID: 21300000, guid: 305826ba18db942ddbaa5fb04c065a30, type: 3}
   - Key: FX/swap_swirl
     Sprite: {fileID: 21300000, guid: d182308df638a4345b38250b3ada496b, type: 3}
+  - Key: FX/triple_shot
+    Sprite: {fileID: 21300000, guid: 0bbe23f859e6b429bad0e00e5d04bb03, type: 3}
   - Key: UI/backgrounds/key_art
     Sprite: {fileID: 21300000, guid: 4a5e6a1f1e5e649ee91917284df1c3a1, type: 3}
   - Key: UI/backgrounds/lobby
@@ -95,6 +99,8 @@ MonoBehaviour:
     Sprite: {fileID: 21300000, guid: 2076247409d7a4bc5a493b1e4de38f95, type: 3}
   - Key: UI/icons/actions/switcheroo
     Sprite: {fileID: 21300000, guid: e123542123bff4414a5a43ef0b038356, type: 3}
+  - Key: UI/icons/actions/triple_shot
+    Sprite: {fileID: 21300000, guid: 240508b2d734840d69ffeba9f5b79fa5, type: 3}
   - Key: UI/icons/status/crown_small
     Sprite: {fileID: 21300000, guid: 7fc6fbeded9fe43af8fec917e7123257, type: 3}
   - Key: UI/icons/status/grit

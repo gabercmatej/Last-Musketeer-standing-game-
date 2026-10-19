@@ -188,7 +188,11 @@ namespace Musketeers.EditorTools.ArtImport
                 {
                     string name = i < names.Length ? names[i] : $"{slot}_{i + 1:00}";
                     string file = name + (front ? "_front" : "") + ".png";
-                    WritePng($"Cosmetics/{slot}/{file}", items[i].Scale(scale).PadToMultipleOf4(), path);
+                    var img = items[i];
+                    // One boot, rendered twice (FIXES_v0.2 §1.2): keep a single boot of the pair.
+                    if (slot == "boots")
+                        img = front ? BootCrop.FrontBoot(img) : BootCrop.SideBoot(img, name);
+                    WritePng($"Cosmetics/{slot}/{file}", img.Scale(scale).PadToMultipleOf4(), path);
                     sliced.Add(name);
                 }
                 Log.Add($"Sliced Cosmetics/{src} → {string.Join(", ", sliced)}{(front ? " (front)" : "")}");

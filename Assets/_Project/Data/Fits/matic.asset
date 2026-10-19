@@ -1,0 +1,233 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 920c59d3578cc406b9b2b77b0653842c, type: 3}
+  m_Name: matic
+  m_EditorClassIdentifier: Musketeers.Data::Musketeers.Data.CharacterFit
+  Poses:
+  - Pose: 0
+    HeadTop:
+      Position: {x: -0.03, y: 1.17}
+      Rotation: 0
+      Scale: 1
+    Face:
+      Position: {x: 0.16, y: 0.99}
+      Rotation: 0
+      Scale: 1
+    Back:
+      Position: {x: -0.089999996, y: 0.8399999}
+      Rotation: 0
+      Scale: 1
+    FootBack:
+      Position: {x: -0.131, y: 0.008}
+      Rotation: 0
+      Scale: 1
+    FootFront:
+      Position: {x: 0.111, y: 0.035}
+      Rotation: 0
+      Scale: 1
+    HandBack:
+      Position: {x: -0.184, y: 0.367}
+      Rotation: 135
+      Scale: 0.72
+    HandFront:
+      Position: {x: 0.195, y: 0.367}
+      Rotation: -60
+      Scale: 0.58
+    BootMaskBack:
+    - {x: -0.209, y: 0.209}
+    - {x: -0.085, y: 0.191}
+    - {x: -0.038, y: -0.004}
+    - {x: -0.128, y: -0.016}
+    - {x: -0.225, y: 0.013}
+    BootMaskFront:
+    - {x: 0.003, y: 0.192}
+    - {x: 0.117, y: 0.196}
+    - {x: 0.222, y: 0.055}
+    - {x: 0.221, y: 0.016}
+    - {x: 0.013, y: 0.02}
+    HandMask:
+    - {x: 0.211, y: 0.293}
+    - {x: 0.234, y: 0.316}
+    - {x: 0.238, y: 0.379}
+    - {x: 0.211, y: 0.438}
+    - {x: 0.152, y: 0.43}
+    - {x: 0.152, y: 0.391}
+    - {x: 0.176, y: 0.293}
+    NoMusket: 0
+    NoRapier: 0
+  - Pose: 1
+    HeadTop:
+      Position: {x: 0.254, y: 1.163}
+      Rotation: -25
+      Scale: 1
+    Face:
+      Position: {x: 0.35, y: 0.92}
+      Rotation: -25
+      Scale: 1
+    Back:
+      Position: {x: 0.04747896, y: 0.8620863}
+      Rotation: 0
+      Scale: 1
+    FootBack:
+      Position: {x: -0.154, y: 0.008}
+      Rotation: 0
+      Scale: 1
+    FootFront:
+      Position: {x: 0.141, y: 0.039}
+      Rotation: 0
+      Scale: 1
+    HandBack:
+      Position: {x: -0.055, y: 0.586}
+      Rotation: 135
+      Scale: 0.72
+    HandFront:
+      Position: {x: 0.055, y: 0.535}
+      Rotation: -70
+      Scale: 0.58
+    BootMaskBack:
+    - {x: -0.219, y: 0.269}
+    - {x: -0.186, y: 0.27}
+    - {x: -0.082, y: 0.232}
+    - {x: -0.039, y: -0.001}
+    - {x: -0.151, y: -0.016}
+    - {x: -0.269, y: 0.006}
+    - {x: -0.237, y: 0.228}
+    BootMaskFront:
+    - {x: 0.015, y: 0.251}
+    - {x: 0.148, y: 0.25}
+    - {x: 0.269, y: 0.066}
+    - {x: 0.268, y: 0.033}
+    - {x: 0.158, y: 0.015}
+    - {x: 0.012, y: 0.041}
+    HandMask:
+    - {x: -0.008, y: 0.496}
+    - {x: 0.047, y: 0.488}
+    - {x: 0.109, y: 0.52}
+    - {x: 0.113, y: 0.551}
+    - {x: 0.098, y: 0.582}
+    - {x: 0.035, y: 0.586}
+    - {x: -0.004, y: 0.539}
+    NoMusket: 0
+    NoRapier: 0
+  - Pose: 2
+    HeadTop:
+      Position: {x: 0, y: 1.22}
+      Rotation: 0
+      Scale: 1
+    Face:
+      Position: {x: 0, y: 1.03}
+      Rotation: 0
+      Scale: 1
+    Back:
+      Position: {x: 0, y: 0.84000003}
+      Rotation: 0
+      Scale: 1
+    FootBack:
+      Position: {x: -0.197, y: 0.008}
+      Rotation: 0
+      Scale: 1
+    FootFront:
+      Position: {x: 0.176, y: 0.016}
+      Rotation: 0
+      Scale: 1
+    HandBack:
+      Position: {x: 0.152, y: 0.559}
+      Rotation: -38
+      Scale: 0.72
+    HandFront:
+      Position: {x: -0.312, y: 1.297}
+      Rotation: 90
+      Scale: 0.58
+    BootMaskBack:
+    - {x: -0.09, y: 0.232}
+    - {x: -0.119, y: 0.02}
+    - {x: -0.216, y: -0.016}
+    - {x: -0.306, y: -0.004}
+    - {x: -0.307, y: 0.029}
+    - {x: -0.224, y: 0.254}
+    BootMaskFront:
+    - {x: 0.051, y: 0.232}
+    - {x: 0.184, y: 0.254}
+    - {x: 0.304, y: 0.038}
+    - {x: 0.302, y: 0.001}
+    - {x: 0.196, y: -0.008}
+    - {x: 0.093, y: 0.016}
+    HandMask:
+    - {x: -0.352, y: 1.168}
+    - {x: -0.293, y: 1.172}
+    - {x: -0.262, y: 1.191}
+    - {x: -0.23, y: 1.309}
+    - {x: -0.23, y: 1.352}
+    - {x: -0.266, y: 1.398}
+    - {x: -0.328, y: 1.398}
+    - {x: -0.363, y: 1.379}
+    - {x: -0.387, y: 1.348}
+    - {x: -0.387, y: 1.289}
+    NoMusket: 0
+    NoRapier: 0
+  - Pose: 3
+    HeadTop:
+      Position: {x: 0.03, y: 1.08}
+      Rotation: 0
+      Scale: 1
+    Face:
+      Position: {x: 0.22, y: 0.9}
+      Rotation: 0
+      Scale: 1
+    Back:
+      Position: {x: -0.03, y: 0.75}
+      Rotation: 0
+      Scale: 1
+    FootBack:
+      Position: {x: -0.451, y: 0.043}
+      Rotation: 0
+      Scale: 1
+    FootFront:
+      Position: {x: 0.41, y: 0.012}
+      Rotation: 0
+      Scale: 1
+    HandBack:
+      Position: {x: -0.461, y: 0.547}
+      Rotation: 135
+      Scale: 0.72
+    HandFront:
+      Position: {x: 0.648, y: 0.703}
+      Rotation: 0
+      Scale: 0.58
+    BootMaskBack:
+    - {x: -0.378, y: 0.249}
+    - {x: -0.325, y: 0.181}
+    - {x: -0.324, y: 0.147}
+    - {x: -0.42, y: 0.023}
+    - {x: -0.576, y: 0.024}
+    - {x: -0.577, y: 0.061}
+    - {x: -0.434, y: 0.239}
+    BootMaskFront:
+    - {x: 0.244, y: 0.214}
+    - {x: 0.319, y: 0.253}
+    - {x: 0.37, y: 0.258}
+    - {x: 0.577, y: 0.038}
+    - {x: 0.576, y: 0.002}
+    - {x: 0.434, y: -0.011}
+    - {x: 0.305, y: 0.006}
+    - {x: 0.243, y: 0.177}
+    HandMask:
+    - {x: 0.555, y: 0.629}
+    - {x: 0.695, y: 0.617}
+    - {x: 0.762, y: 0.66}
+    - {x: 0.777, y: 0.746}
+    - {x: 0.75, y: 0.809}
+    - {x: 0.676, y: 0.801}
+    - {x: 0.551, y: 0.711}
+    - {x: 0.547, y: 0.652}
+    NoMusket: 0
+    NoRapier: 0

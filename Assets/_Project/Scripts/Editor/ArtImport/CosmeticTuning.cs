@@ -1,117 +1,119 @@
+using System;
 using System.Collections.Generic;
+using System.IO;
 using Musketeers.Data;
+using UnityEditor;
 using UnityEngine;
 
 namespace Musketeers.EditorTools.ArtImport
 {
-    // The importer's starting values for item placement, display names and default outfits. Applied to
-    // new items (and on a reset); once Matej nudges an item in the Wardrobe Preview it's marked Tuned and
-    // keeps his values. Units are world units (256 px) from the slot's anchor.
+    // The importer's starting fits: FitDefaults.json next to this file holds every item's fit and every
+    // pose's anchors and masks (the committed first pass). Import Art applies them to new items/poses and
+    // on a reset; once Matej fits something in the Fitting Editor it's marked Tuned and keeps his values.
+    // "Save Fits as Import Defaults" writes the current assets back into the JSON.
     public static class CosmeticTuning
     {
-        struct Place
+        const string DefaultsPath = "Assets/_Project/Scripts/Editor/ArtImport/FitDefaults.json";
+
+        [Serializable]
+        sealed class Defaults
         {
-            public Vector2 Offset, FrontOffset;
-            public float Scale, FrontScale;
-            public Place(float x, float y, float s, float fx, float fy, float fs)
-            {
-                Offset = new Vector2(x, y); Scale = s; FrontOffset = new Vector2(fx, fy); FrontScale = fs;
-            }
+            public List<CharDefaults> Characters = new List<CharDefaults>();
+            public List<ItemDefaults> Items = new List<ItemDefaults>();
         }
 
-        static readonly Dictionary<CosmeticSlot, Place> SlotDefaults = new Dictionary<CosmeticSlot, Place>
+        [Serializable]
+        sealed class CharDefaults
         {
-            { CosmeticSlot.Hat, new Place(0f, 0.06f, 1.1f, 0f, 0.06f, 1.0f) },
-            { CosmeticSlot.Face, new Place(0f, 0f, 0.75f, 0f, 0f, 0.75f) },
-            { CosmeticSlot.Cape, new Place(-0.02f, -0.15f, 1f, 0f, -0.15f, 1f) },
-            { CosmeticSlot.Boots, new Place(0f, 0.1f, 1f, 0f, 0.1f, 1f) },
-        };
+            public string Id;
+            public List<PoseFit> Poses = new List<PoseFit>();
+        }
 
-        // Per-item placement, first pass by eye on Day 4 against the exported check sheets. Boots and capes
-        // are derived from the sprite height (sole on the ground, cape top at the shoulders).
-        static readonly Dictionary<string, Place> Items = new Dictionary<string, Place>
+        [Serializable]
+        sealed class ItemDefaults
         {
-            { "hat_plumed_purple", new Place(0f, 0.06f, 1.1f, 0f, 0.06f, 1f) },
-            { "hat_plumed_green", new Place(0f, 0.06f, 1.1f, 0f, 0.06f, 1f) },
-            { "hat_plumed_blue", new Place(0f, 0.06f, 1.1f, 0f, 0.06f, 1f) },
-            { "hat_plumed_red", new Place(0f, 0.06f, 1.1f, 0f, 0.06f, 1f) },
-            { "hat_plumed_white", new Place(0f, 0.06f, 1.1f, 0f, 0.06f, 1f) },
-            { "hat_cowboy", new Place(0f, 0.06f, 1.1f, 0f, 0.06f, 1f) },
-            { "hat_propeller", new Place(0f, 0.06f, 1.1f, 0f, 0.06f, 1f) },
-            { "hat_helmet_pink", new Place(0f, 0.02f, 1.15f, 0f, 0.02f, 1.1f) },
-            { "hat_bat_mask", new Place(0f, -0.06f, 1.2f, 0f, -0.07f, 1.15f) },
-            { "face_moustache", new Place(-0.05f, -0.1f, 0.38f, 0f, -0.1f, 0.5f) },
-            { "face_beard", new Place(-0.08f, -0.14f, 0.55f, 0f, -0.14f, 0.6f) },
-            { "face_monocle", new Place(-0.03f, -0.03f, 0.36f, 0.06f, -0.03f, 0.4f) },
-            { "face_sunglasses", new Place(-0.06f, 0f, 0.48f, 0f, 0f, 0.6f) },
-            { "face_mask_purple", new Place(-0.06f, -0.1f, 0.42f, 0f, -0.1f, 0.55f) },
-            { "face_mask_green", new Place(-0.06f, -0.1f, 0.42f, 0f, -0.1f, 0.55f) },
-            { "face_mask_blue", new Place(-0.06f, -0.1f, 0.42f, 0f, -0.1f, 0.55f) },
-            { "face_mask_red", new Place(-0.06f, -0.1f, 0.42f, 0f, -0.1f, 0.55f) },
-            { "face_mask_black", new Place(-0.06f, -0.1f, 0.42f, 0f, -0.1f, 0.55f) },
-            { "cape_purple", new Place(-0.07f, -0.233f, 1.45f, 0f, -0.245f, 1.5f) },
-            { "cape_green", new Place(-0.07f, -0.233f, 1.45f, 0f, -0.245f, 1.5f) },
-            { "cape_blue", new Place(-0.07f, -0.233f, 1.45f, 0f, -0.245f, 1.5f) },
-            { "cape_red", new Place(-0.07f, -0.233f, 1.45f, 0f, -0.245f, 1.5f) },
-            { "cape_white", new Place(-0.07f, -0.233f, 1.45f, 0f, -0.245f, 1.5f) },
-            { "cape_black", new Place(-0.07f, -0.233f, 1.45f, 0f, -0.245f, 1.5f) },
-            { "cape_slovenia", new Place(-0.07f, -0.233f, 1.45f, 0f, -0.245f, 1.5f) },
-            { "cape_bat", new Place(-0.07f, -0.256f, 1.45f, 0f, -0.233f, 1.5f) },
-            { "boots_black", new Place(0f, 0.196f, 1.1f, 0f, 0.195f, 1f) },
-            { "boots_purple", new Place(0f, 0.196f, 1.1f, 0f, 0.195f, 1f) },
-            { "boots_green", new Place(0f, 0.196f, 1.1f, 0f, 0.195f, 1f) },
-            { "boots_blue", new Place(0f, 0.196f, 1.1f, 0f, 0.195f, 1f) },
-            { "boots_red", new Place(0f, 0.196f, 1.1f, 0f, 0.195f, 1f) },
-            { "boots_brown", new Place(0f, 0.196f, 1.1f, 0f, 0.195f, 1f) },
-            { "boots_flipflops", new Place(0f, 0.188f, 1.1f, 0f, 0.195f, 1f) },
-            { "boots_crocs", new Place(0f, 0.196f, 1.1f, 0f, 0.195f, 1f) },
-            { "boots_sneakers", new Place(0f, 0.205f, 1.1f, 0f, 0.195f, 1f) },
-            { "boots_barefoot", new Place(0f, 0.196f, 1.1f, 0f, 0.187f, 1f) },
+            public string Id;
+            public bool Enabled = true;
+            public ItemFit Fit;
+            public List<FitOverride> Overrides = new List<FitOverride>();
+        }
+
+        static Defaults _defaults;
+
+        static Defaults Load()
+        {
+            if (_defaults != null)
+                return _defaults;
+            string path = Path.Combine(Directory.GetParent(Application.dataPath).FullName, DefaultsPath);
+            _defaults = File.Exists(path) ? JsonUtility.FromJson<Defaults>(File.ReadAllText(path)) : new Defaults();
+            return _defaults;
+        }
+
+        static readonly Dictionary<CosmeticSlot, ItemFit> SlotDefaults = new Dictionary<CosmeticSlot, ItemFit>
+        {
+            { CosmeticSlot.Hat, new ItemFit(0f, 0.06f, 1.35f) },
+            { CosmeticSlot.Face, new ItemFit(0f, 0f, 0.6f) },
+            { CosmeticSlot.Cape, new ItemFit(-0.07f, -0.23f, 1.45f) },
+            { CosmeticSlot.Boots, new ItemFit(0.02f, 0.13f, 0.7f) },
         };
 
         public static void Apply(CosmeticDef def)
         {
-            var p = Items.TryGetValue(def.Id, out var item) ? item : SlotDefaults[def.Slot];
-            def.Offset = p.Offset;
-            def.Scale = p.Scale;
-            def.FrontOffset = p.FrontOffset;
-            def.FrontScale = p.FrontScale;
-            def.SortOrder = CosmeticDef.DefaultOrder(def.Slot);
+            var d = Load().Items.Find(i => i.Id == def.Id);
+            def.Global = d != null ? d.Fit : SlotDefaults[def.Slot];
+            def.Overrides = new List<FitOverride>();
+            if (d != null)
+            {
+                foreach (var o in d.Overrides)
+                    def.Overrides.Add(new FitOverride { Character = o.Character ?? "", AnyPose = o.AnyPose, Pose = o.Pose, Fit = o.Fit });
+            }
+            def.EnabledInV1 = d == null || d.Enabled;
             def.Tuned = false;
         }
 
-        // Hand-tuned anchors per character and pose ("body", "hurt", "victory", "lunge"), Day 4 first pass:
-        // read off each pose's eye line; hats/faces follow the head (tilted -25° when hurt). Boots stretch on
-        // the wide hurt/victory stance and hide on the lunge. Unlisted poses use the silhouette estimate.
-        static readonly Dictionary<string, PoseAnchors> Anchors = new Dictionary<string, PoseAnchors>
+        // The committed fit for one pose, if there is one.
+        public static bool TryPose(string character, PoseKind kind, out PoseFit fit)
         {
-            { "matej/body", A(-0.02f, 1.18f, 0.17f, 1f, -0.2f, 0.7f, 0.1f, 0.4f, 0f, 0f, false) },
-            { "matej/hurt", A(0.264f, 1.173f, 0.36f, 0.93f, -0.12f, 0.8f, 0.121f, 0.465f, -25f, 1.4f, false) },
-            { "matej/victory", A(0f, 1.23f, 0f, 1.06f, 0f, 0.76f, 0.145f, 0.465f, 0f, 1.3f, false) },
-            { "matej/lunge", A(0.01f, 1.18f, 0.2f, 1f, -0.12f, 0.72f, 0.45f, 0.68f, 0f, 0f, true) },
-            { "matic/body", A(-0.03f, 1.17f, 0.16f, 0.99f, -0.21f, 0.69f, 0.1f, 0.4f, 0f, 0f, false) },
-            { "matic/hurt", A(0.254f, 1.163f, 0.35f, 0.92f, -0.12f, 0.8f, 0.055f, 0.465f, -25f, 1.4f, false) },
-            { "matic/victory", A(0f, 1.2f, 0f, 1.03f, 0f, 0.73f, 0.141f, 0.465f, 0f, 1.3f, false) },
-            { "matic/lunge", A(0.03f, 1.08f, 0.22f, 0.9f, -0.1f, 0.62f, 0.45f, 0.58f, 0f, 0f, true) },
-            { "aljaz/body", A(-0.07f, 1.17f, 0.12f, 0.99f, -0.25f, 0.69f, 0.1f, 0.4f, 0f, 0f, false) },
-            { "aljaz/hurt", A(0.234f, 1.163f, 0.33f, 0.92f, -0.12f, 0.8f, 0.036f, 0.465f, -25f, 1.4f, false) },
-            { "aljaz/victory", A(0f, 1.22f, 0f, 1.05f, 0f, 0.75f, 0.114f, 0.465f, 0f, 1.3f, false) },
-            { "aljaz/lunge", A(0.01f, 1.13f, 0.2f, 0.95f, -0.12f, 0.67f, 0.45f, 0.63f, 0f, 0f, true) },
-            { "nik/body", A(-0.05f, 1.18f, 0.14f, 1f, -0.23f, 0.7f, 0.1f, 0.4f, 0f, 0f, false) },
-            { "nik/hurt", A(0.274f, 1.143f, 0.37f, 0.9f, -0.12f, 0.8f, 0.079f, 0.465f, -25f, 1.4f, false) },
-            { "nik/victory", A(0f, 1.2f, 0f, 1.03f, 0f, 0.73f, 0.141f, 0.465f, 0f, 1.3f, false) },
-            { "nik/lunge", A(0.03f, 1.11f, 0.22f, 0.93f, -0.1f, 0.65f, 0.45f, 0.61f, 0f, 0f, true) },
-        };
+            fit = null;
+            var c = Load().Characters.Find(x => x.Id == character);
+            var p = c?.Poses.Find(x => x.Pose == kind);
+            if (p == null)
+                return false;
+            fit = new PoseFit { Pose = kind };
+            fit.CopyFrom(p);
+            return true;
+        }
 
-        static PoseAnchors A(float hx, float hy, float fx, float fy, float bx, float by, float px, float py, float angle, float stretch, bool hideBoots) =>
-            new PoseAnchors
+        [MenuItem("Tools/Musketeers/Save Fits as Import Defaults")]
+        public static void SaveDefaults()
+        {
+            var roster = AssetDatabase.LoadAssetAtPath<CharacterRoster>("Assets/_Project/Data/CharacterRoster.asset");
+            var catalog = AssetDatabase.LoadAssetAtPath<CosmeticCatalog>("Assets/_Project/Data/CosmeticCatalog.asset");
+            var d = new Defaults();
+            foreach (var c in roster.Characters)
             {
-                HeadTop = new Vector2(hx, hy), Face = new Vector2(fx, fy), Back = new Vector2(bx, by), Feet = Vector2.zero,
-                Hand = new Vector2(px, py), HeadAngle = angle, FeetStretch = stretch, HideBoots = hideBoots,
-            };
-
-        public static bool TryAnchors(string character, string pose, out PoseAnchors a) =>
-            Anchors.TryGetValue(character + "/" + pose, out a);
+                if (c == null || c.Fit == null)
+                    continue;
+                var cd = new CharDefaults { Id = c.Id };
+                foreach (var p in c.Fit.Poses)
+                {
+                    var copy = new PoseFit { Pose = p.Pose };
+                    copy.CopyFrom(p);
+                    cd.Poses.Add(copy);
+                }
+                d.Characters.Add(cd);
+            }
+            foreach (var item in catalog.Items)
+            {
+                if (item != null)
+                    d.Items.Add(new ItemDefaults { Id = item.Id, Enabled = item.EnabledInV1, Fit = item.Global, Overrides = item.Overrides });
+            }
+            string path = Path.Combine(Directory.GetParent(Application.dataPath).FullName, DefaultsPath);
+            File.WriteAllText(path, JsonUtility.ToJson(d, true));
+            _defaults = null;
+            AssetDatabase.ImportAsset(DefaultsPath);
+            Debug.Log("[Fitting] Saved the current fits as Import Art defaults: " + DefaultsPath);
+        }
 
         // Everyone starts in a plumed hat of their own colour and leather boots (ART_GUIDE §4.2 defaults).
         public static Loadout DefaultLoadout(string character)

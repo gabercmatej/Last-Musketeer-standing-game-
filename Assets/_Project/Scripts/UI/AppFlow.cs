@@ -280,7 +280,7 @@ namespace Musketeers.UI
                 setup.IsBot[i] = i != 0;
                 string name = nameOverride ?? _model.Name;
                 setup.Names[i] = i == 0 && !string.IsNullOrEmpty(name) ? name : _art.CharacterName(chars[i]);
-                setup.Loadouts[i] = _model.LoadoutFor(i).Serialize();
+                setup.Loadouts[i] = setup.IsBot[i] ? "" : _model.LoadoutFor(i).Serialize();
             }
             return setup;
         }
@@ -339,11 +339,17 @@ namespace Musketeers.UI
             _mc.Start();
         }
 
+        // Bots never wear cosmetics (FIXES_v0.2 §1.3), whatever the setup carries.
         Loadout[] SetupLoadouts()
         {
             var l = new Loadout[_setup.PlayerCount];
             for (int i = 0; i < l.Length; i++)
-                l[i] = _setup.Loadouts != null && i < _setup.Loadouts.Length ? Loadout.Parse(_setup.Loadouts[i], default) : default;
+            {
+                bool bot = _setup.IsBot != null && i < _setup.IsBot.Length && _setup.IsBot[i];
+                l[i] = !bot && _setup.Loadouts != null && i < _setup.Loadouts.Length ? Loadout.Parse(_setup.Loadouts[i], default) : default;
+                if (_art.Cosmetics != null)
+                    l[i] = _art.Cosmetics.Sanitize(l[i]);
+            }
             return l;
         }
 

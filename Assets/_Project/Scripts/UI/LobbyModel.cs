@@ -4,7 +4,7 @@ using UnityEngine;
 namespace Musketeers.UI
 {
     // The offline lobby's state: you in slot 0 plus bots, your character, the map, everyone's outfit.
-    // Your choices persist in PlayerPrefs (outfit per character); bots get a random outfit when they join.
+    // Your choices persist in PlayerPrefs (outfit per character); bots wear nothing (FIXES_v0.2 §1.3).
     public sealed class LobbyModel
     {
         const string CharacterKey = "Musketeers.Character";
@@ -84,10 +84,11 @@ namespace Musketeers.UI
                 SetMyLoadout(_catalog.RandomLoadout());
         }
 
+        // Bots never wear cosmetics (FIXES_v0.2 §1.3): bare head, their own boots.
         public void RerollBot(int slot)
         {
             if (slot > 0 && slot < 4)
-                _bots[slot] = _catalog != null ? _catalog.RandomLoadout() : default;
+                _bots[slot] = default;
         }
 
         string Id(int character)
