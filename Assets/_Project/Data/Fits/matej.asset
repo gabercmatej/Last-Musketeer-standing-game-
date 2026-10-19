@@ -36,15 +36,15 @@ MonoBehaviour:
       Scale: 1
     HandBack:
       Position: {x: -0.188, y: 0.371}
-      Rotation: 10
+      Rotation: 141
       Scale: 0.72
     HandFront:
-      Position: {x: 0.191, y: 0.371}
+      Position: {x: 0.225, y: 0.338}
       Rotation: -60
       Scale: 0.58
     BootMaskBack:
-    - {x: -0.203, y: 0.197}
-    - {x: -0.056, y: 0.188}
+    - {x: -0.219, y: 0.209}
+    - {x: -0.053, y: 0.203}
     - {x: -0.036, y: 0.03}
     - {x: -0.042, y: -0.008}
     - {x: -0.143, y: -0.016}
@@ -57,7 +57,7 @@ MonoBehaviour:
     - {x: 0.013, y: 0.02}
     HandMask:
     - {x: 0.207, y: 0.297}
-    - {x: 0.23, y: 0.32}
+    - {x: 0.178, y: 0.391}
     - {x: 0.234, y: 0.387}
     - {x: 0.211, y: 0.438}
     - {x: 0.184, y: 0.438}
@@ -68,8 +68,8 @@ MonoBehaviour:
     NoRapier: 0
   - Pose: 1
     HeadTop:
-      Position: {x: 0.264, y: 1.173}
-      Rotation: -25
+      Position: {x: 0.359, y: 1.222}
+      Rotation: -28
       Scale: 1
     Face:
       Position: {x: 0.36, y: 0.93}
@@ -122,7 +122,7 @@ MonoBehaviour:
     NoRapier: 0
   - Pose: 2
     HeadTop:
-      Position: {x: 0, y: 1.23}
+      Position: {x: -0.006, y: 1.331}
       Rotation: 0
       Scale: 1
     Face:
@@ -130,7 +130,7 @@ MonoBehaviour:
       Rotation: 0
       Scale: 1
     Back:
-      Position: {x: 0, y: 0.87}
+      Position: {x: 0, y: 0}
       Rotation: 0
       Scale: 1
     FootBack:
