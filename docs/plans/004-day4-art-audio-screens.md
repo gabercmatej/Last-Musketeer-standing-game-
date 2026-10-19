@@ -36,10 +36,10 @@
 - [x] 4. Arena art: board tiles (deterministic floor variants), props, debris, pit, crack/warn overlays, map backgrounds (cover), ground shadows; camera fits any map ≤13×13; units = rig (cosmetics, musket at hand anchor aiming/recoil, rapier on parry, hurt/lunge/victory poses, breathing, flip); keg/crown/lasso + rope; every FX sprite on its event.
 - [x] 5. UI Toolkit skin: fonts, 9-slice panels/buttons (normal/pressed), banner, action + status icons in plan bar and HUD, logo.
 - [x] 6. Screen flow: Main menu (splash, logo, name, Play vs Bots, Settings, Host/Join disabled) → Lobby stage (pick, add/remove bot, map, wardrobe tabs + live preview, loadout in PlayerPrefs, bots random cosmetics) → Loading (splash, tip, ~3 s) → Arena → Scoreboard (portraits) → Results (winner victory pose on stage, portraits, badges) → Lobby. Emotes Z/X/C/V (bubble + taunt). Tests: Awards, Callouts.
-- [ ] 7. Audio: AudioService (SFX/voice/music, ±5% pitch, crossfades), hooks for every playback event + UI, announcer + character voices, music per screen (battle_final when ≤2 alive or ≤1 ring left), settings sliders in PlayerPrefs; import Vorbis, music streamed, SFX decompress on load. Test: MusicPicker.
-- [ ] 8. Web template indeterminate bar; Version 0.2.0; scene rebuild.
-- [ ] 9. Verify: EditMode all green, 0 console errors; Play Mode every screen + full match on both maps; screenshots (menu, lobby+wardrobe, arena mid-turn FX, results).
-- [ ] 10. Web build (report size), deploy, browser check (?autoplay=4), DECISIONS, commit, repo size + Art/Audio recommendation, push.
+- [x] 7. Audio: AudioService (SFX/voice/music, ±5% pitch, crossfades), hooks for every playback event + UI, announcer + character voices, music per screen (battle_final when ≤2 alive or ≤1 ring left), settings sliders in PlayerPrefs; import Vorbis, music streamed, SFX decompress on load. Test: MusicPicker.
+- [x] 8. Web template indeterminate bar; Version 0.2.0; scene rebuild.
+- [x] 9. Verify: EditMode all green, 0 console errors; Play Mode every screen + full match on both maps; screenshots (menu, lobby+wardrobe, arena mid-turn FX, results).
+- [x] 10. Web build (report size), deploy, browser check (?autoplay=4), DECISIONS, commit, repo size + Art/Audio recommendation, push.
 
 ## Non-goals
 Networking/LobbyNet (Day 5), reveal phase, kill-cam, rematch vote, Hall of Fame, awards data asset (Day 6), balance and bigger maps (Day 7). Frame animation. Editing source art.

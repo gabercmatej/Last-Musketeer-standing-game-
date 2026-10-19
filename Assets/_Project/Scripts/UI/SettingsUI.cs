@@ -32,9 +32,11 @@ namespace Musketeers.UI
 
         public void SetVisible(bool visible)
         {
+            var a = AudioService.Instance;
+            if (Open && !visible)
+                a?.SaveVolumes();
             Open = visible;
             _root.style.display = visible ? DisplayStyle.Flex : DisplayStyle.None;
-            var a = AudioService.Instance;
             if (visible && a != null)
             {
                 _music.SetValueWithoutNotify(a.MusicVolume);
@@ -43,6 +45,6 @@ namespace Musketeers.UI
             }
         }
 
-        void Apply() => AudioService.Instance?.SetVolumes(_music.value, _sfx.value, _voice.value);
+        void Apply() => AudioService.Instance?.SetVolumes(_music.value, _sfx.value, _voice.value, save: false);
     }
 }

@@ -75,18 +75,26 @@ namespace Musketeers.Presentation
 
         // ---------- settings ----------
 
-        public void SetVolumes(float music, float sfx, float voice)
+        // Applies at once; save = write PlayerPrefs too (Settings saves once on close, not per slider tick:
+        // on Web every Save writes IndexedDB).
+        public void SetVolumes(float music, float sfx, float voice, bool save = true)
         {
             MusicVolume = Mathf.Clamp01(music);
             SfxVolume = Mathf.Clamp01(sfx);
             VoiceVolume = Mathf.Clamp01(voice);
+            if (save)
+                SaveVolumes();
+            _announcer.volume = VoiceVolume;
+            _character.volume = VoiceVolume;
+            ApplyMusicVolume();
+        }
+
+        public void SaveVolumes()
+        {
             PlayerPrefs.SetFloat(MusicKey, MusicVolume);
             PlayerPrefs.SetFloat(SfxKey, SfxVolume);
             PlayerPrefs.SetFloat(VoiceKey, VoiceVolume);
             PlayerPrefs.Save();
-            _announcer.volume = VoiceVolume;
-            _character.volume = VoiceVolume;
-            ApplyMusicVolume();
         }
 
         // ---------- playback ----------
@@ -152,7 +160,16 @@ namespace Musketeers.Presentation
             if (clip == null)
                 return;
             _musicKey = key;
-            _aIsCurrent = !_aIsCurrent;
+            // A change while a crossfade is running: keep the louder of the two as the track fading out
+            // and drop the quieter one, so nothing jumps to full volume or cuts out.
+            if (_fade < 1f && _fade < 0.5f)
+                (_aIsCurrent ? _musicA : _musicB).Stop();
+            else
+            {
+                if (_fade < 1f)
+                    (_aIsCurrent ? _musicB : _musicA).Stop();
+                _aIsCurrent = !_aIsCurrent;
+            }
             var cur = _aIsCurrent ? _musicA : _musicB;
             cur.clip = clip;
             cur.volume = 0f;

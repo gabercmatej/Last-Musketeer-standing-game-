@@ -201,7 +201,7 @@ namespace Musketeers.Presentation
         {
             if (_rapier == null)
                 return;
-            _rapier.enabled = on && _rapier.sprite != null && !_def.Pose(_pose).Front;
+            _rapier.enabled = on && _rapier.sprite != null && _def != null && !_placeholder && !_def.Pose(_pose).Front;
             _musket.enabled = !_rapier.enabled && !(_def != null && _def.Pose(_pose).Front);
             ApplyAim();
         }

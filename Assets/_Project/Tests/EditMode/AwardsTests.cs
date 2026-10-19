@@ -21,5 +21,16 @@ namespace Musketeers.Sim.Tests
             Assert.That(awards.Any(a => a.Id == "regicide"), Is.False);
             Assert.That(awards.Any(a => a.Id == "click_click"), Is.False);
         }
+
+        [Test]
+        public void SwanDiveAndRegicide_GoToEveryoneWhoDidIt()
+        {
+            var st = new MatchStats(3);
+            st.SelfRingOuts[0] = 2; st.SelfRingOuts[1] = 1;
+            st.CrownKills[2] = 1;
+            var awards = Awards.Compute(st);
+            Assert.That(awards.Where(a => a.Id == "swan_dive").Select(a => a.Player), Is.EquivalentTo(new[] { 0, 1 }));
+            Assert.That(awards.Where(a => a.Id == "regicide").Select(a => a.Player), Is.EquivalentTo(new[] { 2 }));
+        }
     }
 }

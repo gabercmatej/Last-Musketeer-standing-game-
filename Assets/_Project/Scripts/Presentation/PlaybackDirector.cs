@@ -82,6 +82,9 @@ namespace Musketeers.Presentation
             }
             if (p.Outcome.TurnStart != null && p.Outcome.TurnStart.Count > 0)
             {
+                var callout = Callouts.Top(p.Outcome.TurnStart, _crowned, turnStart: true);
+                if (callout != Callout.None)
+                    At(0.6f, () => Announce(callout));
                 yield return PlayLog(p.Outcome.TurnStart);
                 yield return Wait(0.2f);
             }

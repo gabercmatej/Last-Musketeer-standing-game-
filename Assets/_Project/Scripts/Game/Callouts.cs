@@ -9,7 +9,8 @@ namespace Musketeers.Game
     public static class Callouts
     {
         // The most important moment in a tick (later enum values win), so one tick gets one line.
-        public static Callout Top(EventLog tick, int crowned)
+        // turnStart: the log is a turn start, where falls are the crumbling arena, not a swan dive.
+        public static Callout Top(EventLog tick, int crowned, bool turnStart = false)
         {
             var best = Callout.None;
             int deaths = 0;
@@ -34,7 +35,7 @@ namespace Musketeers.Game
                         deaths++;
                         if (e.Unit == crowned && crowned >= 0)
                             best = Max(best, Callout.CrownFalls);
-                        else if ((DeathCause)e.Reason == DeathCause.Fell && e.Other < 0)
+                        else if ((DeathCause)e.Reason == DeathCause.Fell && e.Other < 0 && !turnStart)
                             best = Max(best, Callout.SwanDive);
                         else if (KilledByRiposte(tick, e.Unit))
                             best = Max(best, Callout.Touche);

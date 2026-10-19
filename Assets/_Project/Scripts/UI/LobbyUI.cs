@@ -73,7 +73,11 @@ namespace Musketeers.UI
         {
             _root.style.display = visible ? DisplayStyle.Flex : DisplayStyle.None;
             if (!visible)
+            {
+                // Leaving with the wardrobe open: close it and bring the bottom panel back for next time.
                 Wardrobe.SetVisible(false);
+                _bottom.style.display = DisplayStyle.Flex;
+            }
         }
 
         public void SetWardrobe(bool open)

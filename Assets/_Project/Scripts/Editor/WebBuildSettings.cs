@@ -35,6 +35,9 @@ namespace Musketeers.EditorTools
             PlayerSettings.defaultWebScreenHeight = 900;
             // Custom template: full-window canvas, dark background, loading bar, Fullscreen button.
             PlayerSettings.WebGL.template = "PROJECT:Musketeers";
+            // The Unity splash logo texture alone is ~2.7 MB of download; our loader page already shows the logo.
+            PlayerSettings.SplashScreen.show = false;
+            PlayerSettings.SplashScreen.showUnityLogo = false;
 
             AssetDatabase.SaveAssets();
             Debug.Log("[WebBuildSettings] Applied TECH_DESIGN §7 Web player settings. Version " + PlayerSettings.bundleVersion);

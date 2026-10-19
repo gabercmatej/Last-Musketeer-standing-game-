@@ -63,6 +63,17 @@ namespace Musketeers.Sim.Tests
         }
 
         [Test]
+        public void CrumbleFalls_AreNotSwanDives_ButTheCrownStillFalls()
+        {
+            var log = new EventLog();
+            log.Add(SimEventKind.Died, unit: 1, other: -1, reason: (byte)DeathCause.Fell);
+            Assert.That(Callouts.Top(log, crowned: -1, turnStart: true), Is.EqualTo(Callout.None));
+            Assert.That(Callouts.Top(log, crowned: 1, turnStart: true), Is.EqualTo(Callout.CrownFalls));
+            log.Add(SimEventKind.Died, unit: 2, other: -1, reason: (byte)DeathCause.Fell);
+            Assert.That(Callouts.Top(log, crowned: -1, turnStart: true), Is.EqualTo(Callout.DoubleKo));
+        }
+
+        [Test]
         public void QuietTick_HasNoCallout()
         {
             var s = Scenario.From("A...B").Plan('A', Act.Move(Dir.E)).ResolveTick();

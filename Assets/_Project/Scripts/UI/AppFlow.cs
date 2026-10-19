@@ -243,6 +243,7 @@ namespace Musketeers.UI
 
         void Teardown()
         {
+            PrimeTween.Tween.StopAll(this);   // delayed results sounds (victory line, award reveal)
             _planning = false;
             _input.Active = false;
             _director.Stop();
@@ -501,7 +502,7 @@ namespace Musketeers.UI
                 if (_mc == null)
                     return;
                 var m = _mc.Match;
-                if (!m.MatchOver && MusicPicker.IsFinal(p.After, m.Cfg))
+                if (p.Outcome.RoundResult == null && MusicPicker.IsFinal(p.After, m.Cfg))
                     _audio?.Music("Music/battle_final", 0.8f);
                 _mc.PlaybackFinished();
             });
@@ -591,8 +592,9 @@ namespace Musketeers.UI
         {
             if (_mc == null || Time.unscaledTime < _emoteReady)
                 return;
+            // §8.7: emotes are for the planning phase, by a musketeer who's still standing.
             var u = _board.Unit(_setup.LocalSlot);
-            if (u == null)
+            if (u == null || !u.Alive || _mc.Phase != MatchPhase.Planning)
                 return;
             _emoteReady = Time.unscaledTime + EmoteCooldown;
             _fx.Emote(u.transform, new Vector3(0.35f, UnitView.FeetY + 1.85f, 0f), UiArt.Get(GameArt.Emotes[index]), 2f);

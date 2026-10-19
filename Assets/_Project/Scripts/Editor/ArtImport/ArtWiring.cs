@@ -185,7 +185,8 @@ namespace Musketeers.EditorTools.ArtImport
         static void WireMaps(List<string> log)
         {
             // Day 3's single theme becomes the Courtyard theme (same asset, so scene references survive).
-            Directory.CreateDirectory($"{Data}/Themes");
+            if (!AssetDatabase.IsValidFolder($"{Data}/Themes"))
+                AssetDatabase.CreateFolder(Data, "Themes");
             if (File.Exists($"{Data}/BoardTheme.asset") && !File.Exists($"{Data}/Themes/Courtyard.asset"))
                 AssetDatabase.MoveAsset($"{Data}/BoardTheme.asset", $"{Data}/Themes/Courtyard.asset");
 

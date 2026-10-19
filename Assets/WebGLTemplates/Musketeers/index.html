@@ -64,12 +64,20 @@
         autoSyncPersistentDataPath: true,
       };
 
-      // Unity reports download progress only when the server sends Content-Length. Netlify doesn't,
-      // so the bar sweeps (indeterminate) until real in-between numbers show up, then fills normally.
+      // Unity reports byte progress only when the server sends Content-Length. Netlify doesn't, and then
+      // the loader only reports whole files done (0.9 * k / 3: 0, 0.3, 0.6, 0.9), which would freeze the
+      // bar at 30% during the big download. So the bar sweeps (indeterminate) until a value that isn't one
+      // of those steps shows up (real byte progress), then fills normally.
       var bar = document.querySelector("#bar");
       var determinate = false;
+      function isFileStep(p) {
+        for (var n = 1; n <= 4; n++)
+          for (var k = 0; k <= n; k++)
+            if (Math.abs(p - 0.9 * k / n) < 0.002) return true;
+        return false;
+      }
       createUnityInstance(canvas, config, function (progress) {
-        if (!determinate && progress > 0.01 && progress < 0.85) {
+        if (!determinate && progress > 0.01 && progress < 0.85 && !isFileStep(progress)) {
           determinate = true;
           bar.classList.remove("indeterminate");
         }
