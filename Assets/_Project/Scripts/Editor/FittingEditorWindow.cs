@@ -223,11 +223,11 @@ namespace Musketeers.EditorTools
             Handles.BeginGUI();
             if (_showBoots)
             {
-                Poly(r, fit.BootMaskBack, new Color(0.2f, 1f, 1f), _selPoly == Grab.BootBack);
-                Poly(r, fit.BootMaskFront, new Color(1f, 0.3f, 1f), _selPoly == Grab.BootFront);
+                Poly(r, fit.BootPathBack.Flatten(), new Color(0.2f, 1f, 1f), _selPoly == Grab.BootBack);
+                Poly(r, fit.BootPathFront.Flatten(), new Color(1f, 0.3f, 1f), _selPoly == Grab.BootFront);
             }
             if (_showHand)
-                Poly(r, fit.HandMask, new Color(1f, 0.85f, 0.2f), _selPoly == Grab.Hand);
+                Poly(r, fit.HandPath.Flatten(), new Color(1f, 0.85f, 0.2f), _selPoly == Grab.Hand);
             if (_showAnchors)
             {
                 foreach (AnchorId id in Enum.GetValues(typeof(AnchorId)))
@@ -281,7 +281,11 @@ namespace Musketeers.EditorTools
                         break;
                     }
                     default:
-                        PolyOf(fit, _grab)[_grabIndex] = Round(pose);
+                        {
+                        var moved = PolyOf(fit, _grab);
+                        moved[_grabIndex] = Round(pose);
+                        SetPoly(fit, _grab, moved);
+                    }
                         break;
                 }
                 EditorUtility.SetDirty(asset);
@@ -342,14 +346,13 @@ namespace Musketeers.EditorTools
 
         static Vector2 Round(Vector2 v) => new Vector2(Mathf.Round(v.x * 1000f) / 1000f, Mathf.Round(v.y * 1000f) / 1000f);
 
-        static Vector2[] PolyOf(PoseFit fit, Grab g) => g == Grab.BootBack ? fit.BootMaskBack : g == Grab.BootFront ? fit.BootMaskFront : fit.HandMask;
+        // Temporary until the Wardrobe Studio replaces this window: edits the flattened polygon and writes
+        // it back as a corner-only path.
+        static BodyMaskId MaskId(Grab g) => g == Grab.BootBack ? BodyMaskId.BootBack : g == Grab.BootFront ? BodyMaskId.BootFront : BodyMaskId.Hand;
 
-        static void SetPoly(PoseFit fit, Grab g, Vector2[] poly)
-        {
-            if (g == Grab.BootBack) fit.BootMaskBack = poly;
-            else if (g == Grab.BootFront) fit.BootMaskFront = poly;
-            else fit.HandMask = poly;
-        }
+        static Vector2[] PolyOf(PoseFit fit, Grab g) => fit.BodyMask(MaskId(g)).Flatten();
+
+        static void SetPoly(PoseFit fit, Grab g, Vector2[] poly) => fit.SetBodyMask(MaskId(g), BezierPath.FromPolygon(poly));
 
         void Poly(Rect r, Vector2[] poly, Color col, bool selected)
         {

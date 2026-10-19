@@ -101,15 +101,18 @@ namespace Musketeers.Sim.Tests
         {
             var sprite = TestSprite(out var tex);
             var fit = new PoseFit { HandBack = new Anchor(-0.2f, 0.4f, -38f, 0.7f), HandFront = new Anchor(0.2f, 0.4f, -60f, 0.7f) };
-            var m = CosmeticLayout.Weapon(fit, sprite, true);
-            var r = CosmeticLayout.Weapon(fit, sprite, false, 62f);
+            var musket = WeaponDef.Temporary(sprite, true);
+            var rapier = WeaponDef.Temporary(sprite, false);
+            var m = CosmeticLayout.Weapon(fit, musket, "matej", PoseKind.Idle, false);
+            var r = CosmeticLayout.Weapon(fit, rapier, "matej", PoseKind.Idle, false, 62f - fit.HandFront.Rotation);
             Assert.That(m.Position, Is.EqualTo(new Vector2(-0.2f, 0.4f)));
             Assert.That(m.Order, Is.LessThan(CosmeticLayout.Order(RigPart.Body)));
             Assert.That(r.Order, Is.GreaterThan(CosmeticLayout.Order(RigPart.Body)));
             Assert.That(CosmeticLayout.Order(RigPart.Hand), Is.GreaterThan(r.Order), "the hand overlay wraps the grip");
             Assert.That(r.Angle, Is.EqualTo(62f), "an explicit angle (parry) overrides the rest angle");
             fit.NoMusket = true;
-            Assert.That(CosmeticLayout.Weapon(fit, sprite, true).Valid, Is.False);
+            Assert.That(CosmeticLayout.Weapon(fit, musket, "matej", PoseKind.Idle, false).Valid, Is.False);
+            Object.DestroyImmediate(musket); Object.DestroyImmediate(rapier);
             Object.DestroyImmediate(tex);
         }
 

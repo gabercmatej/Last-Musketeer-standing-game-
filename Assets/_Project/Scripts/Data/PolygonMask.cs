@@ -41,6 +41,9 @@ namespace Musketeers.Data
             return Rect.MinMaxRect(min.x, min.y, max.x, max.y);
         }
 
+        public static Sprite Sprite(BezierPath path, out Vector2 origin) =>
+            Sprite(path != null && path.Valid ? path.Flatten() : null, out origin);
+
         // A sprite whose pivot is the bottom-left of the polygon's bounds: place it at `origin`.
         public static Sprite Sprite(Vector2[] poly, out Vector2 origin)
         {

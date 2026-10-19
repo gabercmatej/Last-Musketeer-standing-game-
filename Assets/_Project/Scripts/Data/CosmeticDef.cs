@@ -38,7 +38,7 @@ namespace Musketeers.Data
     // One wardrobe item (GAME_DESIGN §10, FIXES_v0.2 §1.2). The global Offset/Scale/Rotation place it on
     // every musketeer and pose; overrides replace them for one musketeer, one pose, or one of each.
     [CreateAssetMenu(menuName = "Musketeers/Cosmetic", fileName = "Cosmetic")]
-    public sealed class CosmeticDef : ScriptableObject
+    public sealed class CosmeticDef : ScriptableObject, IFitTarget
     {
         public string Id = "item";
         public string DisplayName = "Item";
@@ -51,6 +51,13 @@ namespace Musketeers.Data
         public float Rotation;
         public List<FitOverride> Overrides = new List<FitOverride>();
         public bool Tuned;             // true once fitted by hand; the importer then leaves the fit alone
+        public ItemMasks Masks = new ItemMasks();
+        public int CheckedMask;        // Studio "checked" tick per pose, bit = (int)PoseKind
+
+        int IFitTarget.CheckedPoses { get => CheckedMask; set => CheckedMask = value; }
+        string IFitTarget.Id => Id;
+        List<FitOverride> IFitTarget.Overrides => Overrides ?? (Overrides = new List<FitOverride>());
+        ItemMasks IFitTarget.Masks => Masks ?? (Masks = new ItemMasks());
 
         public ItemFit Global
         {
@@ -58,31 +65,9 @@ namespace Musketeers.Data
             set { Offset = value.Offset; Scale = value.Scale; Rotation = value.Rotation; }
         }
 
-        // Most specific wins: musketeer + pose, then pose, then musketeer, then global. A pose override
-        // beats a musketeer one because poses differ more than heads do (the victory pose is front-on).
-        public ItemFit FitFor(string character, PoseKind pose)
-        {
-            int best = -1;
-            var fit = Global;
-            if (Overrides == null)
-                return fit;
-            foreach (var o in Overrides)
-            {
-                if (o == null)
-                    continue;
-                bool charOk = !o.ForCharacter || o.Character == character;
-                bool poseOk = o.AnyPose || o.Pose == pose;
-                if (!charOk || !poseOk)
-                    continue;
-                int rank = (o.ForCharacter ? 1 : 0) + (o.AnyPose ? 0 : 2);
-                if (rank > best)
-                {
-                    best = rank;
-                    fit = o.Fit;
-                }
-            }
-            return fit;
-        }
+        // Most specific wins (see FitEdit.Resolve): a pose override beats a musketeer one because poses
+        // differ more than heads do (the victory pose is front-on).
+        public ItemFit FitFor(string character, PoseKind pose) => FitEdit.Resolve(this, character, pose);
 
         public FitOverride FindOverride(string character, bool anyPose, PoseKind pose)
         {

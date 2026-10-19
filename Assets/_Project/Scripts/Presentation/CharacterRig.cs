@@ -95,6 +95,8 @@ namespace Musketeers.Presentation
             StartBreathing();
         }
 
+        WeaponDef _musketDef, _rapierDef;
+
         int Order(RigPart part) => _base + CosmeticLayout.Order(part);
 
         SpriteRenderer Add(string name, Transform parent, Sprite sprite, RigPart part)
@@ -188,12 +190,17 @@ namespace Musketeers.Presentation
             bool front = Item(RigPart.BootFront, art, fit, kind, CosmeticSlot.Boots, false);
 
             // Footwear on: hide the body's own boots so the new ones never sit on top of them.
-            bool masked = SetMask(_bootMaskBack, back || front ? fit.BootMaskBack : null);
-            masked |= SetMask(_bootMaskFront, back || front ? fit.BootMaskFront : null);
+            bool masked = SetMask(_bootMaskBack, back || front ? fit.BootPathBack : null);
+            masked |= SetMask(_bootMaskFront, back || front ? fit.BootPathFront : null);
             _body.maskInteraction = masked ? SpriteMaskInteraction.VisibleOutsideMask : SpriteMaskInteraction.None;
 
             // Musket: back hand, behind the body (its own hand covers the grip).
-            var m = CosmeticLayout.Weapon(fit, _musket.sprite, true);
+            // Temporary weapon defs (identity fit) until the runtime switches to WeaponDef assets.
+            if (_musketDef == null) _musketDef = WeaponDef.Temporary(null, true);
+            if (_rapierDef == null) _rapierDef = WeaponDef.Temporary(null, false);
+            _musketDef.Sprite = _musket.sprite;
+            _rapierDef.Sprite = _rapier.sprite;
+            var m = CosmeticLayout.Weapon(fit, _musketDef, _def.Id, kind, false);
             _musket.enabled = _weapons && m.Valid;
             if (m.Valid)
             {
@@ -201,12 +208,12 @@ namespace Musketeers.Presentation
                 _musket.transform.localScale = new Vector3(m.Scale.x, m.Scale.y, 1f);
             }
             // Rapier: front hand, in front of the body, with the hand overlay over its grip.
-            var r = CosmeticLayout.Weapon(fit, _rapier.sprite, false, _raised ? RaisedAngle : (float?)null);
+            var r = CosmeticLayout.Weapon(fit, _rapierDef, _def.Id, kind, false, _raised ? RaisedAngle - fit.HandFront.Rotation : 0f);
             _rapier.enabled = _weapons && r.Valid;
             if (r.Valid)
                 Put(_rapier, r);
             _hand.sprite = art.Sprite;
-            bool hand = _rapier.enabled && SetMask(_handMask, fit.HandMask);
+            bool hand = _rapier.enabled && SetMask(_handMask, fit.HandPath);
             if (!_rapier.enabled)
                 SetMask(_handMask, null);
             _hand.enabled = hand;
@@ -234,7 +241,7 @@ namespace Musketeers.Presentation
             sr.transform.localScale = new Vector3(p.Scale.x, p.Scale.y, 1f);
         }
 
-        static bool SetMask(SpriteMask mask, Vector2[] poly)
+        static bool SetMask(SpriteMask mask, BezierPath poly)
         {
             var sprite = PolygonMask.Sprite(poly, out var origin);
             mask.enabled = sprite != null;

@@ -73,20 +73,25 @@ namespace Musketeers.EditorTools
                     layers.Add(From(p));
                 }
             }
-            var bodyHide = boots ? new[] { fit.BootMaskBack, fit.BootMaskFront } : null;
+            var bodyHide = boots ? new[] { fit.BootPathBack.Flatten(), fit.BootPathFront.Flatten() } : null;
             layers.Add(new Layer { Order = 0, Sprite = art.Sprite, Pos = Vector2.zero, Scale = Vector2.one, Shade = 1f, Alpha = 1f, Hide = bodyHide });
             if (opt.Weapons)
             {
                 var musket = Sprite(GameArt.Musket);
                 var rapier = Sprite(GameArt.Rapier);
-                var m = CosmeticLayout.Weapon(fit, musket, true);
+                var musketDef = WeaponDef.Temporary(musket, true);
+                var rapierDef = WeaponDef.Temporary(rapier, false);
+                var m = CosmeticLayout.Weapon(fit, musketDef, c.Id, kind, false);
                 if (m.Valid) layers.Add(From(m));
-                var r = CosmeticLayout.Weapon(fit, rapier, false, opt.Raised ? 62f : (float?)null);
+                var r = CosmeticLayout.Weapon(fit, rapierDef, c.Id, kind, false, opt.Raised ? 62f - fit.HandFront.Rotation : 0f);
+                UnityEngine.Object.DestroyImmediate(musketDef);
+                UnityEngine.Object.DestroyImmediate(rapierDef);
                 if (r.Valid)
                 {
                     layers.Add(From(r));
-                    if (PolygonMask.Valid(fit.HandMask))
-                        layers.Add(new Layer { Order = CosmeticLayout.Order(RigPart.Hand), Sprite = art.Sprite, Scale = Vector2.one, Shade = 1f, Alpha = 1f, Only = fit.HandMask });
+                    var handPoly = fit.HandPath.Flatten();
+                    if (PolygonMask.Valid(handPoly))
+                        layers.Add(new Layer { Order = CosmeticLayout.Order(RigPart.Hand), Sprite = art.Sprite, Scale = Vector2.one, Shade = 1f, Alpha = 1f, Only = handPoly });
                 }
             }
             layers.Sort((a, b) => a.Order.CompareTo(b.Order));

@@ -100,24 +100,32 @@ namespace Musketeers.Data
             };
         }
 
-        // A weapon at its hand: the musket in the back hand, the rapier in the front hand (§1.2). The
-        // sprite's pivot is the grip; `angle` overrides the anchor's resting angle (aiming, parrying).
-        public static LayerPlacement Weapon(PoseFit fit, Sprite sprite, bool musket, float? angle = null)
+        // A weapon at its hand (Plan 006 layering: body -> weapon -> front-hand overlay). The resting musket
+        // is in the back hand, behind the body; the aimed musket and the rapier (rest or raised) are in the
+        // front hand, in front of the body and below the front-hand overlay. The sprite's pivot is the grip;
+        // `extraAngle` adds to the fitted angle (aiming north/south, parrying).
+        public static LayerPlacement Weapon(PoseFit fit, WeaponDef weapon, string character, PoseKind pose, bool active, float extraAngle = 0f)
         {
-            if (fit == null || sprite == null || (musket ? fit.NoMusket : fit.NoRapier))
+            if (fit == null || weapon == null || weapon.Sprite == null || (weapon.Musket ? fit.NoMusket : fit.NoRapier))
                 return default;
-            var a = musket ? fit.HandBack : fit.HandFront;
+            bool restMusket = weapon.Musket && !active;
+            var a = restMusket ? fit.HandBack : fit.HandFront;
+            var f = FitEdit.Resolve(weapon.For(active), character, pose);
             return new LayerPlacement
             {
                 Valid = true,
-                Sprite = sprite,
-                Position = a.Position,
-                Angle = angle ?? a.Rotation,
-                Scale = Vector2.one * a.S,
-                Order = Order(musket ? RigPart.Musket : RigPart.Rapier),
+                Sprite = weapon.Sprite,
+                Position = a.Position + Rotate(f.Offset * a.S, a.Rotation),
+                Angle = a.Rotation + f.Rotation + extraAngle,
+                Scale = Vector2.one * (a.S * f.S),
+                Order = Order(restMusket ? RigPart.Musket : RigPart.Rapier),
                 Shade = 1f,
             };
         }
+
+        // The mask an item draws on this pose (null = none).
+        public static BezierPath ItemMask(CosmeticDef item, PoseArt pose, PoseKind kind) =>
+            item == null ? null : ((IFitTarget)item).Masks.For(kind, pose != null && pose.Front && item.FrontSprite != null);
 
         public static Vector2 Rotate(Vector2 v, float degrees)
         {
