@@ -1,0 +1,11 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements">
+    <ui:VisualElement name="loading" class="screen loading-screen">
+        <ui:VisualElement name="loading-bg" class="fill-bg" picking-mode="Ignore" />
+        <ui:VisualElement class="loading-shade" picking-mode="Ignore" />
+        <ui:VisualElement class="panel loading-panel">
+            <ui:Label name="loading-map" text="The Courtyard" class="title title--panel" />
+            <ui:Label name="loading-tip" text="" class="loading-tip" />
+            <ui:VisualElement class="bar"><ui:VisualElement name="loading-fill" class="bar-fill" /></ui:VisualElement>
+        </ui:VisualElement>
+    </ui:VisualElement>
+</ui:UXML>

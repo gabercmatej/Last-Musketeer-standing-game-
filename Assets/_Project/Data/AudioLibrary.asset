@@ -1,0 +1,304 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3afb320957a4841728c3a25558928af8, type: 3}
+  m_Name: AudioLibrary
+  m_EditorClassIdentifier: Musketeers.Data::Musketeers.Data.AudioLibrary
+  Entries:
+  - Key: Music/battle
+    Clips:
+    - {fileID: 8300000, guid: 23eaf5f577deb4c99a709ea1ec209891, type: 3}
+  - Key: Music/battle_final
+    Clips:
+    - {fileID: 8300000, guid: 1f7c94635d3e8464c996952f0637469f, type: 3}
+  - Key: Music/lobby
+    Clips:
+    - {fileID: 8300000, guid: 0112dd25ce00342dfa591ffced6dc3f9, type: 3}
+  - Key: Music/menu
+    Clips:
+    - {fileID: 8300000, guid: de1dcd5ed7a6f4047adc85b68ca0a43a, type: 3}
+  - Key: Music/results
+    Clips:
+    - {fileID: 8300000, guid: 82f3926b75c8249e8af9e3c84ab1c75a, type: 3}
+  - Key: SFX/abilities/bull_rush
+    Clips:
+    - {fileID: 8300000, guid: f85f8134205a6491d87a6b38c99182bb, type: 3}
+  - Key: SFX/abilities/bull_rush_hit
+    Clips:
+    - {fileID: 8300000, guid: 25862e6b8e0f245e6a649847a7f6c6db, type: 3}
+  - Key: SFX/abilities/double_charge
+    Clips:
+    - {fileID: 8300000, guid: 5e5f793675f8045e493a3289eb4868aa, type: 3}
+  - Key: SFX/abilities/grappin_throw
+    Clips:
+    - {fileID: 8300000, guid: 1068b4776f53d45bda96cb2dbf724155, type: 3}
+  - Key: SFX/abilities/grappin_yank
+    Clips:
+    - {fileID: 8300000, guid: 5bfc951e26d784e738951d22bdd6a55a, type: 3}
+  - Key: SFX/abilities/switcheroo
+    Clips:
+    - {fileID: 8300000, guid: a0a91134feb9341d291694f89cfc05b3, type: 3}
+  - Key: SFX/actions/catch_breath
+    Clips:
+    - {fileID: 8300000, guid: 108e4d1e49c724237874973743c55f3b, type: 3}
+  - Key: SFX/actions/dash
+    Clips:
+    - {fileID: 8300000, guid: cba11a95fbb1d46d1b03497e66415956, type: 3}
+  - Key: SFX/actions/fuse_hiss
+    Clips:
+    - {fileID: 8300000, guid: 1559d1cd663b44d219d6de209b77b2ae, type: 3}
+  - Key: SFX/actions/guard_break
+    Clips:
+    - {fileID: 8300000, guid: cb61d45fa0795401a8afd738bcc030ca, type: 3}
+  - Key: SFX/actions/keg_land
+    Clips:
+    - {fileID: 8300000, guid: 5fb29f654a0aa4ca8bf0807a45656340, type: 3}
+  - Key: SFX/actions/keg_throw
+    Clips:
+    - {fileID: 8300000, guid: 37d5a0ff9185e49ada7b30022bb3960c, type: 3}
+  - Key: SFX/actions/leap
+    Clips:
+    - {fileID: 8300000, guid: 4a387f2316c054648981ef1e932e92f6, type: 3}
+  - Key: SFX/actions/musket_click
+    Clips:
+    - {fileID: 8300000, guid: 6dbeec316510c4153927efab7c932c0f, type: 3}
+  - Key: SFX/actions/musket_fire
+    Clips:
+    - {fileID: 8300000, guid: f75b9788b580c4b11b989cb3ac658bf8, type: 3}
+    - {fileID: 8300000, guid: 06f79fa8e89c6493a93bec78ab32ab5d, type: 3}
+  - Key: SFX/actions/parry_clang
+    Clips:
+    - {fileID: 8300000, guid: 69642961cfa0d40f8bf2971408ef7fab, type: 3}
+  - Key: SFX/actions/parry_ready
+    Clips:
+    - {fileID: 8300000, guid: 198896cbfed704732a940e973759cf1b, type: 3}
+  - Key: SFX/actions/reload
+    Clips:
+    - {fileID: 8300000, guid: 154f21d05002240a58cbd09cd5492cde, type: 3}
+  - Key: SFX/actions/riposte
+    Clips:
+    - {fileID: 8300000, guid: 60f22d6365a9843b2a482a13a075af5e, type: 3}
+  - Key: SFX/actions/shove
+    Clips:
+    - {fileID: 8300000, guid: 033a3b5adf19446bb94b27fa48e96de8, type: 3}
+  - Key: SFX/actions/step
+    Clips:
+    - {fileID: 8300000, guid: c6eff9819f142401c92636a5c6e22f28, type: 3}
+    - {fileID: 8300000, guid: e4508102d65284403887dcd346eff485, type: 3}
+    - {fileID: 8300000, guid: 1ba95d5a683414d9ab003e46a6a1be4d, type: 3}
+  - Key: SFX/impacts/bonk
+    Clips:
+    - {fileID: 8300000, guid: 0d9e0c492790a48e69d4c659501439e7, type: 3}
+  - Key: SFX/impacts/chain_explosion
+    Clips:
+    - {fileID: 8300000, guid: 18976b4b103a740bebc7812fa7837d7e, type: 3}
+  - Key: SFX/impacts/crate_break
+    Clips:
+    - {fileID: 8300000, guid: b8a394f3b02744d1683e3728480cc159, type: 3}
+  - Key: SFX/impacts/death
+    Clips:
+    - {fileID: 8300000, guid: 05106cad878074c05a470f86e49392fb, type: 3}
+  - Key: SFX/impacts/explosion
+    Clips:
+    - {fileID: 8300000, guid: b0f1a255768f94197a78c49060e4d4ee, type: 3}
+    - {fileID: 8300000, guid: 31cd5d941f9fe409e920a821891f6bbd, type: 3}
+  - Key: SFX/impacts/fall_pit
+    Clips:
+    - {fileID: 8300000, guid: 9a753810a95284735a086b2ec160a6c9, type: 3}
+  - Key: SFX/impacts/hit
+    Clips:
+    - {fileID: 8300000, guid: 523c0af3747b54a5a81cff2e776951f3, type: 3}
+    - {fileID: 8300000, guid: ed8a8de42d57b46ff8fb4701b85c6351, type: 3}
+    - {fileID: 8300000, guid: 769cfbb45fb074a299edb3d57a15ce71, type: 3}
+  - Key: SFX/impacts/splash
+    Clips:
+    - {fileID: 8300000, guid: f768813e3f89240599e5f2babe445091, type: 3}
+  - Key: SFX/impacts/squeeze
+    Clips:
+    - {fileID: 8300000, guid: e40e69f9c91264a23bfa757e4af647f4, type: 3}
+  - Key: SFX/impacts/wall_slam
+    Clips:
+    - {fileID: 8300000, guid: 848453310c93e436bb99cbe019715b3d, type: 3}
+  - Key: SFX/match/award_reveal
+    Clips:
+    - {fileID: 8300000, guid: bdc584b8b5e464098a3d88c1a563223d, type: 3}
+  - Key: SFX/match/crown_gain
+    Clips:
+    - {fileID: 8300000, guid: c8bcd4643c0c6400a8d1389eecbcc34f, type: 3}
+  - Key: SFX/match/crown_lost
+    Clips:
+    - {fileID: 8300000, guid: 477f24133d48c4652970890a17a158a1, type: 3}
+  - Key: SFX/match/lock_in
+    Clips:
+    - {fileID: 8300000, guid: 76412d3d81d814d09aa9046ed15f5130, type: 3}
+  - Key: SFX/match/match_win
+    Clips:
+    - {fileID: 8300000, guid: 181c5b60b55764b08810121054f9779b, type: 3}
+  - Key: SFX/match/points_tick
+    Clips:
+    - {fileID: 8300000, guid: 07b0dde3180e5452ebd795c143bce117, type: 3}
+  - Key: SFX/match/reveal
+    Clips:
+    - {fileID: 8300000, guid: 575e493afc6334c37937e904f10da545, type: 3}
+  - Key: SFX/match/round_start
+    Clips:
+    - {fileID: 8300000, guid: 213b328bf7cb64522bb06b5551edfe51, type: 3}
+  - Key: SFX/match/round_win
+    Clips:
+    - {fileID: 8300000, guid: ab6f4681c77754df5afcce76269b3d54, type: 3}
+  - Key: SFX/match/tile_crumble
+    Clips:
+    - {fileID: 8300000, guid: 00eb30a5f69da48bf96a955adfeb1d71, type: 3}
+  - Key: SFX/match/tile_warn
+    Clips:
+    - {fileID: 8300000, guid: 10050ded5cd4b402aaeb5146fec8db68, type: 3}
+  - Key: SFX/match/timer_end
+    Clips:
+    - {fileID: 8300000, guid: 3370724315b6242f1a00852bbca3cf31, type: 3}
+  - Key: SFX/match/timer_tick
+    Clips:
+    - {fileID: 8300000, guid: ceb0020fd54134685a7558f88d745152, type: 3}
+  - Key: SFX/match/turn_start
+    Clips:
+    - {fileID: 8300000, guid: 45469eee81f2b4efa9df54541d31353d, type: 3}
+  - Key: SFX/ui/countdown
+    Clips:
+    - {fileID: 8300000, guid: 47885af47c98c4755a87788d5a7b4863, type: 3}
+  - Key: SFX/ui/emote_pop
+    Clips:
+    - {fileID: 8300000, guid: 21e906e5f3320436f8414f1ddbb8506a, type: 3}
+  - Key: SFX/ui/plan_add
+    Clips:
+    - {fileID: 8300000, guid: f3dab67f2557044ada6d4d9486966701, type: 3}
+  - Key: SFX/ui/plan_undo
+    Clips:
+    - {fileID: 8300000, guid: b6609748777924150b7de4d45d847627, type: 3}
+  - Key: SFX/ui/player_join
+    Clips:
+    - {fileID: 8300000, guid: 3e91bf5c48b814d78aa74e4f15037133, type: 3}
+  - Key: SFX/ui/player_leave
+    Clips:
+    - {fileID: 8300000, guid: 6712e3b81fe22468c86f8496b81c3a69, type: 3}
+  - Key: SFX/ui/ready
+    Clips:
+    - {fileID: 8300000, guid: ba5f16110b1b7422ba88b7641c638fc9, type: 3}
+  - Key: SFX/ui/ui_back
+    Clips:
+    - {fileID: 8300000, guid: 6010b1ae509bb4e8795d40d054c5b57b, type: 3}
+  - Key: SFX/ui/ui_click
+    Clips:
+    - {fileID: 8300000, guid: 078c3e3b6da4243f782a17d18453c8b6, type: 3}
+  - Key: SFX/ui/ui_error
+    Clips:
+    - {fileID: 8300000, guid: 88a685ee1018344e5873b6f1e89aa9b8, type: 3}
+  - Key: SFX/ui/ui_hover
+    Clips:
+    - {fileID: 8300000, guid: 4748347e0ab2b4bc8bc056080b326744, type: 3}
+  - Key: SFX/ui/wardrobe_equip
+    Clips:
+    - {fileID: 8300000, guid: 65d293b39e575495e90fff72475f7e41, type: 3}
+  - Key: Voice/aljaz/death
+    Clips:
+    - {fileID: 8300000, guid: f7f9ef63dd6bb4a7b92c10c94c325d4c, type: 3}
+  - Key: Voice/aljaz/hurt
+    Clips:
+    - {fileID: 8300000, guid: 22776c157dfcf463584c254684d5ec39, type: 3}
+    - {fileID: 8300000, guid: aa38aaddccee1409fb7d3482b7a3330d, type: 3}
+  - Key: Voice/aljaz/taunt
+    Clips:
+    - {fileID: 8300000, guid: fdce2329873bb4adea41dd695a50707f, type: 3}
+    - {fileID: 8300000, guid: 4be5a2b00cea84e7296950bbe3f8857d, type: 3}
+    - {fileID: 8300000, guid: cbf00a8b47db64aff9e920698146cfe5, type: 3}
+    - {fileID: 8300000, guid: 250c25466a56f429e83fec8911ed169a, type: 3}
+  - Key: Voice/aljaz/victory
+    Clips:
+    - {fileID: 8300000, guid: 1d6149bb992a64c12a1ae04616170bd6, type: 3}
+  - Key: Voice/announcer/bonk
+    Clips:
+    - {fileID: 8300000, guid: c803bda96a38c489da82d6f8610b5e6e, type: 3}
+  - Key: Voice/announcer/double_ko
+    Clips:
+    - {fileID: 8300000, guid: 4ebea4d4dd7a44c1cb8fc0c8a1730f61, type: 3}
+  - Key: Voice/announcer/draw
+    Clips:
+    - {fileID: 8300000, guid: a11f9010dc6bb43358c992b73f01f566, type: 3}
+  - Key: Voice/announcer/en_garde
+    Clips:
+    - {fileID: 8300000, guid: 57afd505040554433a8c726ec28019ed, type: 3}
+  - Key: Voice/announcer/guard_break
+    Clips:
+    - {fileID: 8300000, guid: 37d0c9e4a93c247e89b44f27ac72ea9b, type: 3}
+  - Key: Voice/announcer/last_musketeer_standing
+    Clips:
+    - {fileID: 8300000, guid: 730e5696b769847c7a23e5e3f371ed42, type: 3}
+  - Key: Voice/announcer/riposte
+    Clips:
+    - {fileID: 8300000, guid: 5f6ff101fcf1440ccbc73125592c6d82, type: 3}
+  - Key: Voice/announcer/signature
+    Clips:
+    - {fileID: 8300000, guid: 4d8ea6da1b8494682bf8c2d29f556e29, type: 3}
+  - Key: Voice/announcer/swan_dive
+    Clips:
+    - {fileID: 8300000, guid: 5507c5cb7945d4fa5800ba6b1a199fc0, type: 3}
+  - Key: Voice/announcer/the_crown_falls
+    Clips:
+    - {fileID: 8300000, guid: dd14ebabd05e446d6ad57c0d375d33cf, type: 3}
+  - Key: Voice/announcer/touche
+    Clips:
+    - {fileID: 8300000, guid: 105b8b70728d548708d967c41e04da63, type: 3}
+  - Key: Voice/matej/death
+    Clips:
+    - {fileID: 8300000, guid: 006b92d7acc7140fe9f999d00652331a, type: 3}
+  - Key: Voice/matej/hurt
+    Clips:
+    - {fileID: 8300000, guid: 5e9e8e5fa09464721a9722ca5fd7ac09, type: 3}
+    - {fileID: 8300000, guid: 829ec54173d9c4ea3bfa04afd43b807d, type: 3}
+  - Key: Voice/matej/taunt
+    Clips:
+    - {fileID: 8300000, guid: 88838b5636f6f465e9eb28c3a48f55c2, type: 3}
+    - {fileID: 8300000, guid: fd4e996f7862b432aa3476f138a7412c, type: 3}
+    - {fileID: 8300000, guid: 9898904110a634e11ad9dd7cb13cf7d3, type: 3}
+    - {fileID: 8300000, guid: 878ebc3aed2fe4f268e73f0a6d7e434f, type: 3}
+  - Key: Voice/matej/victory
+    Clips:
+    - {fileID: 8300000, guid: 9787b68aa6afb45bc9189190d0a4138c, type: 3}
+  - Key: Voice/matic/death
+    Clips:
+    - {fileID: 8300000, guid: fae99a17a16774e3aa6bdb2d85321929, type: 3}
+  - Key: Voice/matic/hurt
+    Clips:
+    - {fileID: 8300000, guid: 32e5ba090b50d45f7b60ab038ed1a04c, type: 3}
+    - {fileID: 8300000, guid: 7c015313c35594f7abb9842724fd2544, type: 3}
+  - Key: Voice/matic/taunt
+    Clips:
+    - {fileID: 8300000, guid: 4583c150962a94f7296a36d96423f392, type: 3}
+    - {fileID: 8300000, guid: a1b7613603e794315b3b4f5177c0a6e8, type: 3}
+    - {fileID: 8300000, guid: 1d11bb3f2331c4721a51b172a58e7acc, type: 3}
+    - {fileID: 8300000, guid: 719f4a43c485942f4b1878be29c09c87, type: 3}
+  - Key: Voice/matic/victory
+    Clips:
+    - {fileID: 8300000, guid: bc11b8b2784ee418d82cfdbee20c219d, type: 3}
+  - Key: Voice/nik/death
+    Clips:
+    - {fileID: 8300000, guid: 71a22923d28bb4a7183b7a37b2de1a4f, type: 3}
+  - Key: Voice/nik/hurt
+    Clips:
+    - {fileID: 8300000, guid: 20a3778e5f5d14c5a901dacb2ffcdbb5, type: 3}
+    - {fileID: 8300000, guid: 8050dcaa9682d497ead3549d549e02e5, type: 3}
+  - Key: Voice/nik/taunt
+    Clips:
+    - {fileID: 8300000, guid: bce98f48e03224a1781f702f8ca7c632, type: 3}
+    - {fileID: 8300000, guid: 68e2a7057027e4cd49c6e18a9d163086, type: 3}
+    - {fileID: 8300000, guid: 97773128879a047c9871e8ffeda1ee2a, type: 3}
+    - {fileID: 8300000, guid: d742b9b01bbde4d55a534dba62e61621, type: 3}
+  - Key: Voice/nik/victory
+    Clips:
+    - {fileID: 8300000, guid: 3837833ee2fd14b99a387fc4a0afb5ba, type: 3}

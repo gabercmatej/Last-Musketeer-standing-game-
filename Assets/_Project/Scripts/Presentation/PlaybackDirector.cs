@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using Musketeers.Data;
 using Musketeers.Game;
 using Musketeers.Sim;
 using PrimeTween;
@@ -8,18 +9,21 @@ using UnityEngine;
 
 namespace Musketeers.Presentation
 {
-    // Plays a resolved turn's EventLog back, grouped by tick then phase (§6 order), ~0.7 s per tick at 1×.
-    // After every tick the views snap to the sim's state for that tick, so even an imperfect animation
-    // never leaves the board wrong. Read-only: it never touches the live GameState.
+    // Plays a resolved turn's EventLog back, grouped by tick then phase (§6 order), ~0.7 s per tick at 1×,
+    // with Matej's FX sprites, poses, sounds and voice lines. After every tick the views snap to the sim's
+    // state for that tick, so even an imperfect animation never leaves the board wrong. Read-only: it never
+    // touches the live GameState.
     public sealed class PlaybackDirector : MonoBehaviour
     {
         [SerializeField] private BoardView _board;
         [SerializeField] private Fx _fx;
+        [SerializeField] private AudioService _audio;
 
         public static readonly float[] Speeds = { 0.5f, 1f, 2f };
         public float Speed { get; set; } = 1f;
         public bool IsPlaying { get; private set; }
         public event Action<int> TickStarted;
+        public event Action<Callout> Announced;   // the HUD shows the banner
 
         static readonly Color Red = new Color(1f, 0.3f, 0.3f);
         static readonly Color Gold = new Color(1f, 0.85f, 0.3f);
@@ -68,6 +72,9 @@ namespace Musketeers.Presentation
             for (int t = 0; t < p.TickCount; t++)
             {
                 TickStarted?.Invoke(t);
+                var callout = Callouts.Top(p.TickLogs[t], _crowned);
+                if (callout != Callout.None)
+                    At(0.45f, () => Announce(callout));
                 yield return PlayLog(p.TickLogs[t]);
                 yield return Wait(0.08f);
                 _board.Sync(p.AfterTick[t], _crowned);
@@ -82,6 +89,12 @@ namespace Musketeers.Presentation
             IsPlaying = false;
             _running = null;
             done?.Invoke();
+        }
+
+        public void Announce(Callout c)
+        {
+            _audio?.Announce(Callouts.Clip(c));
+            Announced?.Invoke(c);
         }
 
         // Splits a log into phase groups (and Phase 2b into one group per ability, since those resolve
@@ -119,7 +132,7 @@ namespace Musketeers.Presentation
                 if (e.Kind == SimEventKind.KegThrown)
                     afterThrow = true;
                 if (afterThrow && e.Kind == SimEventKind.KegExploded)
-                    delay = Mathf.Max(delay, 0.32f);
+                    delay = Mathf.Max(delay, 0.36f);
                 if (group[0].Phase == SimPhase.Shots && (e.Kind == SimEventKind.ShotHit || e.Kind == SimEventKind.Damaged ||
                                                          e.Kind == SimEventKind.Parried || e.Kind == SimEventKind.CrateDestroyed))
                     delay = Mathf.Max(delay, 0.12f);
@@ -137,6 +150,12 @@ namespace Musketeers.Presentation
                 Tween.Delay(this, S(delay), _ => a());
         }
 
+        void Sfx(float delay, string key, float volume = 1f) => At(delay, () => _audio?.Sfx(key, volume));
+
+        void Line(float delay, UnitView u, string line) => At(delay, () => { if (u != null) _audio?.Line(u.CharacterId, line); });
+
+        static float DirX(Dir d) => d == Dir.E ? 1f : d == Dir.W ? -1f : 0f;
+
         // Returns the animation's length in 1× seconds.
         float PlayEvent(SimEvent e, float delay)
         {
@@ -144,22 +163,27 @@ namespace Musketeers.Presentation
             var o = _board.Unit(e.Other);
             Vector3 to = BoardMath.ToWorld(e.To);
             Vector3 from = BoardMath.ToWorld(e.From);
+            Vector3 feet = new Vector3(0f, UnitView.FeetY, 0f);
             switch (e.Kind)
             {
                 case SimEventKind.Moved:
                     if (u == null) return 0f;
                     u.SetFacing(e.Dir);
                     Slide(u, e.To, 0.26f, delay, Ease.OutQuad);
+                    Hop(u, 0.08f, 0.26f, delay);
+                    Sfx(delay, "SFX/actions/step");
                     return 0.26f;
                 case SimEventKind.Dashed:
                     if (u == null) return 0f;
                     u.SetFacing(e.Dir);
                     Slide(u, e.To, 0.18f, delay, Ease.OutCubic);
-                    At(delay, () => _fx.Flash(from, new Color(1, 1, 1, 0.5f), 0.4f, 0.8f, S(0.2f), PlaceholderArt.SoftCircle));
+                    At(delay, () => _fx.Dust(from + feet, DirX(e.Dir), 0.7f, S(0.4f)));
+                    Sfx(delay, "SFX/actions/dash");
                     return 0.2f;
                 case SimEventKind.Leaped:
                     if (u == null) return 0f;
-                    At(delay, () => Tween.PunchScale(u.Body, Vector3.one * 0.35f, S(0.2f), 1f));
+                    Hop(u, 0.45f, 0.2f, delay);
+                    Sfx(delay, "SFX/actions/leap");
                     return 0.2f;
                 case SimEventKind.MoveBlocked:
                     if (u == null) return 0f;
@@ -170,21 +194,25 @@ namespace Musketeers.Presentation
                     Nudge(u.Body, to - u.transform.localPosition, 0.3f, 0.24f, delay);
                     At(delay + 0.1f, () =>
                     {
-                        _fx.Flash(u.transform.localPosition, Color.white, 0.4f, 1.0f, S(0.2f), PlaceholderArt.Star);
+                        _fx.Burst(GameArt.Stars, PlaceholderArt.Star, Color.white, u.transform.localPosition + new Vector3(0f, 0.95f, 0f), 0.3f, 0.75f, S(0.55f));
                         _fx.Shake(0.08f, S(0.2f));
                         if (e.Unit < (e.Other < 0 ? 99 : e.Other))
-                            _fx.Popup("BONK!", u.transform.localPosition + Vector3.up * 0.3f, Color.white, S(0.7f), "popup-big");
+                            _fx.Popup("BONK!", u.transform.localPosition + Vector3.up * 0.6f, Color.white, S(0.7f), "popup-big");
                     });
+                    Sfx(delay + 0.1f, "SFX/impacts/bonk");
                     return 0.28f;
                 case SimEventKind.ParryRaised:
                     if (u == null) return 0f;
                     At(delay, () => u.SetParry(true));
+                    Sfx(delay, "SFX/actions/parry_ready");
                     return 0.12f;
                 case SimEventKind.Shoved:
                 {
                     if (u == null) return 0f;
                     u.SetFacing(e.Dir);
+                    At(delay, () => u.FlashPose(PoseKind.Lunge, S(0.35f)));
                     Nudge(u.Body, BoardMath.DirVector(e.Dir), 0.3f, 0.2f, delay);
+                    Sfx(delay, "SFX/actions/shove");
                     if (e.Other < 0 && e.Keg < 0)
                         At(delay, () => _fx.Popup("whiff", to, new Color(0.8f, 0.8f, 0.8f), S(0.5f)));
                     return 0.2f;
@@ -192,32 +220,36 @@ namespace Musketeers.Presentation
                 case SimEventKind.Pushed:
                     if (u == null) return 0f;
                     Slide(u, e.To, 0.2f, delay + 0.06f, Ease.OutQuad);
+                    At(delay + 0.06f, () => _fx.Dust(from + feet, (e.To.X - e.From.X), 0.6f, S(0.35f)));
                     return 0.28f;
                 case SimEventKind.GuardBreak:
                     if (u == null) return 0f;
                     At(delay, () =>
                     {
                         u.SetParry(false);
-                        _fx.Flash(u.transform.localPosition, Riposte, 1f, 1.5f, S(0.3f));
-                        _fx.Popup("GUARD BREAK!", u.transform.localPosition + Vector3.up * 0.4f, Riposte, S(0.9f), "popup-big");
+                        _fx.Burst(GameArt.Spark, PlaceholderArt.Star, Riposte, u.transform.localPosition + new Vector3(0f, 0.3f, 0f), 0.5f, 1.2f, S(0.4f));
+                        _fx.Popup("GUARD BREAK!", u.transform.localPosition + Vector3.up * 0.7f, Riposte, S(0.9f), "popup-big");
                     });
+                    Sfx(delay, "SFX/actions/guard_break");
                     return 0.3f;
                 case SimEventKind.Squeezed:
                     if (u == null) return 0f;
                     At(delay, () =>
                     {
                         Tween.PunchScale(u.Body, new Vector3(-0.3f, 0.3f, 0), S(0.3f), 2f);
-                        _fx.Popup("SQUEEZED", u.transform.localPosition + Vector3.up * 0.4f, Color.white, S(0.7f));
+                        _fx.Popup("SQUEEZED", u.transform.localPosition + Vector3.up * 0.7f, Color.white, S(0.7f));
                     });
+                    Sfx(delay, "SFX/impacts/squeeze");
                     return 0.3f;
                 case SimEventKind.WallSlam:
                     if (u == null) return 0f;
                     At(delay + 0.2f, () =>
                     {
-                        _fx.Flash((u.transform.localPosition + to) * 0.5f, Color.white, 0.3f, 0.8f, S(0.2f), PlaceholderArt.Star);
+                        _fx.Burst(GameArt.Stars, PlaceholderArt.Star, Color.white, (u.transform.localPosition + to) * 0.5f + new Vector3(0f, 0.4f, 0f), 0.3f, 0.7f, S(0.5f));
                         _fx.Shake(0.1f, S(0.2f));
                     });
                     Nudge(u.Body, to - BoardMath.ToWorld(u.GridPos), 0.25f, 0.18f, delay + 0.2f);
+                    Sfx(delay + 0.2f, "SFX/impacts/wall_slam");
                     return 0.4f;
                 case SimEventKind.Fell:
                     if (u != null)
@@ -228,8 +260,10 @@ namespace Musketeers.Presentation
                             Tween.LocalPosition(u.transform, to, S(0.15f));
                             Tween.Scale(u.Body, 0.2f, S(0.45f), Ease.InBack, startDelay: S(0.12f));
                             Tween.LocalRotation(u.Body, Quaternion.Euler(0, 0, 170f), S(0.45f), startDelay: S(0.12f));
-                            _fx.Flash(to, new Color(0.4f, 0.6f, 1f, 0.8f), 0.3f, 0.9f, S(0.45f));
                         });
+                        At(delay + 0.35f, () => _fx.Burst(GameArt.Splash, PlaceholderArt.Ring, new Color(0.4f, 0.6f, 1f, 0.8f), to, 0.5f, 1.1f, S(0.6f)));
+                        Sfx(delay, "SFX/impacts/fall_pit");
+                        Sfx(delay + 0.35f, "SFX/impacts/splash", 0.7f);
                         return 0.6f;
                     }
                     if (e.Keg >= 0)
@@ -241,71 +275,90 @@ namespace Musketeers.Presentation
                             Tween.LocalPosition(kv.transform, to, S(0.12f));
                             Tween.Scale(kv.transform, 0.1f, S(0.35f), Ease.InBack, startDelay: S(0.1f));
                         });
+                        At(delay + 0.3f, () => _fx.Burst(GameArt.Splash, PlaceholderArt.Ring, new Color(0.4f, 0.6f, 1f, 0.8f), to, 0.4f, 0.9f, S(0.5f)));
+                        Sfx(delay + 0.3f, "SFX/impacts/splash", 0.6f);
                         return 0.45f;
                     }
                     return 0f;
                 case SimEventKind.ShotFired:
                 {
                     if (u == null) return 0f;
-                    u.SetFacing(e.Dir);
                     bool dc = (ShotKind)e.Reason == ShotKind.DoubleCharge;
-                    Vector3 start = from + BoardMath.DirVector(e.Dir) * 0.35f;
+                    u.Aim(e.Dir);
+                    Vector3 tip = u.BarrelTip(e.Dir);
+                    Vector3 dv = BoardMath.DirVector(e.Dir);
+                    Vector3 end = to + new Vector3(0f, UnitView.FeetY + 0.42f, 0f);
                     At(delay, () =>
                     {
                         u.SetLoaded(false);
-                        _fx.Flash(start, Gold, 0.2f, 0.6f, S(0.15f), PlaceholderArt.Star);
-                        _fx.Tracer(start, to, dc ? Blast : Tracer, dc ? 0.14f : 0.07f, S(0.4f));
-                        Nudge(u.Body, -BoardMath.DirVector(e.Dir), 0.1f, 0.15f, 0f);
+                        u.Recoil(S(0.3f));
+                        _fx.MuzzleFlash(tip, dv, S(dc ? 0.3f : 0.2f));
+                        _fx.Smoke(tip + dv * 0.1f, dc ? 0.8f : 0.55f, S(0.8f));
+                        _fx.Tracer(tip, end, dc ? Blast : Tracer, dc ? 0.14f : 0.06f, S(0.4f));
+                        Nudge(u.Body, -dv, 0.1f, 0.15f, 0f);
                     });
+                    Sfx(delay, dc ? "SFX/abilities/double_charge" : "SFX/actions/musket_fire");
+                    At(delay + 0.6f, () => { if (u != null) u.Rest(); });
                     return 0.4f;
                 }
                 case SimEventKind.ShotHit:
-                    At(delay, () => _fx.Flash(to, Color.white, 0.2f, 0.7f, S(0.2f), PlaceholderArt.Star));
+                    At(delay, () => _fx.Burst(GameArt.Spark, PlaceholderArt.Star, Color.white, to + new Vector3(0f, 0.15f, 0f), 0.25f, 0.6f, S(0.3f)));
+                    Sfx(delay, "SFX/impacts/hit");
                     return 0.2f;
                 case SimEventKind.Parried:
                     if (u == null) return 0f;
                     At(delay, () =>
                     {
-                        _fx.Flash(u.transform.localPosition, Riposte, 0.8f, 1.4f, S(0.25f));
-                        _fx.Popup(e.Keg >= 0 ? "BLOCKED" : "PARRY!", u.transform.localPosition + Vector3.up * 0.4f, Riposte, S(0.7f));
+                        _fx.Burst(GameArt.Spark, PlaceholderArt.Ring, Riposte, u.transform.localPosition + new Vector3(0.15f, 0.25f, 0f), 0.5f, 1.1f, S(0.35f));
+                        _fx.Popup(e.Keg >= 0 ? "BLOCKED" : "PARRY!", u.transform.localPosition + Vector3.up * 0.7f, Riposte, S(0.7f));
                     });
+                    Sfx(delay, "SFX/actions/parry_clang");
                     return 0.25f;
                 case SimEventKind.Reflected:
+                {
+                    Vector3 lift = new Vector3(0f, UnitView.FeetY + 0.42f, 0f);
                     At(delay, () =>
                     {
-                        _fx.Tracer(from, to, Riposte, 0.08f, S(0.4f));
-                        _fx.Popup("RIPOSTE!", from + Vector3.up * 0.55f, Riposte, S(0.9f), "popup-big");
+                        _fx.Tracer(from + lift, to + lift, Riposte, 0.08f, S(0.4f));
+                        _fx.Popup("RIPOSTE!", from + Vector3.up * 0.8f, Riposte, S(0.9f), "popup-big");
                     });
+                    Sfx(delay, "SFX/actions/riposte");
                     return 0.4f;
+                }
                 case SimEventKind.Damaged:
                     if (u == null) return 0f;
                     At(delay, () =>
                     {
                         u.SetHp(Mathf.Max(0, u.Hp - e.Amount));
                         u.Flash(Red, S(0.3f));
-                        Tween.PunchScale(u.Body, Vector3.one * 0.15f, S(0.2f), 1f);
-                        _fx.Popup("-" + e.Amount, u.transform.localPosition + Vector3.right * 0.25f, Red, S(0.8f), "popup-dmg");
+                        u.FlashPose(PoseKind.Hurt, S(0.5f));
+                        Tween.PunchScale(u.Body, Vector3.one * 0.12f, S(0.2f), 1f);
+                        _fx.Popup("-" + e.Amount, u.transform.localPosition + new Vector3(0.3f, 0.5f, 0f), Red, S(0.8f), "popup-dmg");
                     });
+                    Line(delay, u, "hurt");
                     return 0.3f;
                 case SimEventKind.Reloaded:
                     if (u == null) return 0f;
                     At(delay, () =>
                     {
                         u.SetLoaded(true);
-                        _fx.Popup("reload", u.transform.localPosition, new Color(0.9f, 0.9f, 0.8f), S(0.6f));
+                        _fx.Popup("reload", u.transform.localPosition + Vector3.up * 0.3f, new Color(0.9f, 0.9f, 0.8f), S(0.6f));
                     });
+                    Sfx(delay, "SFX/actions/reload");
                     return 0.2f;
                 case SimEventKind.CaughtBreath:
                     if (u == null) return 0f;
-                    At(delay, () => _fx.Popup("+" + e.Amount + " grit", u.transform.localPosition, Gold, S(0.6f)));
+                    At(delay, () => _fx.Popup("+" + e.Amount + " grit", u.transform.localPosition + Vector3.up * 0.3f, Gold, S(0.6f)));
+                    Sfx(delay, "SFX/actions/catch_breath", 0.5f);
                     return 0.2f;
                 case SimEventKind.Fizzled:
                     if (u == null) return 0f;
                     At(delay, () =>
                     {
-                        _fx.Popup("*click*", u.transform.localPosition + Vector3.up * 0.2f, new Color(0.75f, 0.75f, 0.78f), S(0.8f));
+                        _fx.Popup("*click*", u.transform.localPosition + Vector3.up * 0.5f, new Color(0.75f, 0.75f, 0.78f), S(0.8f));
                         Tween.ShakeLocalPosition(u.Body, new Vector3(0.05f, 0, 0), S(0.2f), 20f);
                     });
+                    Sfx(delay, "SFX/actions/musket_click");
                     return 0.25f;
                 case SimEventKind.KegThrown:
                 {
@@ -313,29 +366,41 @@ namespace Musketeers.Presentation
                     kv.SetGridPos(e.From);
                     kv.SetGridPosLogical(e.To);
                     kv.ShowFuse(false);
-                    kv.transform.localScale = Vector3.one * 0.5f;
+                    kv.transform.localScale = Vector3.one * 0.6f;
+                    if (u != null) u.SetFacing(e.To.X > e.From.X ? Dir.E : e.To.X < e.From.X ? Dir.W : u.Rig.FacingRight ? Dir.E : Dir.W);
                     At(delay, () =>
                     {
-                        Tween.LocalPosition(kv.transform, to, S(0.3f), Ease.InOutQuad);
-                        Tween.Scale(kv.transform, 1.3f, S(0.15f), Ease.OutQuad, 2, CycleMode.Yoyo);
+                        // A lob: straight across, plus an arc up and down.
+                        Tween.Custom(0f, 1f, S(0.32f), t =>
+                        {
+                            if (kv == null) return;
+                            kv.transform.localPosition = Vector3.Lerp(from, to, t) + new Vector3(0f, Mathf.Sin(t * Mathf.PI) * 0.9f, 0f);
+                            kv.transform.localScale = Vector3.one * Mathf.Lerp(0.6f, 1f, t);
+                        }, Ease.Linear);
                     });
-                    return 0.32f;
+                    Sfx(delay, "SFX/actions/keg_throw");
+                    return 0.34f;
                 }
                 case SimEventKind.KegLanded:
                 {
                     var kv = _board.Keg(e.Keg);
-                    At(delay + 0.3f, () =>
+                    bool impact = (KegLanding)e.Reason == KegLanding.Impact;
+                    At(delay + 0.32f, () =>
                     {
                         if (kv != null)
                         {
                             kv.transform.localScale = Vector3.one;
+                            kv.transform.localPosition = to;
                             kv.ShowFuse(true);
                         }
-                        _fx.Flash(to, new Color(1, 1, 1, 0.6f), 0.4f, 0.9f, S(0.2f), PlaceholderArt.SoftCircle);
-                        if ((KegLanding)e.Reason == KegLanding.Impact)
-                            _fx.Popup("DIRECT HIT!", to + Vector3.up * 0.4f, Blast, S(0.8f));
+                        _fx.Dust(to + new Vector3(0f, -0.3f, 0f), 0f, 0.6f, S(0.35f));
+                        if (impact)
+                            _fx.Popup("DIRECT HIT!", to + Vector3.up * 0.7f, Blast, S(0.8f));
                     });
-                    return 0.35f;
+                    Sfx(delay + 0.32f, "SFX/actions/keg_land");
+                    if (!impact)
+                        Sfx(delay + 0.4f, "SFX/actions/fuse_hiss", 0.3f);
+                    return 0.36f;
                 }
                 case SimEventKind.KegKicked:
                 {
@@ -343,6 +408,7 @@ namespace Musketeers.Presentation
                     if (kv == null) return 0f;
                     kv.SetGridPosLogical(e.To);
                     At(delay + 0.05f, () => Tween.LocalPosition(kv.transform, to, S(0.25f), Ease.OutQuad));
+                    Sfx(delay + 0.05f, "SFX/actions/keg_land", 0.7f);
                     return 0.3f;
                 }
                 case SimEventKind.KegExploded:
@@ -351,9 +417,8 @@ namespace Musketeers.Presentation
                     At(delay, () =>
                     {
                         if (kv != null)
-                            Tween.Scale(kv.transform, 1.5f, S(0.12f), Ease.OutQuad);
-                        _fx.Flash(to, Color.white, 0.6f, 2.2f, S(0.25f), PlaceholderArt.SoftCircle);
-                        _fx.Shake(0.2f, S(0.3f));
+                            Tween.Scale(kv.transform, 1.4f, S(0.12f), Ease.OutQuad);
+                        _fx.Shake(0.22f, S(0.35f));
                     });
                     At(delay + 0.1f, () =>
                     {
@@ -365,9 +430,12 @@ namespace Musketeers.Presentation
                             if (BoardMath.InBounds(p))
                                 _fx.TileBurst(BoardMath.ToWorld(p), Blast, S(0.5f));
                         }
-                        _fx.Flash(to, Gold, 0.5f, 1.6f, S(0.35f), PlaceholderArt.Star);
-                        _fx.Popup(e.Amount == 1 ? "CHAIN!" : "BOOM!", to + Vector3.up * 0.3f, Blast, S(0.9f), "popup-big");
+                        _fx.Burst(GameArt.Explosion, PlaceholderArt.Star, Gold, to + new Vector3(0f, 0.1f, 0f), 1.2f, 2.9f, S(0.5f), UnityEngine.Random.Range(-20f, 20f), Ease.OutCubic);
+                        _fx.Smoke(to + new Vector3(-0.35f, 0.1f, 0f), 0.9f, S(0.9f));
+                        _fx.Smoke(to + new Vector3(0.35f, 0.2f, 0f), 0.8f, S(1f));
+                        _fx.Popup(e.Amount == 1 ? "CHAIN!" : "BOOM!", to + Vector3.up * 0.6f, Blast, S(0.9f), "popup-big");
                     });
+                    Sfx(delay + 0.1f, e.Amount == 1 ? "SFX/impacts/chain_explosion" : "SFX/impacts/explosion");
                     return 0.6f;
                 }
                 case SimEventKind.CrateDestroyed:
@@ -379,8 +447,9 @@ namespace Musketeers.Presentation
                             Tween.Scale(prop.transform, 0.2f, S(0.25f), Ease.InBack)
                                 .OnComplete(() => _board.SetTile(e.To, TileType.Floor));
                         }
-                        _fx.Flash(to, new Color(0.8f, 0.55f, 0.3f), 0.5f, 1.2f, S(0.3f), PlaceholderArt.Star);
+                        _fx.Dust(to, 0f, 0.9f, S(0.45f));
                     });
+                    Sfx(delay, "SFX/impacts/crate_break");
                     return 0.3f;
                 case SimEventKind.Grappled:
                 {
@@ -390,12 +459,15 @@ namespace Musketeers.Presentation
                     Vector3 hookEnd = result == GrappleResult.Miss || result == GrappleResult.PullSelf
                         ? (result == GrappleResult.PullSelf ? to + BoardMath.DirVector(e.Dir) : to)
                         : from;
-                    var self = BoardMath.ToWorld(u.GridPos);
-                    At(delay, () => _fx.Tracer(self, hookEnd, new Color(0.85f, 0.85f, 0.9f), 0.05f, S(0.45f)));
+                    var self = BoardMath.ToWorld(u.GridPos) + new Vector3(0f, 0.15f, 0f);
+                    hookEnd += new Vector3(0f, 0.15f, 0f);
+                    At(delay, () => _fx.Hook(self, hookEnd, S(0.18f), S(0.05f), S(0.25f), u.transform));
+                    Sfx(delay, "SFX/abilities/grappin_throw");
                     if (result == GrappleResult.YankUnit && o != null)
                     {
-                        Slide(o, e.To, 0.25f, delay + 0.18f, Ease.InQuad);
-                        return 0.45f;
+                        Slide(o, e.To, 0.25f, delay + 0.2f, Ease.InQuad);
+                        Sfx(delay + 0.2f, "SFX/abilities/grappin_yank");
+                        return 0.48f;
                     }
                     if (result == GrappleResult.PullKeg)
                     {
@@ -403,37 +475,38 @@ namespace Musketeers.Presentation
                         if (kv != null)
                         {
                             kv.SetGridPosLogical(e.To);
-                            At(delay + 0.18f, () => Tween.LocalPosition(kv.transform, to, S(0.25f), Ease.InQuad));
+                            At(delay + 0.2f, () => Tween.LocalPosition(kv.transform, to, S(0.25f), Ease.InQuad));
                         }
-                        return 0.45f;
+                        Sfx(delay + 0.2f, "SFX/abilities/grappin_yank");
+                        return 0.48f;
                     }
                     if (result == GrappleResult.PullSelf)
                     {
-                        Slide(u, e.To, 0.25f, delay + 0.18f, Ease.InQuad);
-                        return 0.45f;
+                        Slide(u, e.To, 0.25f, delay + 0.2f, Ease.InQuad);
+                        Sfx(delay + 0.2f, "SFX/abilities/grappin_yank");
+                        return 0.48f;
                     }
-                    At(delay + 0.2f, () => _fx.Popup("miss", to, new Color(0.8f, 0.8f, 0.8f), S(0.6f)));
-                    return 0.4f;
+                    At(delay + 0.2f, () => _fx.Popup("miss", to + Vector3.up * 0.3f, new Color(0.8f, 0.8f, 0.8f), S(0.6f)));
+                    return 0.48f;
                 }
                 case SimEventKind.Swapped:
                 {
                     if (u == null) return 0f;
                     u.SetFacing(e.Dir);
+                    Sfx(delay, "SFX/abilities/switcheroo");
                     if (e.Other < 0 && e.Keg < 0)
                     {
-                        At(delay, () => _fx.Popup("miss", from + BoardMath.DirVector(e.Dir), new Color(0.8f, 0.8f, 0.8f), S(0.6f)));
+                        At(delay, () => _fx.Popup("miss", from + BoardMath.DirVector(e.Dir) + Vector3.up * 0.3f, new Color(0.8f, 0.8f, 0.8f), S(0.6f)));
                         return 0.3f;
                     }
                     At(delay, () =>
                     {
-                        _fx.Flash(from, new Color(0.7f, 0.5f, 1f, 0.8f), 0.4f, 1.2f, S(0.35f), PlaceholderArt.Star);
-                        _fx.Flash(to, new Color(0.7f, 0.5f, 1f, 0.8f), 0.4f, 1.2f, S(0.35f), PlaceholderArt.Star);
+                        _fx.Burst(GameArt.SwapSwirl, PlaceholderArt.Star, new Color(0.7f, 0.5f, 1f, 0.8f), from + new Vector3(0f, 0.3f, 0f), 0.4f, 1.1f, S(0.45f), 0f);
+                        _fx.Burst(GameArt.SwapSwirl, PlaceholderArt.Star, new Color(0.7f, 0.5f, 1f, 0.8f), to + new Vector3(0f, 0.3f, 0f), 0.4f, 1.1f, S(0.45f), 180f);
                     });
                     Slide(u, e.To, 0.3f, delay, Ease.InOutQuad);
                     if (o != null)
-                    {
                         Slide(o, e.From, 0.3f, delay, Ease.InOutQuad);
-                    }
                     else if (e.Keg >= 0)
                     {
                         var kv = _board.Keg(e.Keg);
@@ -448,11 +521,20 @@ namespace Musketeers.Presentation
                 case SimEventKind.BullRushed:
                     if (u == null) return 0f;
                     u.SetFacing(e.Dir);
+                    At(delay, () => u.FlashPose(PoseKind.Lunge, S(0.45f)));
                     Slide(u, e.To, 0.22f, delay, Ease.InQuad);
-                    At(delay, () => _fx.Tracer(from, to, new Color(0.85f, 0.7f, 0.5f, 0.6f), 0.35f, S(0.5f)));
+                    At(delay, () =>
+                    {
+                        _fx.Dust(from + feet, DirX(e.Dir), 0.8f, S(0.5f));
+                        _fx.Dust(Vector3.Lerp(from, to, 0.5f) + feet, DirX(e.Dir), 0.7f, S(0.45f));
+                    });
+                    Sfx(delay, "SFX/abilities/bull_rush");
+                    if (e.Other >= 0 || e.Keg >= 0)
+                        Sfx(delay + 0.22f, "SFX/abilities/bull_rush_hit");
                     return 0.24f;
                 case SimEventKind.TileWarned:
                     At(delay, () => _board.SetWarned(e.To, true));
+                    Sfx(delay, "SFX/match/tile_warn", 0.6f);
                     return 0.2f;
                 case SimEventKind.TileCrumbled:
                 {
@@ -466,8 +548,9 @@ namespace Musketeers.Presentation
                     {
                         _board.SetWarned(e.To, false);
                         _board.SetTile(e.To, TileType.Pit);
-                        _fx.TileBurst(to, new Color(0.4f, 0.35f, 0.3f, 0.8f), S(0.4f));
+                        _fx.Dust(to, 0f, 0.8f, S(0.45f));
                     });
+                    Sfx(delay + 0.3f, "SFX/match/tile_crumble", 0.7f);
                     return 0.75f;
                 }
                 case SimEventKind.Died:
@@ -476,15 +559,23 @@ namespace Musketeers.Presentation
                     {
                         bool fell = (DeathCause)e.Reason == DeathCause.Fell;
                         if (!fell)
-                            _fx.Flash(u.transform.localPosition, Red, 0.6f, 1.6f, S(0.4f), PlaceholderArt.Star);
-                        _fx.Popup(fell ? "SPLASH!" : "DOWN!", u.transform.localPosition + Vector3.up * 0.45f, Red, S(1.1f), "popup-big");
+                            _fx.Burst(GameArt.Stars, PlaceholderArt.Star, Red, u.transform.localPosition + new Vector3(0f, 0.6f, 0f), 0.5f, 1.2f, S(0.5f));
+                        _fx.Popup(fell ? "SPLASH!" : "DOWN!", u.transform.localPosition + Vector3.up * 0.8f, Red, S(1.1f), "popup-big");
                         if (!fell)
                             u.SetAlive(false, false);
                     });
+                    Sfx(delay + 0.1f, "SFX/impacts/death");
+                    Line(delay + 0.15f, u, "death");
                     return 0.5f;
                 case SimEventKind.RoundEnded:
                     At(delay + 0.2f, () => _fx.Shake(0.15f, S(0.4f)));
-                    return 0.6f;
+                    if (u != null)
+                    {
+                        At(delay + 0.3f, () => { if (u.Alive) u.SetPose(PoseKind.Victory); });
+                        Line(delay + 0.5f, u, "victory");
+                    }
+                    Sfx(delay + 0.2f, "SFX/match/round_win");
+                    return 0.8f;
                 default:
                     return 0f;
             }
@@ -498,6 +589,17 @@ namespace Musketeers.Presentation
             {
                 if ((u.transform.localPosition - target).sqrMagnitude > 0.0001f)
                     Tween.LocalPosition(u.transform, target, S(duration), ease);
+            });
+        }
+
+        // A small hop while walking (or a big one over a pit).
+        void Hop(UnitView u, float height, float duration, float delay)
+        {
+            At(delay, () =>
+            {
+                var body = u.Body;
+                body.localPosition = Vector3.zero;
+                Tween.LocalPositionY(body, height, S(duration * 0.5f), Ease.OutQuad, 2, CycleMode.Yoyo);
             });
         }
 

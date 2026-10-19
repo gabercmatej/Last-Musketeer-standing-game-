@@ -30,7 +30,7 @@ namespace Musketeers.UI
 
         public void SetVisible(bool visible) => _root.style.display = visible ? DisplayStyle.Flex : DisplayStyle.None;
 
-        public void Show(RoundResult r, MatchState m, string[] names, Color[] colors)
+        public void Show(RoundResult r, MatchState m, string[] names, Color[] colors, Sprite[] portraits)
         {
             _title.text = r.SuddenDeath ? $"Round {r.RoundNumber} (sudden death)" : $"Round {r.RoundNumber}";
             _subtitle.text = r.Winner >= 0 ? $"{names[r.Winner]} is the last musketeer standing!" : "A draw. Nobody is left standing.";
@@ -53,7 +53,7 @@ namespace Musketeers.UI
                 }
                 _gains.Add(Row($"+{g.Amount}", $"{names[g.Player]}: {reason}", colors[g.Player]));
             }
-            Totals(_totals, m, names, colors);
+            Totals(_totals, m, names, colors, portraits);
             _continue.text = m.MatchOver ? "See results" : "Next round";
             SetVisible(true);
         }
@@ -76,7 +76,7 @@ namespace Musketeers.UI
         }
 
         // Shared with the results screen: a row per player, sorted by points, with a bar toward the goal.
-        public static void Totals(VisualElement into, MatchState m, string[] names, Color[] colors)
+        public static void Totals(VisualElement into, MatchState m, string[] names, Color[] colors, Sprite[] portraits)
         {
             into.Clear();
             int n = m.PlayerCount;
@@ -88,9 +88,8 @@ namespace Musketeers.UI
             {
                 var row = new VisualElement();
                 row.AddToClassList("total");
-                var sw = new VisualElement();
-                sw.AddToClassList("total-swatch");
-                sw.style.backgroundColor = colors[i];
+                var sw = UiArt.Image("total-swatch", portraits != null && i < portraits.Length ? portraits[i] : null, colors[i]);
+                sw.style.borderLeftColor = sw.style.borderRightColor = sw.style.borderTopColor = sw.style.borderBottomColor = colors[i];
                 var name = new Label(names[i]);
                 name.AddToClassList("total-name");
                 var wins = new Label(m.RoundWins[i] > 0 ? $"{m.RoundWins[i]} round win{(m.RoundWins[i] == 1 ? "" : "s")}" : "");

@@ -4,6 +4,7 @@
     "references": [
         "Musketeers.Sim",
         "Musketeers.Game",
+        "Musketeers.Data",
         "UnityEngine.TestRunner",
         "UnityEditor.TestRunner"
     ],

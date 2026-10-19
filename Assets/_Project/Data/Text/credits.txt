@@ -1,0 +1,13 @@
+The Last Musketeer Standing, by Los Cuatro Mosqueteros: Matej, Matic, Aljaž and Nik.
+
+Music
+Baroque Opusendo by Alexandr Zhelanov (CC-BY 4.0), opengameart.org/content/baroque-opusendo, soundcloud.com/alexandr-zhelanov. Level adjusted, loop crossfade.
+Battle Theme B for RPG by cynicmusic (CC0), opengameart.org/node/84703. Battle final is the same track at 1.18x tempo.
+Medieval: The Old Tower Inn and Medieval: Rejoicing by RandomMind (CC0), opengameart.org.
+
+Sound effects
+Jingle_Achievement_00 by LittleRobotSoundFactory (CC-BY 4.0), freesound.org/people/LittleRobotSoundFactory/sounds/270404. Mono, trimmed, level matched.
+All other sound effects are CC0 (freesound.org and others).
+
+Fonts
+Pirata One by Rodrigo Fuenzalida and Nicolas Massi, Fredoka by Milena Brandao. SIL Open Font License 1.1.

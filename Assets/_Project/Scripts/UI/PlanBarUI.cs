@@ -25,6 +25,8 @@ namespace Musketeers.UI
         readonly List<VisualElement> _actions = new List<VisualElement>();
         readonly List<Label> _actionNames = new List<Label>();
         readonly List<Label> _actionCosts = new List<Label>();
+        readonly List<VisualElement> _actionIcons = new List<VisualElement>();
+        Ability _ability;
         readonly VisualElement[] _slots = new VisualElement[TurnPlan.Length];
         readonly VisualElement[] _slotIcons = new VisualElement[TurnPlan.Length];
         readonly Label[] _slotTexts = new Label[TurnPlan.Length];
@@ -99,6 +101,7 @@ namespace Musketeers.UI
                 el.RegisterCallback<PointerLeaveEvent>(_ => HideTooltip());
                 actions.Add(el);
                 _actions.Add(el);
+                _actionIcons.Add(icon);
                 _actionNames.Add(name);
                 _actionCosts.Add(cost);
             }
@@ -113,7 +116,10 @@ namespace Musketeers.UI
                 var type = ActionInfo.Bar[i];
                 _actionNames[i].text = ActionInfo.Name(type, c);
                 _actionCosts[i].text = ActionInfo.Cost(type, cfg, ability);
+                _actionIcons[i].style.backgroundImage = new StyleBackground(ActionInfo.Icon(type, ability));
+                _actionIcons[i].style.unityBackgroundImageTintColor = ActionInfo.IconTint(type, ability);
             }
+            _ability = ability;
             _planningFor.text = who;
             _planningFor.style.color = color;
         }
@@ -141,10 +147,10 @@ namespace Musketeers.UI
                 _slots[t].EnableInClassList("slot--locked", locked);
                 _slotTexts[t].text = a.Type == ActionType.Idle ? (t == b.Cursor && !locked ? "next..." : "idle") : ActionInfo.Short(a, c);
                 _slotSubs[t].text = issue != PlanIssue.None ? ShortIssue(issue) : "";
-                var icon = ActionInfo.Icon(a.Type);
+                var icon = ActionInfo.Icon(a.Type, _ability);
                 _slotIcons[t].style.backgroundImage = icon != null ? new StyleBackground(icon) : new StyleBackground(StyleKeyword.None);
-                _slotIcons[t].style.unityBackgroundImageTintColor = ActionInfo.IconTint(a.Type);
-                _slotIcons[t].style.rotate = new Rotate(ActionInfo.IconAngle(a));
+                _slotIcons[t].style.unityBackgroundImageTintColor = ActionInfo.IconTint(a.Type, _ability);
+                _slotIcons[t].style.rotate = new Rotate(ActionInfo.IconAngle(a, _ability));
             }
 
             _lock.text = locked ? "Locked  (Space to edit)" : "Lock in  (Space)";

@@ -89,7 +89,41 @@ namespace Musketeers.UI
             }
         }
 
-        public static Sprite Icon(ActionType t)
+        // Matej's icon for an action (the signature icon depends on the ability), or the placeholder shape.
+        public static Sprite Icon(ActionType t, Ability ability = Ability.Grappin)
+        {
+            var real = UiArt.Get(GameArt.ActionIcon(IconName(t, ability)));
+            return real != null ? real : PlaceholderIcon(t);
+        }
+
+        public static bool HasRealIcon(ActionType t, Ability ability = Ability.Grappin) =>
+            t != ActionType.Idle && UiArt.Get(GameArt.ActionIcon(IconName(t, ability))) != null;
+
+        static string IconName(ActionType t, Ability ability)
+        {
+            switch (t)
+            {
+                case ActionType.Move: return "move";
+                case ActionType.Dash: return "dash";
+                case ActionType.Fire: return "fire";
+                case ActionType.Reload: return "reload";
+                case ActionType.Parry: return "parry";
+                case ActionType.Shove: return "shove";
+                case ActionType.Keg: return "keg";
+                case ActionType.CatchBreath: return "catch_breath";
+                case ActionType.Signature:
+                    switch (ability)
+                    {
+                        case Ability.Grappin: return "grappin";
+                        case Ability.Switcheroo: return "switcheroo";
+                        case Ability.DoubleCharge: return "double_charge";
+                        default: return "bull_rush";
+                    }
+                default: return "";
+            }
+        }
+
+        static Sprite PlaceholderIcon(ActionType t)
         {
             switch (t)
             {
@@ -106,8 +140,10 @@ namespace Musketeers.UI
             }
         }
 
-        public static Color IconTint(ActionType t)
+        public static Color IconTint(ActionType t, Ability ability = Ability.Grappin)
         {
+            if (HasRealIcon(t, ability))
+                return Color.white;
             switch (t)
             {
                 case ActionType.Dash: return new Color(0.6f, 0.85f, 1f);
@@ -123,9 +159,9 @@ namespace Musketeers.UI
         }
 
         // Rotation for a directional icon: arrows and the musket point their way.
-        public static float IconAngle(PlannedAction a)
+        public static float IconAngle(PlannedAction a, Ability ability = Ability.Grappin)
         {
-            bool directional = PlanBuilder.NeedsDirection(a.Type);
+            bool directional = PlanBuilder.NeedsDirection(a.Type) && !HasRealIcon(a.Type, ability);
             if (!directional)
                 return 0f;
             // UI rotation is clockwise; arrows point north, the musket sprite points east.

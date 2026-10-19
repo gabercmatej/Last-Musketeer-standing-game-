@@ -1,14 +1,18 @@
 using System.Collections.Generic;
+using Musketeers.Data;
 using Musketeers.Sim;
 using PrimeTween;
 using UnityEngine;
 
 namespace Musketeers.Presentation
 {
-    // Tiles, units and kegs for one round. Build() makes the views for a fresh GameState; Sync() snaps
-    // every view to a state (after playback, so the screen always ends on the sim's truth).
+    // Tiles, props, units and kegs for one round, drawn with the map's BoardTheme. Build() makes the views
+    // for a fresh GameState (any board size); Sync() snaps every view to a state (after playback, so the
+    // screen always ends on the sim's truth). Crate debris is presentation memory only.
     public sealed class BoardView : MonoBehaviour
     {
+        const float PropFoot = -0.42f;   // tall props stand near the bottom edge of their tile
+
         [SerializeField] private ArtLibrary _art;
         [SerializeField] private WorldLabels _labels;
 
@@ -20,7 +24,9 @@ namespace Musketeers.Presentation
 
         SpriteRenderer[] _ground;
         SpriteRenderer[] _props;
+        SpriteRenderer[] _debris;
         SpriteRenderer[] _warn;
+        SpriteRenderer[] _crack;
         Tween[] _warnTweens;
         TileType[] _shown;
         UnitView[] _units = new UnitView[0];
@@ -33,7 +39,7 @@ namespace Musketeers.Presentation
         public int UnitCount => _units.Length;
         public UnitView Unit(int slot) => slot >= 0 && slot < _units.Length ? _units[slot] : null;
 
-        public void Build(GameState s, GameConfig cfg, int[] characters, string[] names)
+        public void Build(GameState s, GameConfig cfg, int[] characters, string[] names, Loadout[] loadouts)
         {
             Clear();
             Config = cfg;
@@ -51,21 +57,33 @@ namespace Musketeers.Presentation
             int n = Width * Height;
             _ground = new SpriteRenderer[n];
             _props = new SpriteRenderer[n];
+            _debris = new SpriteRenderer[n];
             _warn = new SpriteRenderer[n];
+            _crack = new SpriteRenderer[n];
             _warnTweens = new Tween[n];
             _shown = new TileType[n];
+            var theme = _art.Theme;
             for (int y = 0; y < Height; y++)
             for (int x = 0; x < Width; x++)
             {
                 int i = y * Width + x;
                 var p = new Int2(x, y);
-                var g = _art.MakeRenderer($"Tile {x},{y}", _tileRoot, _art.FloorSprite, Color.white, Layers.Tile);
+                var g = _art.MakeRenderer($"Tile {x},{y}", _tileRoot, _art.FloorSprite(x, y), Color.white, Layers.Tile);
                 g.transform.localPosition = BoardMath.ToWorld(p);
                 _ground[i] = g;
-                var prop = _art.MakeRenderer("Prop", g.transform, null, Color.white, Layers.Tile + 2);
+                _debris[i] = _art.MakeRenderer("Debris", g.transform, theme != null ? theme.CrateBroken : null, Color.white, Layers.TileDecal);
+                _debris[i].transform.localScale = Vector3.one * 0.85f;
+                _debris[i].enabled = false;
+                _crack[i] = _art.MakeRenderer("Crack", g.transform, theme != null ? theme.CrackOverlay : null, new Color(1, 1, 1, 0.9f), Layers.TileOverlay);
+                _crack[i].enabled = false;
+                bool realWarn = theme != null && theme.WarnOverlay != null;
+                _warn[i] = _art.MakeRenderer("Warn", g.transform, realWarn ? theme.WarnOverlay : PlaceholderArt.Square, Color.clear, Layers.TileOverlay + 1);
+                if (realWarn)
+                    _warn[i].transform.localScale = Vector3.one * 0.94f;
+                var prop = _art.MakeRenderer($"Prop {x},{y}", _pieceRoot, null, Color.white, Layers.Prop(y));
+                prop.transform.localPosition = BoardMath.ToWorld(p);
+                prop.enabled = false;
                 _props[i] = prop;
-                var warn = _art.MakeRenderer("Warn", g.transform, PlaceholderArt.Square, Color.clear, Layers.TileOverlay);
-                _warn[i] = warn;
                 _shown[i] = (TileType)255;
             }
 
@@ -75,7 +93,7 @@ namespace Musketeers.Presentation
                 var go = new GameObject($"Unit {i} {names[i]}");
                 go.transform.SetParent(_pieceRoot, false);
                 var uv = go.AddComponent<UnitView>();
-                uv.Build(_art, _labels, i, characters[i], names[i], cfg.MaxHp);
+                uv.Build(_art, _labels, i, characters[i], names[i], cfg.MaxHp, loadouts != null && i < loadouts.Length ? loadouts[i] : default);
                 _units[i] = uv;
             }
         }
@@ -123,11 +141,14 @@ namespace Musketeers.Presentation
                 Tween.StopAll(v.Body);
                 v.Body.localPosition = Vector3.zero;
                 v.Body.localRotation = Quaternion.identity;
+                v.Body.localScale = Vector3.one;
                 v.SetGridPos(u.Pos);
                 v.SyncStats(u, crowned == i);
                 v.SetParry(false);
                 if (!u.Alive)
                     v.SetAlive(false, s.Board.Get(u.Pos) == TileType.Pit);
+                else
+                    v.Rest();
             }
 
             // Kegs: drop views that no longer exist, add or move the rest.
@@ -201,9 +222,13 @@ namespace Musketeers.Presentation
             var prop = _props[i];
             g.transform.localScale = Vector3.one;
             prop.transform.localScale = Vector3.one;
-            prop.transform.localPosition = Vector3.zero;
             if (_shown[i] == t)
                 return;
+            // A crate that became floor leaves its debris behind (cosmetic memory for this round).
+            if (_shown[i] == TileType.Crate && t == TileType.Floor && _debris[i].sprite != null)
+                _debris[i].enabled = true;
+            if (t == TileType.Pit)
+                _debris[i].enabled = false;
             _shown[i] = t;
             var theme = _art.Theme;
             bool odd = ((p.X + p.Y) & 1) == 1;
@@ -211,33 +236,34 @@ namespace Musketeers.Presentation
             if (t == TileType.Pit)
             {
                 g.sprite = _art.PitSprite;
-                g.color = theme != null ? theme.PitColor : new Color(0.05f, 0.06f, 0.1f);
+                g.color = g.sprite == PlaceholderArt.Pit ? (theme != null ? theme.PitColor : new Color(0.05f, 0.06f, 0.1f)) : Color.white;
             }
             else
             {
-                g.sprite = _art.FloorSprite;
-                g.color = _art.FloorSprite == PlaceholderArt.Floor ? floor : Color.white;
+                g.sprite = _art.FloorSprite(p.X, p.Y);
+                g.color = g.sprite == PlaceholderArt.Floor ? floor : Color.white;
             }
 
-            switch (t)
+            Sprite sprite = null;
+            Color tint = Color.white;
+            if (t == TileType.Pillar)
             {
-                case TileType.Pillar:
-                    prop.sprite = _art.PillarSprite;
-                    prop.color = _art.PillarSprite == PlaceholderArt.Pillar && theme != null ? theme.PillarColor : Color.white;
-                    prop.enabled = true;
-                    break;
-                case TileType.Crate:
-                    prop.sprite = _art.CrateSprite;
-                    prop.color = _art.CrateSprite == PlaceholderArt.Crate && theme != null ? theme.CrateColor : Color.white;
-                    prop.enabled = true;
-                    break;
-                default:
-                    prop.enabled = false;
-                    break;
+                sprite = _art.PillarSprite;
+                if (sprite == PlaceholderArt.Pillar && theme != null) tint = theme.PillarColor;
             }
+            else if (t == TileType.Crate)
+            {
+                sprite = _art.CrateSprite;
+                if (sprite == PlaceholderArt.Crate && theme != null) tint = theme.CrateColor;
+            }
+            prop.enabled = sprite != null;
+            prop.sprite = sprite;
+            prop.color = tint;
+            bool placeholder = sprite == PlaceholderArt.Pillar || sprite == PlaceholderArt.Crate;
+            prop.transform.localPosition = BoardMath.ToWorld(p) + (placeholder ? Vector3.zero : new Vector3(0f, PropFoot, 0f));
         }
 
-        // §3: a warned ring glows red and pulses for the turn before it falls.
+        // §3: a warned ring cracks and pulses red for the turn before it falls.
         public void SetWarned(Int2 p, bool warned)
         {
             if (!InBounds(p))
@@ -245,6 +271,7 @@ namespace Musketeers.Presentation
             int i = p.Y * Width + p.X;
             var w = _warn[i];
             bool active = _warnTweens[i].isAlive;
+            _crack[i].enabled = warned && _crack[i].sprite != null;
             if (warned == active)
                 return;
             if (!warned)
@@ -253,9 +280,10 @@ namespace Musketeers.Presentation
                 w.color = Color.clear;
                 return;
             }
-            var c = _art.Theme != null ? _art.Theme.WarnColor : new Color(0.95f, 0.15f, 0.12f, 0.55f);
-            w.color = new Color(c.r, c.g, c.b, c.a * 0.35f);
-            _warnTweens[i] = Tween.Color(w, c, 0.6f, Ease.InOutSine, -1, CycleMode.Yoyo);
+            bool real = w.sprite != PlaceholderArt.Square;
+            var c = real ? Color.white : _art.Theme != null ? _art.Theme.WarnColor : new Color(0.95f, 0.15f, 0.12f, 0.55f);
+            w.color = new Color(c.r, c.g, c.b, c.a * 0.3f);
+            _warnTweens[i] = Tween.Color(w, new Color(c.r, c.g, c.b, real ? 0.95f : c.a), 0.6f, Ease.InOutSine, -1, CycleMode.Yoyo);
         }
 
         public bool IsWarned(Int2 p) => InBounds(p) && _warnTweens[p.Y * Width + p.X].isAlive;

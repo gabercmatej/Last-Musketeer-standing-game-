@@ -1,6 +1,6 @@
 <ui:UXML xmlns:ui="UnityEngine.UIElements">
     <ui:VisualElement name="hud" class="screen" picking-mode="Ignore">
-        <ui:VisualElement name="top-bar" class="top-bar">
+        <ui:VisualElement name="top-bar" class="top-bar panel-bar">
             <ui:VisualElement class="top-left" picking-mode="Ignore">
                 <ui:Label name="round-label" text="Round 1" class="round-label" />
                 <ui:Label name="turn-label" text="Turn 1" class="turn-label" />
@@ -15,7 +15,8 @@
         <ui:VisualElement class="corner-buttons">
             <ui:Button name="speed" text="Speed 1x" class="btn btn--small" />
             <ui:Button name="log-toggle" text="Log (L)" class="btn btn--small" />
-            <ui:Button name="quit" text="Menu" class="btn btn--small" />
+            <ui:Button name="hud-settings" text="Settings" class="btn btn--small" />
+            <ui:Button name="quit" text="Leave" class="btn btn--small" />
         </ui:VisualElement>
         <ui:Label name="dev-badge" text="DEV: CONTROL ALL (F2)  Tab or click a unit to switch" class="badge badge--dev dev-badge" />
 
@@ -24,7 +25,7 @@
             <ui:ScrollView name="log-scroll" class="log-scroll" />
         </ui:VisualElement>
 
-        <ui:VisualElement name="plan-bar" class="plan-bar">
+        <ui:VisualElement name="plan-bar" class="plan-bar panel-bar">
             <ui:VisualElement class="plan-row">
                 <ui:Label name="planning-for" text="Matej" class="planning-for" />
                 <ui:VisualElement name="slots" class="slots" />
@@ -35,6 +36,9 @@
         </ui:VisualElement>
 
         <ui:Label name="tooltip" text="" class="tooltip" picking-mode="Ignore" />
-        <ui:Label name="banner" text="" class="banner" picking-mode="Ignore" />
+        <ui:VisualElement name="banner" class="banner" picking-mode="Ignore">
+            <ui:Label name="banner-text" text="" class="banner-text" picking-mode="Ignore" />
+        </ui:VisualElement>
+        <ui:Label text="Emotes: Z X C V" class="emote-hint" picking-mode="Ignore" />
     </ui:VisualElement>
 </ui:UXML>

@@ -1,0 +1,33 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b1ed7e312b942406c92310fe607bd975, type: 3}
+  m_Name: Bridge
+  m_EditorClassIdentifier: Musketeers.Data::Musketeers.Data.BoardTheme
+  FloorVariants:
+  - {fileID: 21300000, guid: 618a7717665e748d48fc73acad24b5fa, type: 3}
+  - {fileID: 21300000, guid: 3e6c4af013272439798d002fd855d202, type: 3}
+  - {fileID: 21300000, guid: b6fc6a93b56ae4bb49a665905a1d2372, type: 3}
+  Pillar: {fileID: 21300000, guid: 9fe2db272a32f43719bf02c58d5ba25d, type: 3}
+  Crate: {fileID: 21300000, guid: 231e951317b0941e893f325e1d8bae54, type: 3}
+  CrateBroken: {fileID: 21300000, guid: 07320ab1c0858465eb14b830dbf44b28, type: 3}
+  Pit: {fileID: 21300000, guid: 4790fccfc7db740619b88716a917b494, type: 3}
+  CrackOverlay: {fileID: 21300000, guid: 79682b8b0dd2e4e52ba8a9027e50417f, type: 3}
+  WarnOverlay: {fileID: 21300000, guid: e2ff270c0b6ef45fdac9939ca1d5e789, type: 3}
+  BackgroundArt: {fileID: 21300000, guid: f586122c89b0e4f7e8bb28a205ec08d5, type: 3}
+  FloorA: {r: 0.36, g: 0.33, b: 0.29, a: 1}
+  FloorB: {r: 0.4, g: 0.37, b: 0.32, a: 1}
+  PillarColor: {r: 0.62, g: 0.62, b: 0.66, a: 1}
+  CrateColor: {r: 0.62, g: 0.42, b: 0.22, a: 1}
+  PitColor: {r: 0.05, g: 0.06, b: 0.1, a: 1}
+  WarnColor: {r: 0.95, g: 0.15, b: 0.12, a: 0.55}
+  KegColor: {r: 0.3, g: 0.18, b: 0.1, a: 1}
+  Background: {r: 0.1, g: 0.22, b: 0.3, a: 1}

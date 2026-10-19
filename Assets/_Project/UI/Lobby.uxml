@@ -1,0 +1,46 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements">
+    <ui:VisualElement name="lobby" class="screen" picking-mode="Ignore">
+        <ui:VisualElement class="lobby-top" picking-mode="Ignore">
+            <ui:Button name="lobby-back" text="Menu" class="btn btn--small" />
+            <ui:Label text="The Tavern" class="title lobby-title" />
+            <ui:VisualElement class="panel panel--slim map-choice">
+                <ui:Label text="Map" class="section-label section-label--inline" />
+                <ui:Button name="map-prev" text="&lt;" class="btn btn--icon" />
+                <ui:VisualElement class="map-text">
+                    <ui:Label name="map-name" text="The Courtyard" class="map-name" />
+                    <ui:Label name="map-desc" text="" class="map-desc" />
+                </ui:VisualElement>
+                <ui:Button name="map-next" text="&gt;" class="btn btn--icon" />
+            </ui:VisualElement>
+        </ui:VisualElement>
+
+        <ui:VisualElement name="lobby-bottom" class="panel lobby-bottom">
+            <ui:VisualElement class="lobby-col">
+                <ui:Label text="Your musketeer" class="section-label" />
+                <ui:VisualElement name="char-picker" class="char-picker" />
+                <ui:Label name="char-ability" text="" class="ability-text" />
+            </ui:VisualElement>
+            <ui:VisualElement class="lobby-col lobby-col--narrow">
+                <ui:Label text="Players" class="section-label" />
+                <ui:VisualElement class="menu-row menu-row--center">
+                    <ui:Button name="remove-bot" text="- Bot" class="btn btn--small" />
+                    <ui:Label name="player-count" text="4" class="player-count" />
+                    <ui:Button name="add-bot" text="+ Bot" class="btn btn--small" />
+                </ui:VisualElement>
+                <ui:Button name="wardrobe-open" text="Wardrobe" class="btn" />
+            </ui:VisualElement>
+            <ui:Button name="start" text="Start" class="btn btn--big btn--start" />
+        </ui:VisualElement>
+
+        <ui:VisualElement name="wardrobe" class="panel wardrobe">
+            <ui:Label text="Wardrobe" class="title title--panel" />
+            <ui:VisualElement name="wardrobe-tabs" class="tabs" />
+            <ui:ScrollView name="wardrobe-grid" class="wardrobe-grid" />
+            <ui:Label name="wardrobe-item" text="" class="item-name" />
+            <ui:VisualElement class="menu-row menu-row--center">
+                <ui:Button name="wardrobe-random" text="Surprise me" class="btn btn--small btn--quiet" />
+                <ui:Button name="wardrobe-close" text="Done" class="btn" />
+            </ui:VisualElement>
+        </ui:VisualElement>
+    </ui:VisualElement>
+</ui:UXML>

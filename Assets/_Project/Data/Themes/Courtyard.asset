@@ -1,0 +1,33 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b1ed7e312b942406c92310fe607bd975, type: 3}
+  m_Name: Courtyard
+  m_EditorClassIdentifier: Musketeers.Data::Musketeers.Data.BoardTheme
+  FloorVariants:
+  - {fileID: 21300000, guid: 9109effc3624a4523afb5ebf5600de10, type: 3}
+  - {fileID: 21300000, guid: ea16ce9cf598b41ae9ad32ec406ddb1e, type: 3}
+  - {fileID: 21300000, guid: 267919695e96f46f8af6ddbe39945bca, type: 3}
+  Pillar: {fileID: 21300000, guid: 30e287905a922421084d52b79d104c4f, type: 3}
+  Crate: {fileID: 21300000, guid: ad81b34ca632d45f48a6d518e3ed0639, type: 3}
+  CrateBroken: {fileID: 21300000, guid: d48837b1d78144265a6202cc69b72207, type: 3}
+  Pit: {fileID: 21300000, guid: 4ae16671662e54a519a205297df5fc7f, type: 3}
+  CrackOverlay: {fileID: 21300000, guid: 1e981bb89655046ff9c0c873f4361d33, type: 3}
+  WarnOverlay: {fileID: 21300000, guid: 616d060bec9c041da9dccea23152e93b, type: 3}
+  BackgroundArt: {fileID: 21300000, guid: 654f38cdaf0e94bd4ad4ab0f3f9c69be, type: 3}
+  FloorA: {r: 0.36, g: 0.33, b: 0.29, a: 1}
+  FloorB: {r: 0.4, g: 0.37, b: 0.32, a: 1}
+  PillarColor: {r: 0.62, g: 0.62, b: 0.66, a: 1}
+  CrateColor: {r: 0.62, g: 0.42, b: 0.22, a: 1}
+  PitColor: {r: 0.05, g: 0.06, b: 0.1, a: 1}
+  WarnColor: {r: 0.95, g: 0.15, b: 0.12, a: 0.55}
+  KegColor: {r: 0.3, g: 0.18, b: 0.1, a: 1}
+  Background: {r: 0.09, g: 0.08, b: 0.11, a: 1}

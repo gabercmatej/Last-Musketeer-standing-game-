@@ -1,0 +1,15 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements">
+    <ui:VisualElement name="settings" class="screen screen--modal">
+        <ui:VisualElement class="panel settings-panel">
+            <ui:Label text="Settings" class="title title--panel" />
+            <ui:Slider name="music-volume" label="Music" low-value="0" high-value="1" class="volume" />
+            <ui:Slider name="sfx-volume" label="Sound effects" low-value="0" high-value="1" class="volume" />
+            <ui:Slider name="voice-volume" label="Voices" low-value="0" high-value="1" class="volume" />
+            <ui:Label text="Credits" class="section-label" />
+            <ui:ScrollView class="credits-scroll">
+                <ui:Label name="credits" text="" class="credits" />
+            </ui:ScrollView>
+            <ui:Button name="settings-close" text="Close" class="btn" />
+        </ui:VisualElement>
+    </ui:VisualElement>
+</ui:UXML>

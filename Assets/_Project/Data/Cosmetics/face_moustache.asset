@@ -1,0 +1,25 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e84b5946ec25a4a1abe09cf4857730c0, type: 3}
+  m_Name: face_moustache
+  m_EditorClassIdentifier: Musketeers.Data::Musketeers.Data.CosmeticDef
+  Id: face_moustache
+  DisplayName: Moustache
+  Slot: 1
+  Sprite: {fileID: 21300000, guid: 0b6bb741ed411496fa9cb6d6c8646a7e, type: 3}
+  FrontSprite: {fileID: 21300000, guid: 737ea81b8a33247d1b9e8087e30579dc, type: 3}
+  Offset: {x: -0.05, y: -0.1}
+  Scale: 0.38
+  FrontOffset: {x: 0, y: -0.1}
+  FrontScale: 0.5
+  SortOrder: 10
+  Tuned: 0

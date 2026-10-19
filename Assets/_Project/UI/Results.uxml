@@ -1,13 +1,16 @@
 <ui:UXML xmlns:ui="UnityEngine.UIElements">
-    <ui:VisualElement name="results" class="screen screen--dim">
-        <ui:VisualElement class="card results-card">
-            <ui:Label text="The last musketeer standing" class="kicker" />
+    <ui:VisualElement name="results" class="screen" picking-mode="Ignore">
+        <ui:VisualElement class="results-banner" picking-mode="Ignore">
+            <ui:Label text="The last musketeer standing" class="banner-text banner-text--static" />
+        </ui:VisualElement>
+        <ui:VisualElement class="panel results-card">
             <ui:Label name="winner" text="Matej" class="winner" />
             <ui:Label name="winner-line" text="" class="subtitle" />
+            <ui:VisualElement name="awards" class="awards" />
             <ui:VisualElement name="final" class="totals" />
             <ui:VisualElement class="menu-row menu-row--center">
-                <ui:Button name="again" text="Play again" class="btn btn--primary btn--big" />
-                <ui:Button name="menu" text="Menu" class="btn btn--big" />
+                <ui:Button name="again" text="Play again" class="btn" />
+                <ui:Button name="menu" text="Back to lobby" class="btn" />
             </ui:VisualElement>
         </ui:VisualElement>
     </ui:VisualElement>

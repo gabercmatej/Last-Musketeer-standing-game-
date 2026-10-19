@@ -14,16 +14,18 @@ namespace Musketeers.UI
         public event Action SpeedClicked;
         public event Action LogClicked;
         public event Action QuitClicked;
+        public event Action SettingsClicked;
 
         readonly VisualElement _root;
-        readonly Label _round, _turn, _timer, _phase, _banner, _devBadge;
+        readonly Label _round, _turn, _timer, _phase, _bannerText, _devBadge;
+        readonly VisualElement _banner;
         readonly VisualElement _scores;
         readonly Button _speed;
         VisualElement[] _scoreEls = new VisualElement[0];
         Label[] _points = new Label[0];
         VisualElement[] _crowns = new VisualElement[0];
         VisualElement[] _locks = new VisualElement[0];
-        Tween _bannerTween;
+        Sequence _bannerTween;
 
         public HudUI(VisualElement hudRoot)
         {
@@ -33,21 +35,25 @@ namespace Musketeers.UI
             _timer = hudRoot.Q<Label>("timer");
             _phase = hudRoot.Q<Label>("phase-label");
             _scores = hudRoot.Q("scores");
-            _banner = hudRoot.Q<Label>("banner");
+            _banner = hudRoot.Q("banner");
+            _bannerText = hudRoot.Q<Label>("banner-text");
             _devBadge = hudRoot.Q<Label>("dev-badge");
             _speed = hudRoot.Q<Button>("speed");
             var log = hudRoot.Q<Button>("log-toggle");
             var quit = hudRoot.Q<Button>("quit");
-            foreach (var b in new[] { _speed, log, quit })
+            var settings = hudRoot.Q<Button>("hud-settings");
+            foreach (var b in new[] { _speed, log, quit, settings })
                 b.focusable = false;
+            quit.AddToClassList("btn--back");
             _speed.clicked += () => SpeedClicked?.Invoke();
             log.clicked += () => LogClicked?.Invoke();
             quit.clicked += () => QuitClicked?.Invoke();
+            settings.clicked += () => SettingsClicked?.Invoke();
         }
 
         public void SetVisible(bool visible) => _root.style.display = visible ? DisplayStyle.Flex : DisplayStyle.None;
 
-        public void BuildScores(string[] names, Color[] colors)
+        public void BuildScores(string[] names, Color[] colors, Sprite[] portraits = null)
         {
             _scores.Clear();
             int n = names.Length;
@@ -60,13 +66,20 @@ namespace Musketeers.UI
                 var el = new VisualElement { pickingMode = PickingMode.Ignore };
                 el.AddToClassList("score");
                 el.style.borderLeftColor = colors[i];
+                el.style.borderRightColor = colors[i];
+                el.style.borderTopColor = colors[i];
+                el.style.borderBottomColor = colors[i];
+                var portrait = UiArt.Image("score-portrait", portraits != null && i < portraits.Length ? portraits[i] : null, colors[i]);
+                el.Add(portrait);
                 var name = new Label(names[i]);
                 name.AddToClassList("score-name");
                 name.style.color = Color.Lerp(colors[i], Color.white, 0.3f);
                 var pts = new Label("0");
                 pts.AddToClassList("score-points");
-                var crown = Icon(PlaceholderArt.Crown, new Color(1f, 0.82f, 0.2f));
-                var lockIcon = Icon(PlaceholderArt.Check, new Color(0.5f, 1f, 0.6f));
+                var crownArt = UiArt.Get(Musketeers.Data.GameArt.CrownSmall);
+                var lockArt = UiArt.Get(Musketeers.Data.GameArt.LockIn);
+                var crown = Icon(crownArt != null ? crownArt : PlaceholderArt.Crown, crownArt != null ? Color.white : new Color(1f, 0.82f, 0.2f));
+                var lockIcon = Icon(lockArt != null ? lockArt : PlaceholderArt.Check, lockArt != null ? Color.white : new Color(0.5f, 1f, 0.6f));
                 el.Add(name);
                 el.Add(pts);
                 el.Add(crown);
@@ -121,13 +134,16 @@ namespace Musketeers.UI
 
         public void SetDevBadge(bool on) => _devBadge.style.display = on ? DisplayStyle.Flex : DisplayStyle.None;
 
+        // The announcer ribbon: pops in, holds, fades.
         public void Banner(string text, Color color, float seconds)
         {
             _bannerTween.Stop();
-            _banner.text = text;
-            _banner.style.color = color;
+            _bannerText.text = text;
+            _bannerText.style.color = color;
             _banner.style.opacity = 1f;
-            _bannerTween = Tween.Custom(1f, 0f, 0.5f, v => _banner.style.opacity = v, startDelay: seconds);
+            _banner.style.scale = new Scale(new Vector3(0.6f, 0.6f, 1f));
+            _bannerTween = Tween.Custom(0f, 1f, 0.22f, v => _banner.style.scale = new Scale(Vector3.one * Mathf.LerpUnclamped(0.6f, 1f, v)), Ease.OutBack)
+                .Chain(Tween.Custom(1f, 0f, 0.45f, v => _banner.style.opacity = v, startDelay: seconds));
         }
     }
 }

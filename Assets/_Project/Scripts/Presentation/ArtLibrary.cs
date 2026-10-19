@@ -8,19 +8,45 @@ namespace Musketeers.Presentation
     public sealed class ArtLibrary : MonoBehaviour
     {
         [SerializeField] private CharacterRoster _roster;
-        [SerializeField] private BoardTheme _theme;
+        [SerializeField] private BoardTheme _theme;          // default theme (first map's)
+        [SerializeField] private GameArt _gameArt;
+        [SerializeField] private CosmeticCatalog _cosmetics;
+        [SerializeField] private MapCatalog _maps;
+        [SerializeField] private AudioLibrary _audio;
         [SerializeField] private Material _spriteMaterial;
 
+        BoardTheme _current;
+
         public CharacterRoster Roster => _roster;
-        public BoardTheme Theme => _theme;
+        public BoardTheme Theme => _current != null ? _current : _theme;
+        public GameArt Game => _gameArt;
+        public CosmeticCatalog Cosmetics => _cosmetics;
+        public MapCatalog Maps => _maps;
+        public AudioLibrary Audio => _audio;
         public Material SpriteMaterial => _spriteMaterial;
 
-        public Sprite FloorSprite => _theme != null && _theme.Floor != null ? _theme.Floor : PlaceholderArt.Floor;
-        public Sprite PillarSprite => _theme != null && _theme.Pillar != null ? _theme.Pillar : PlaceholderArt.Pillar;
-        public Sprite CrateSprite => _theme != null && _theme.Crate != null ? _theme.Crate : PlaceholderArt.Crate;
-        public Sprite PitSprite => _theme != null && _theme.Pit != null ? _theme.Pit : PlaceholderArt.Pit;
-        public Sprite KegSprite => _theme != null && _theme.Keg != null ? _theme.Keg : PlaceholderArt.Keg;
-        public Sprite CrownSprite => _theme != null && _theme.Crown != null ? _theme.Crown : PlaceholderArt.Crown;
+        public void SetTheme(BoardTheme theme) => _current = theme;
+
+        // Real art from GameArt by key, or the placeholder.
+        public Sprite Sprite(string key, Sprite fallback)
+        {
+            var s = _gameArt != null ? _gameArt.Get(key) : null;
+            return s != null ? s : fallback;
+        }
+
+        public bool Has(string key) => _gameArt != null && _gameArt.Get(key) != null;
+
+        public Sprite FloorSprite(int x, int y)
+        {
+            var s = Theme != null ? Theme.Floor(x, y) : null;
+            return s != null ? s : PlaceholderArt.Floor;
+        }
+
+        public Sprite PillarSprite => Theme != null && Theme.Pillar != null ? Theme.Pillar : PlaceholderArt.Pillar;
+        public Sprite CrateSprite => Theme != null && Theme.Crate != null ? Theme.Crate : PlaceholderArt.Crate;
+        public Sprite PitSprite => Theme != null && Theme.Pit != null ? Theme.Pit : PlaceholderArt.Pit;
+        public Sprite KegSprite => Sprite(GameArt.Keg, PlaceholderArt.Keg);
+        public Sprite CrownSprite => Sprite(GameArt.Crown, PlaceholderArt.Crown);
 
         public CharacterDef Character(int index) => _roster != null ? _roster.Get(index) : null;
 

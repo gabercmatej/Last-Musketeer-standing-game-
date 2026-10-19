@@ -31,7 +31,14 @@ namespace Musketeers.EditorTools
 
             var material = EnsureMaterial();
             var roster = EnsureRoster();
-            var theme = EnsureAsset<BoardTheme>($"{DataDir}/BoardTheme.asset");
+            // Day 4: themes, maps, cosmetics, shared art and audio come from Tools/Musketeers/Import Art.
+            var theme = AssetDatabase.LoadAssetAtPath<BoardTheme>($"{DataDir}/Themes/Courtyard.asset") ?? EnsureAsset<BoardTheme>($"{DataDir}/BoardTheme.asset");
+            var gameArt = AssetDatabase.LoadAssetAtPath<GameArt>($"{DataDir}/GameArt.asset");
+            var cosmetics = AssetDatabase.LoadAssetAtPath<CosmeticCatalog>($"{DataDir}/CosmeticCatalog.asset");
+            var maps = AssetDatabase.LoadAssetAtPath<MapCatalog>($"{DataDir}/MapCatalog.asset");
+            var audioLib = AssetDatabase.LoadAssetAtPath<AudioLibrary>($"{DataDir}/AudioLibrary.asset");
+            if (gameArt == null || cosmetics == null || maps == null || audioLib == null)
+                Debug.LogWarning("[MainSceneBuilder] Run Tools/Musketeers/Import Art: some art/audio data assets are missing (placeholders will be used).");
             var panel = EnsurePanelSettings();
 
             // Camera rig: the rig moves to frame the board, the camera child shakes.
@@ -53,6 +60,10 @@ namespace Musketeers.EditorTools
             var art = new GameObject("Art").AddComponent<ArtLibrary>();
             Set(art, "_roster", roster);
             Set(art, "_theme", theme);
+            Set(art, "_gameArt", gameArt);
+            Set(art, "_cosmetics", cosmetics);
+            Set(art, "_maps", maps);
+            Set(art, "_audio", audioLib);
             Set(art, "_spriteMaterial", material);
 
             var labels = new GameObject("WorldLabels").AddComponent<WorldLabels>();
@@ -60,6 +71,14 @@ namespace Musketeers.EditorTools
             var board = new GameObject("Board").AddComponent<BoardView>();
             Set(board, "_art", art);
             Set(board, "_labels", labels);
+
+            var stage = new GameObject("Stage").AddComponent<StageView>();
+            Set(stage, "_art", art);
+            Set(stage, "_labels", labels);
+
+            var audio = new GameObject("Audio").AddComponent<AudioService>();
+            Set(audio, "_library", audioLib);
+            audio.gameObject.AddComponent<AudioListener>();
 
             var fx = new GameObject("Fx").AddComponent<Fx>();
             Set(fx, "_art", art);
@@ -76,6 +95,7 @@ namespace Musketeers.EditorTools
             var director = new GameObject("Playback").AddComponent<PlaybackDirector>();
             Set(director, "_board", board);
             Set(director, "_fx", fx);
+            Set(director, "_audio", audio);
 
             var uiGo = new GameObject("UI");
             var doc = uiGo.AddComponent<UIDocument>();
@@ -83,6 +103,11 @@ namespace Musketeers.EditorTools
             var flow = uiGo.AddComponent<AppFlow>();
             Set(flow, "_document", doc);
             Set(flow, "_menuUxml", Load<VisualTreeAsset>($"{UiDir}/MainMenu.uxml"));
+            Set(flow, "_lobbyUxml", Load<VisualTreeAsset>($"{UiDir}/Lobby.uxml"));
+            Set(flow, "_loadingUxml", Load<VisualTreeAsset>($"{UiDir}/Loading.uxml"));
+            Set(flow, "_settingsUxml", Load<VisualTreeAsset>($"{UiDir}/Settings.uxml"));
+            Set(flow, "_tips", Load<TextAsset>($"{DataDir}/Text/tips.txt"));
+            Set(flow, "_credits", Load<TextAsset>($"{DataDir}/Text/credits.txt"));
             Set(flow, "_hudUxml", Load<VisualTreeAsset>($"{UiDir}/Hud.uxml"));
             Set(flow, "_scoreboardUxml", Load<VisualTreeAsset>($"{UiDir}/Scoreboard.uxml"));
             Set(flow, "_resultsUxml", Load<VisualTreeAsset>($"{UiDir}/Results.uxml"));
@@ -94,6 +119,9 @@ namespace Musketeers.EditorTools
             Set(flow, "_input", input);
             Set(flow, "_director", director);
             Set(flow, "_labels", labels);
+            Set(flow, "_stage", stage);
+            Set(flow, "_fx", fx);
+            Set(flow, "_audio", audio);
 
             // UI Toolkit reads input through the EventSystem when the project uses the Input System only.
             var es = new GameObject("EventSystem");
@@ -159,18 +187,18 @@ namespace Musketeers.EditorTools
             return m;
         }
 
-        // GAME_DESIGN §4 roster. Colors are strong and distinct, and none is red (red means danger).
+        // GAME_DESIGN §4 roster. Colors match Matej's art (Day 4): Matej purple, Matic crimson, Aljaž blue, Nik green.
         static CharacterRoster EnsureRoster()
         {
             var defs = new[]
             {
-                Character("Matej", "Matej", new Color(0.20f, 0.52f, 1.00f), Ability.Grappin, "Grappin",
+                Character("Matej", "Matej", new Color(0.62f, 0.38f, 0.98f), Ability.Grappin, "Grappin",
                     "Hook the first thing in a line (5). Units get yanked to you; walls pull you in."),
-                Character("Matic", "Matic", new Color(0.20f, 0.80f, 0.36f), Ability.Switcheroo, "Switcheroo",
+                Character("Matic", "Matic", new Color(0.93f, 0.27f, 0.30f), Ability.Switcheroo, "Switcheroo",
                     "Swap places with the first unit or keg in a line (5). Passes over pits."),
-                Character("Aljaz", "Aljaž", new Color(0.70f, 0.38f, 1.00f), Ability.DoubleCharge, "Double Charge",
+                Character("Aljaz", "Aljaž", new Color(0.27f, 0.55f, 1.00f), Ability.DoubleCharge, "Double Charge",
                     "Range 7 shot that pierces 2 units and ignores Parry. Needs a loaded musket."),
-                Character("Nik", "Nik", new Color(1.00f, 0.60f, 0.12f), Ability.BullRush, "Bull Rush",
+                Character("Nik", "Nik", new Color(0.27f, 0.80f, 0.40f), Ability.BullRush, "Bull Rush",
                     "Charge up to 3 tiles. A unit you crash into is pushed 2."),
             };
             var roster = EnsureAsset<CharacterRoster>($"{DataDir}/CharacterRoster.asset");
@@ -189,6 +217,7 @@ namespace Musketeers.EditorTools
             if (existing != null)
                 return existing;
             var c = EnsureAsset<CharacterDef>(path);
+            c.Id = file.ToLowerInvariant();
             c.DisplayName = name;
             c.Color = color;
             c.Ability = ability;

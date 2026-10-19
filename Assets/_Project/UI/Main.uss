@@ -1,19 +1,23 @@
-/* The Last Musketeer Standing: one stylesheet for every screen. Laid out for a 1280x720 reference
-   panel (PanelSettings scales it up for 1080p). Placeholder look: dark parchment and brass. */
+/* The Last Musketeer Standing: one stylesheet for every screen, laid out for a 1280x720 reference panel
+   (PanelSettings scales it). Skin: Matej's royal-blue panels with gold trim (9-sliced), Pirata One titles,
+   Fredoka UI text. Images that a screen needs at runtime (logo, portraits, icons) are set from code with
+   placeholder fallbacks; panels and buttons fall back to their background colours if the art is missing. */
 
 :root {
-    --ink: rgb(238, 230, 214);
-    --ink-dim: rgb(170, 160, 145);
-    --ink-faint: rgb(120, 112, 102);
-    --panel: rgba(22, 19, 24, 0.92);
-    --panel-solid: rgb(30, 26, 32);
-    --line: rgba(255, 240, 210, 0.14);
-    --brass: rgb(232, 182, 72);
-    --brass-dark: rgb(150, 108, 34);
-    --danger: rgb(240, 90, 80);
+    --ink: rgb(252, 244, 222);
+    --ink-dim: rgb(206, 196, 172);
+    --ink-faint: rgb(150, 142, 128);
+    --gold: rgb(255, 206, 96);
+    --gold-dark: rgb(170, 118, 34);
+    --navy: rgb(14, 30, 92);
+    --navy-deep: rgba(8, 14, 44, 0.92);
+    --line: rgba(255, 214, 120, 0.35);
+    --danger: rgb(255, 98, 86);
+    --good: rgb(120, 230, 150);
     --dev: rgb(120, 220, 255);
     color: var(--ink);
     font-size: 15px;
+    -unity-font-definition: url("/Assets/_Project/Art/Fonts/Fredoka-SemiBold.ttf");
 }
 
 .screen {
@@ -25,126 +29,197 @@
 }
 
 .screen--dim {
-    background-color: rgba(10, 8, 12, 0.78);
+    background-color: rgba(6, 8, 20, 0.62);
     align-items: center;
     justify-content: center;
 }
 
-.card {
-    background-color: var(--panel-solid);
-    border-color: var(--line);
-    border-width: 1px;
-    border-radius: 10px;
-    padding: 22px 26px;
+.screen--modal {
+    background-color: rgba(4, 6, 16, 0.7);
+    align-items: center;
+    justify-content: center;
+}
+
+.fill-bg {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    -unity-background-scale-mode: scale-and-crop;
+    background-color: rgb(20, 18, 28);
+}
+
+/* ---------- skin: panels, buttons, titles ---------- */
+
+.panel {
+    background-image: url("/Assets/_Project/Art/UI/panels/panel.png");
+    -unity-slice-left: 80;
+    -unity-slice-right: 80;
+    -unity-slice-top: 80;
+    -unity-slice-bottom: 80;
+    -unity-slice-scale: 0.42px;
+    background-color: rgba(0, 0, 0, 0);
+    padding: 26px 30px;
+}
+
+.panel--slim {
+    -unity-slice-scale: 0.28px;
+    padding: 8px 18px;
+}
+
+.panel-bar {
+    background-color: var(--navy-deep);
+    border-color: var(--gold-dark);
 }
 
 .title {
-    font-size: 34px;
-    -unity-font-style: bold;
-    color: var(--brass);
+    -unity-font-definition: url("/Assets/_Project/Art/Fonts/PirataOne-Regular.ttf");
+    font-size: 40px;
+    color: var(--gold);
     -unity-text-align: middle-center;
+    -unity-text-outline-width: 1.5px;
+    -unity-text-outline-color: rgb(40, 22, 6);
+    text-shadow: 2px 3px 2px rgba(0, 0, 0, 0.6);
     margin-bottom: 4px;
 }
 
-.title--small {
-    font-size: 28px;
+.title--hero {
+    font-size: 62px;
+    white-space: normal;
+}
+
+.title--panel {
+    font-size: 34px;
 }
 
 .subtitle {
     color: var(--ink-dim);
     -unity-text-align: middle-center;
     white-space: normal;
-    margin-bottom: 14px;
+    margin-bottom: 10px;
 }
 
 .section-label {
     font-size: 12px;
-    color: var(--ink-faint);
-    -unity-font-style: bold;
+    color: var(--gold);
     letter-spacing: 1px;
-    margin: 10px 0 4px 0;
+    margin: 8px 0 4px 2px;
 }
 
-.help {
-    color: var(--ink-faint);
+.section-label--inline {
+    margin: 0 8px 0 0;
+}
+
+.note {
     font-size: 12px;
+    color: var(--ink-faint);
     -unity-text-align: middle-center;
-    white-space: normal;
-    margin-top: 12px;
+    margin: 2px 0 6px 0;
 }
 
-/* ---------- buttons and fields ---------- */
+.corner-note {
+    position: absolute;
+    right: 12px;
+    bottom: 8px;
+    font-size: 11px;
+    color: rgba(255, 255, 255, 0.55);
+}
 
 .btn {
-    background-color: rgb(52, 46, 54);
-    border-color: var(--line);
-    border-width: 1px;
-    border-radius: 6px;
+    background-image: url("/Assets/_Project/Art/UI/panels/button.png");
+    -unity-slice-left: 54;
+    -unity-slice-right: 54;
+    -unity-slice-top: 30;
+    -unity-slice-bottom: 30;
+    -unity-slice-scale: 0.42px;
+    background-color: rgba(0, 0, 0, 0);
+    border-width: 0;
     color: var(--ink);
-    padding: 6px 12px;
-    margin: 3px;
-    font-size: 15px;
-    transition-property: background-color, scale;
+    font-size: 16px;
+    padding: 8px 22px;
+    margin: 4px;
+    min-height: 40px;
+    -unity-text-outline-width: 0.5px;
+    -unity-text-outline-color: rgb(6, 12, 40);
+    transition-property: scale, opacity;
     transition-duration: 0.08s;
 }
 
 .btn:hover {
-    background-color: rgb(70, 62, 72);
+    scale: 1.03 1.03;
 }
 
 .btn:active {
-    scale: 0.97 0.97;
-}
-
-.btn--primary {
-    background-color: var(--brass-dark);
-    border-color: var(--brass);
-    -unity-font-style: bold;
-}
-
-.btn--primary:hover {
-    background-color: rgb(178, 130, 44);
-}
-
-.btn--big {
-    font-size: 19px;
-    padding: 10px 26px;
-    margin-top: 12px;
-}
-
-.btn--small {
-    font-size: 12px;
-    padding: 3px 8px;
-}
-
-.btn--ghost,
-.btn--ghost:hover {
-    background-color: rgba(0, 0, 0, 0);
-    color: var(--ink-faint);
-    border-color: rgba(255, 240, 210, 0.08);
+    background-image: url("/Assets/_Project/Art/UI/panels/button_pressed.png");
+    scale: 0.98 0.98;
 }
 
 .btn:disabled {
     opacity: 0.45;
+    scale: 1 1;
+}
+
+.btn--big {
+    font-size: 22px;
+    min-height: 54px;
+    margin-top: 10px;
+    -unity-slice-scale: 0.55px;
+}
+
+.btn--small {
+    font-size: 12px;
+    min-height: 30px;
+    padding: 4px 14px;
+    -unity-slice-scale: 0.3px;
+}
+
+.btn--icon {
+    font-size: 18px;
+    min-height: 34px;
+    width: 46px;
+    padding: 2px;
+    -unity-slice-scale: 0.3px;
+}
+
+.btn--half {
+    flex-grow: 1;
+    flex-basis: 0;
+}
+
+.btn--quiet {
+    opacity: 0.85;
+    font-size: 14px;
+}
+
+.btn--primary {
+    -unity-font-style: bold;
+}
+
+.btn--start {
+    width: 210px;
+    font-size: 26px;
+    min-height: 66px;
+    -unity-background-image-tint-color: rgb(255, 236, 180);
 }
 
 .field {
     margin: 0;
-    font-size: 16px;
+    font-size: 17px;
 }
 
 .field > .unity-text-field__input,
 .field .unity-base-text-field__input {
-    background-color: rgb(18, 16, 20);
-    border-color: var(--line);
+    background-color: rgba(4, 8, 28, 0.85);
+    border-color: var(--gold-dark);
+    border-width: 1px;
     color: var(--ink);
-    padding: 6px 8px;
-    border-radius: 5px;
+    padding: 7px 10px;
+    border-radius: 6px;
 }
 
 .badge {
     font-size: 11px;
-    -unity-font-style: bold;
     padding: 2px 6px;
     border-radius: 4px;
 }
@@ -154,112 +229,327 @@
     background-color: var(--dev);
 }
 
-/* ---------- main menu ---------- */
-
-.menu-card {
-    width: 760px;
-}
-
 .menu-row {
     flex-direction: row;
-    align-items: flex-end;
+    align-items: center;
 }
 
 .menu-row--center {
     justify-content: center;
-    align-items: center;
-}
-
-.menu-col {
-    flex-grow: 1;
-    margin-right: 14px;
-}
-
-.menu-col--narrow {
-    flex-grow: 0;
-    margin-right: 0;
-}
-
-.segmented {
-    flex-direction: row;
-}
-
-.seg {
-    width: 48px;
-    margin: 0 4px 0 0;
-    font-size: 17px;
-}
-
-.seg--on {
-    background-color: var(--brass-dark);
-    border-color: var(--brass);
-    -unity-font-style: bold;
-}
-
-.char-grid {
-    flex-direction: row;
-    justify-content: space-between;
-}
-
-.char-card {
-    width: 172px;
-    height: 132px;
-    padding: 10px;
-    border-radius: 8px;
-    border-width: 2px;
-    border-color: rgba(255, 255, 255, 0.06);
-    background-color: rgb(40, 35, 42);
-    transition-property: border-color, background-color, translate;
-    transition-duration: 0.1s;
-}
-
-.char-card:hover {
-    background-color: rgb(52, 46, 54);
-}
-
-.char-card--on {
-    border-color: var(--brass);
-    background-color: rgb(58, 50, 44);
-    translate: 0 -2px;
-}
-
-.char-swatch {
-    width: 26px;
-    height: 26px;
-    border-radius: 13px;
-    margin-bottom: 6px;
-}
-
-.char-name {
-    font-size: 18px;
-    -unity-font-style: bold;
-}
-
-.char-ability {
-    font-size: 13px;
-    color: var(--brass);
-    -unity-font-style: bold;
-}
-
-.char-desc {
-    font-size: 11px;
-    color: var(--ink-dim);
-    white-space: normal;
 }
 
 .dev-row {
-    margin-top: 10px;
-    align-items: center;
+    margin-top: 8px;
 }
 
 .dev-label {
     color: var(--dev);
-    font-size: 12px;
-    margin: 0 6px;
+    font-size: 11px;
+    margin: 0 4px;
 }
 
 .field--seed {
-    width: 120px;
+    width: 90px;
+}
+
+/* ---------- main menu ---------- */
+
+.menu-shade {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.18);
+}
+
+.menu-layout {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    flex-direction: row;
+    align-items: flex-end;
+    justify-content: space-between;
+    padding: 30px 40px 26px 40px;
+}
+
+.menu-left {
+    width: 560px;
+    align-items: center;
+    align-self: center;
+}
+
+.menu-logo {
+    width: 520px;
+    height: 290px;
+    -unity-background-scale-mode: scale-to-fit;
+}
+
+.tagline {
+    position: absolute;
+    left: 24px;
+    bottom: 14px;
+    color: var(--ink);
+    font-size: 15px;
+    -unity-text-align: middle-center;
+    white-space: normal;
+    -unity-text-outline-width: 1px;
+    -unity-text-outline-color: rgba(0, 0, 0, 0.85);
+    margin-top: 6px;
+}
+
+.menu-panel {
+    width: 340px;
+    padding: 20px 24px;
+}
+
+/* ---------- lobby ---------- */
+
+.lobby-top {
+    position: absolute;
+    left: 12px;
+    right: 12px;
+    top: 10px;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.lobby-title {
+    font-size: 46px;
+}
+
+.map-choice {
+    flex-direction: row;
+    align-items: center;
+    width: 380px;
+}
+
+.map-text {
+    flex-grow: 1;
+    align-items: center;
+}
+
+.map-name {
+    font-size: 17px;
+    color: var(--gold);
+}
+
+.map-desc {
+    font-size: 11px;
+    color: var(--ink-dim);
+    white-space: normal;
+    -unity-text-align: middle-center;
+}
+
+.lobby-bottom {
+    position: absolute;
+    left: 40px;
+    right: 40px;
+    bottom: 12px;
+    flex-direction: row;
+    align-items: center;
+    padding: 16px 26px;
+}
+
+.lobby-col {
+    flex-grow: 1;
+}
+
+.lobby-col--narrow {
+    flex-grow: 0;
+    width: 200px;
+    margin: 0 14px;
+}
+
+.char-picker {
+    flex-direction: row;
+}
+
+.char-pick {
+    width: 84px;
+    height: 84px;
+    margin-right: 10px;
+    border-radius: 42px;
+    border-width: 3px;
+    border-color: rgba(255, 255, 255, 0.15);
+    background-color: rgba(0, 0, 0, 0.35);
+    -unity-background-scale-mode: scale-and-crop;
+    transition-property: border-color, scale, opacity;
+    transition-duration: 0.1s;
+}
+
+.char-pick:hover {
+    scale: 1.05 1.05;
+}
+
+.char-pick--on {
+    border-color: var(--gold);
+    scale: 1.08 1.08;
+}
+
+.ability-text {
+    font-size: 13px;
+    color: var(--ink-dim);
+    white-space: normal;
+    margin-top: 6px;
+    max-width: 440px;
+}
+
+.player-count {
+    font-size: 26px;
+    color: var(--gold);
+    width: 34px;
+    -unity-text-align: middle-center;
+}
+
+.wardrobe {
+    position: absolute;
+    right: 14px;
+    top: 92px;
+    bottom: 14px;
+    width: 420px;
+    display: none;
+}
+
+.tabs {
+    flex-direction: row;
+    justify-content: center;
+    margin-bottom: 6px;
+}
+
+.tab {
+    flex-grow: 1;
+    flex-basis: 0;
+    font-size: 14px;
+    opacity: 0.6;
+}
+
+.tab--on {
+    opacity: 1;
+    -unity-background-image-tint-color: rgb(255, 236, 180);
+}
+
+.wardrobe-grid {
+    flex-grow: 1;
+}
+
+#wardrobe-grid .unity-scroll-view__content-container {
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+.item {
+    width: 82px;
+    height: 82px;
+    margin: 4px;
+    border-radius: 10px;
+    border-width: 2px;
+    border-color: rgba(255, 255, 255, 0.1);
+    background-color: rgba(0, 0, 0, 0.3);
+    align-items: center;
+    justify-content: center;
+}
+
+.item:hover {
+    background-color: rgba(255, 255, 255, 0.12);
+}
+
+.item--on {
+    border-color: var(--gold);
+    background-color: rgba(255, 206, 96, 0.18);
+}
+
+.item-icon {
+    width: 70px;
+    height: 70px;
+    -unity-background-scale-mode: scale-to-fit;
+}
+
+.item-none {
+    font-size: 13px;
+    color: var(--ink-dim);
+}
+
+.item-name {
+    font-size: 16px;
+    color: var(--gold);
+    -unity-text-align: middle-center;
+    margin: 6px 0 2px 0;
+}
+
+/* ---------- loading ---------- */
+
+.loading-shade {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.25);
+}
+
+.loading-panel {
+    position: absolute;
+    left: 290px;
+    right: 290px;
+    bottom: 40px;
+    align-items: stretch;
+}
+
+.loading-tip {
+    font-size: 17px;
+    white-space: normal;
+    -unity-text-align: middle-center;
+    margin: 6px 0 14px 0;
+    min-height: 44px;
+}
+
+.bar {
+    height: 14px;
+    border-radius: 7px;
+    background-color: rgba(0, 0, 0, 0.5);
+    border-color: var(--gold-dark);
+    border-width: 1px;
+    overflow: hidden;
+}
+
+.bar-fill {
+    height: 100%;
+    width: 0%;
+    background-color: var(--gold);
+    border-radius: 7px;
+}
+
+/* ---------- settings ---------- */
+
+.settings-panel {
+    width: 520px;
+    max-height: 640px;
+}
+
+.volume {
+    margin: 6px 0;
+}
+
+.volume > .unity-label {
+    color: var(--ink);
+    min-width: 130px;
+    font-size: 15px;
+}
+
+.credits-scroll {
+    height: 170px;
+    margin-bottom: 8px;
+}
+
+.credits {
+    font-size: 11px;
+    color: var(--ink-dim);
+    white-space: normal;
 }
 
 /* ---------- HUD ---------- */
@@ -273,9 +563,7 @@
     flex-direction: row;
     align-items: center;
     padding: 0 14px;
-    background-color: rgba(14, 12, 16, 0.82);
-    border-bottom-width: 1px;
-    border-color: var(--line);
+    border-bottom-width: 2px;
 }
 
 .top-left {
@@ -283,13 +571,14 @@
 }
 
 .round-label {
-    font-size: 18px;
-    -unity-font-style: bold;
-    color: var(--brass);
+    -unity-font-definition: url("/Assets/_Project/Art/Fonts/PirataOne-Regular.ttf");
+    font-size: 26px;
+    color: var(--gold);
 }
 
 .turn-label {
     color: var(--ink-dim);
+    font-size: 13px;
 }
 
 .top-center {
@@ -298,13 +587,14 @@
 }
 
 .timer {
-    font-size: 30px;
-    -unity-font-style: bold;
+    font-size: 32px;
     -unity-text-align: middle-center;
+    color: var(--ink);
 }
 
 .timer--low {
     color: var(--danger);
+    scale: 1.15 1.15;
 }
 
 .phase-label {
@@ -313,7 +603,7 @@
 }
 
 .scores {
-    width: 420px;
+    width: 460px;
     flex-direction: row;
     justify-content: flex-end;
 }
@@ -321,55 +611,70 @@
 .score {
     flex-direction: row;
     align-items: center;
-    padding: 4px 8px;
+    padding: 3px 8px 3px 3px;
     margin-left: 6px;
-    border-radius: 6px;
-    background-color: rgba(255, 255, 255, 0.05);
-    border-left-width: 4px;
+    border-radius: 22px;
+    background-color: rgba(255, 255, 255, 0.07);
+    border-width: 2px;
 }
 
 .score--dead {
     opacity: 0.45;
 }
 
+.score-portrait {
+    width: 34px;
+    height: 34px;
+    border-radius: 17px;
+    margin-right: 6px;
+    -unity-background-scale-mode: scale-and-crop;
+}
+
 .score-name {
     font-size: 13px;
-    -unity-font-style: bold;
     margin-right: 6px;
 }
 
 .score-points {
-    font-size: 18px;
-    -unity-font-style: bold;
-    color: var(--brass);
+    font-size: 20px;
+    color: var(--gold);
 }
 
 .score-icon {
-    width: 16px;
-    height: 16px;
+    width: 20px;
+    height: 20px;
     margin-left: 4px;
+    -unity-background-scale-mode: scale-to-fit;
 }
 
 .corner-buttons {
     position: absolute;
-    left: 10px;
-    top: 72px;
+    left: 8px;
+    top: 70px;
     flex-direction: row;
 }
 
 .dev-badge {
     position: absolute;
     left: 12px;
-    top: 104px;
+    top: 108px;
+}
+
+.emote-hint {
+    position: absolute;
+    right: 12px;
+    top: 72px;
+    font-size: 11px;
+    color: rgba(255, 255, 255, 0.55);
 }
 
 .log-panel {
     position: absolute;
     right: 10px;
-    top: 72px;
+    top: 92px;
     bottom: 196px;
     width: 300px;
-    background-color: var(--panel);
+    background-color: var(--navy-deep);
     border-radius: 8px;
     border-width: 1px;
     border-color: var(--line);
@@ -377,8 +682,7 @@
 }
 
 .log-title {
-    -unity-font-style: bold;
-    color: var(--brass);
+    color: var(--gold);
     margin-bottom: 4px;
 }
 
@@ -394,13 +698,11 @@
 
 .log-line--tick {
     color: var(--ink);
-    -unity-font-style: bold;
     margin-top: 4px;
 }
 
 .log-line--turn {
-    color: var(--brass);
-    -unity-font-style: bold;
+    color: var(--gold);
     margin-top: 8px;
 }
 
@@ -414,9 +716,7 @@
     right: 0;
     bottom: 0;
     padding: 8px 12px 10px 12px;
-    background-color: rgba(14, 12, 16, 0.88);
-    border-top-width: 1px;
-    border-color: var(--line);
+    border-top-width: 2px;
     align-items: center;
 }
 
@@ -427,8 +727,7 @@
 
 .planning-for {
     width: 150px;
-    font-size: 16px;
-    -unity-font-style: bold;
+    font-size: 17px;
     -unity-text-align: middle-right;
     margin-right: 10px;
 }
@@ -438,29 +737,29 @@
 }
 
 .slot {
-    width: 150px;
-    height: 48px;
+    width: 156px;
+    height: 50px;
     margin: 0 4px;
     flex-direction: row;
     align-items: center;
     padding: 4px 8px;
-    border-radius: 7px;
+    border-radius: 9px;
     border-width: 2px;
-    border-color: rgba(255, 255, 255, 0.08);
-    background-color: rgb(36, 32, 38);
+    border-color: rgba(255, 255, 255, 0.12);
+    background-color: rgba(20, 40, 110, 0.75);
 }
 
 .slot:hover {
-    background-color: rgb(48, 43, 50);
+    background-color: rgba(40, 64, 150, 0.85);
 }
 
 .slot--cursor {
-    border-color: var(--brass);
+    border-color: var(--gold);
 }
 
 .slot--invalid {
     border-color: var(--danger);
-    background-color: rgb(60, 30, 30);
+    background-color: rgba(110, 30, 30, 0.8);
 }
 
 .slot--locked {
@@ -474,14 +773,14 @@
 }
 
 .slot-icon {
-    width: 26px;
-    height: 26px;
+    width: 32px;
+    height: 32px;
     margin-right: 6px;
+    -unity-background-scale-mode: scale-to-fit;
 }
 
 .slot-text {
     font-size: 14px;
-    -unity-font-style: bold;
 }
 
 .slot-sub {
@@ -490,15 +789,14 @@
 }
 
 .btn--lock {
-    width: 190px;
-    height: 46px;
+    width: 200px;
+    height: 50px;
     margin-left: 10px;
     font-size: 16px;
 }
 
 .btn--locked {
-    background-color: rgb(46, 110, 70);
-    border-color: rgb(120, 220, 150);
+    -unity-background-image-tint-color: rgb(140, 255, 170);
 }
 
 .hint {
@@ -515,14 +813,14 @@
 }
 
 .action {
-    width: 104px;
-    height: 64px;
+    width: 106px;
+    height: 70px;
     margin: 0 3px;
-    padding: 5px 4px 4px 4px;
-    border-radius: 7px;
-    border-width: 1px;
-    border-color: var(--line);
-    background-color: rgb(46, 41, 48);
+    padding: 4px 4px 3px 4px;
+    border-radius: 9px;
+    border-width: 2px;
+    border-color: rgba(255, 214, 120, 0.25);
+    background-color: rgba(20, 40, 110, 0.8);
     align-items: center;
     justify-content: flex-start;
     transition-property: background-color, translate, opacity;
@@ -530,13 +828,13 @@
 }
 
 .action:hover {
-    background-color: rgb(66, 59, 68);
+    background-color: rgba(44, 70, 160, 0.9);
     translate: 0 -2px;
 }
 
 .action--pending {
-    background-color: var(--brass-dark);
-    border-color: var(--brass);
+    background-color: var(--gold-dark);
+    border-color: var(--gold);
 }
 
 .action--off {
@@ -545,41 +843,40 @@
 
 .action--off:hover {
     translate: 0 0;
-    background-color: rgb(46, 41, 48);
+    background-color: rgba(20, 40, 110, 0.8);
 }
 
 .action-top {
     flex-direction: row;
     align-items: center;
     flex-shrink: 0;
-    height: 20px;
+    height: 30px;
 }
 
 .action-key {
     font-size: 11px;
-    -unity-font-style: bold;
     color: rgb(20, 16, 12);
     background-color: var(--ink-dim);
     border-radius: 3px;
     padding: 0 4px;
-    margin-right: 5px;
+    margin-right: 4px;
 }
 
 .action-icon {
-    width: 20px;
-    height: 20px;
+    width: 30px;
+    height: 30px;
+    -unity-background-scale-mode: scale-to-fit;
 }
 
 .action-name {
     font-size: 13px;
-    -unity-font-style: bold;
     margin: 1px 0 0 0;
     padding: 0;
 }
 
 .action-cost {
     font-size: 10px;
-    color: var(--brass);
+    color: var(--gold);
     margin: 0;
     padding: 0;
 }
@@ -588,8 +885,8 @@
     position: absolute;
     max-width: 280px;
     padding: 6px 9px;
-    background-color: rgb(12, 10, 14);
-    border-color: var(--brass-dark);
+    background-color: rgb(8, 12, 34);
+    border-color: var(--gold-dark);
     border-width: 1px;
     border-radius: 6px;
     font-size: 12px;
@@ -597,24 +894,66 @@
     display: none;
 }
 
+/* Announcer banner: Matej's ribbon, text on top. */
 .banner {
     position: absolute;
-    left: 0;
-    right: 0;
-    top: 120px;
-    font-size: 40px;
-    -unity-font-style: bold;
-    -unity-text-align: middle-center;
-    color: var(--brass);
-    -unity-text-outline-width: 1px;
-    -unity-text-outline-color: rgb(30, 20, 10);
+    left: 360px;
+    right: 360px;
+    top: 66px;
+    height: 76px;
+    background-image: url("/Assets/_Project/Art/UI/panels/banner.png");
+    -unity-slice-left: 200;
+    -unity-slice-right: 200;
+    -unity-slice-top: 50;
+    -unity-slice-bottom: 50;
+    -unity-slice-scale: 0.4px;
+    align-items: center;
+    justify-content: center;
     opacity: 0;
+}
+
+.banner-text {
+    -unity-font-definition: url("/Assets/_Project/Art/Fonts/PirataOne-Regular.ttf");
+    font-size: 34px;
+    color: var(--gold);
+    -unity-text-align: middle-center;
+    -unity-text-outline-width: 1.5px;
+    -unity-text-outline-color: rgb(30, 16, 4);
+    margin-bottom: 8px;
 }
 
 /* ---------- scoreboard and results ---------- */
 
-.score-card,
+.score-card {
+    width: 600px;
+    align-items: stretch;
+}
+
+.results-banner {
+    position: absolute;
+    left: 250px;
+    right: 250px;
+    top: 14px;
+    height: 100px;
+    background-image: url("/Assets/_Project/Art/UI/panels/banner.png");
+    -unity-slice-left: 200;
+    -unity-slice-right: 200;
+    -unity-slice-top: 50;
+    -unity-slice-bottom: 50;
+    -unity-slice-scale: 0.55px;
+    align-items: center;
+    justify-content: center;
+}
+
+.banner-text--static {
+    font-size: 36px;
+}
+
 .results-card {
+    position: absolute;
+    right: 30px;
+    top: 120px;
+    bottom: 20px;
     width: 560px;
     align-items: stretch;
 }
@@ -631,9 +970,8 @@
 
 .gain-amount {
     width: 44px;
-    font-size: 20px;
-    -unity-font-style: bold;
-    color: var(--brass);
+    font-size: 21px;
+    color: var(--gold);
 }
 
 .gain-text {
@@ -649,14 +987,16 @@
 .total {
     flex-direction: row;
     align-items: center;
-    padding: 4px 0;
+    padding: 3px 0;
 }
 
 .total-swatch {
-    width: 14px;
-    height: 14px;
-    border-radius: 7px;
+    width: 34px;
+    height: 34px;
+    border-radius: 17px;
     margin-right: 8px;
+    border-width: 2px;
+    -unity-background-scale-mode: scale-and-crop;
 }
 
 .total-name {
@@ -671,38 +1011,63 @@
 }
 
 .total-bar {
-    width: 160px;
-    height: 8px;
-    border-radius: 4px;
-    background-color: rgba(255, 255, 255, 0.08);
+    width: 150px;
+    height: 9px;
+    border-radius: 5px;
+    background-color: rgba(255, 255, 255, 0.1);
     margin-right: 10px;
 }
 
 .total-fill {
-    height: 8px;
-    border-radius: 4px;
-    background-color: var(--brass);
+    height: 9px;
+    border-radius: 5px;
+    background-color: var(--gold);
 }
 
 .total-points {
-    width: 60px;
+    width: 66px;
     font-size: 18px;
-    -unity-font-style: bold;
     -unity-text-align: middle-right;
 }
 
-.kicker {
-    font-size: 13px;
-    color: var(--ink-faint);
-    -unity-font-style: bold;
+.winner {
+    -unity-font-definition: url("/Assets/_Project/Art/Fonts/PirataOne-Regular.ttf");
+    font-size: 50px;
     -unity-text-align: middle-center;
-    letter-spacing: 2px;
+    -unity-text-outline-width: 1.5px;
+    -unity-text-outline-color: rgb(20, 10, 4);
 }
 
-.winner {
-    font-size: 52px;
-    -unity-font-style: bold;
+.awards {
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: center;
+    margin-bottom: 8px;
+}
+
+.award {
+    width: 112px;
+    align-items: center;
+    margin: 1px 2px;
+}
+
+.award-badge {
+    width: 44px;
+    height: 44px;
+    -unity-background-scale-mode: scale-to-fit;
+}
+
+.award-name {
+    font-size: 12px;
+    color: var(--gold);
     -unity-text-align: middle-center;
+}
+
+.award-who {
+    font-size: 10px;
+    color: var(--ink-dim);
+    -unity-text-align: middle-center;
+    white-space: normal;
 }
 
 /* ---------- world labels (over the board, under the HUD) ---------- */
@@ -717,7 +1082,6 @@
 
 .world-label {
     font-size: 13px;
-    -unity-font-style: bold;
     -unity-text-align: middle-center;
     -unity-text-outline-width: 1px;
     -unity-text-outline-color: rgba(0, 0, 0, 0.9);
@@ -726,6 +1090,16 @@
 
 .unit-name {
     font-size: 12px;
+}
+
+.stage-name {
+    font-size: 20px;
+    -unity-text-outline-width: 1.5px;
+}
+
+.stage-tag {
+    font-size: 12px;
+    color: var(--ink-dim);
 }
 
 .keg-fuse {
@@ -753,9 +1127,10 @@
 }
 
 .popup-big {
-    font-size: 22px;
+    -unity-font-definition: url("/Assets/_Project/Art/Fonts/PirataOne-Regular.ttf");
+    font-size: 28px;
 }
 
 .popup-dmg {
-    font-size: 24px;
+    font-size: 26px;
 }

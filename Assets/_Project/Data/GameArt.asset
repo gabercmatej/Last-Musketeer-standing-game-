@@ -1,0 +1,127 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b7aa1514172224031a872085ffc175ab, type: 3}
+  m_Name: GameArt
+  m_EditorClassIdentifier: Musketeers.Data::Musketeers.Data.GameArt
+  Sprites:
+  - Key: Objects/crown
+    Sprite: {fileID: 21300000, guid: baf90cd5044a047b7a826f5b359988b1, type: 3}
+  - Key: Objects/keg
+    Sprite: {fileID: 21300000, guid: fd6c4277ed42d476cbc772387dd9100f, type: 3}
+  - Key: Objects/lasso
+    Sprite: {fileID: 21300000, guid: 751a001024c6545d6aaec1e2ca54638a, type: 3}
+  - Key: Objects/shadow
+    Sprite: {fileID: 21300000, guid: 75b4c65e208f44f6a88414140a981c77, type: 3}
+  - Key: Weapons/musket
+    Sprite: {fileID: 21300000, guid: 689dd2452c8914525b2d5fe65c3ce05e, type: 3}
+  - Key: Weapons/rapier
+    Sprite: {fileID: 21300000, guid: adacb93dcb02f4735b11cbbd3de84de5, type: 3}
+  - Key: FX/dust
+    Sprite: {fileID: 21300000, guid: ca068660f343e425da261f4f71a95a95, type: 3}
+  - Key: FX/explosion
+    Sprite: {fileID: 21300000, guid: cda601dcb4bc5427a819796e2e00f4b8, type: 3}
+  - Key: FX/muzzle_flash
+    Sprite: {fileID: 21300000, guid: a9c56d7b78186497fa2f6cba15cbfabf, type: 3}
+  - Key: FX/smoke_puff
+    Sprite: {fileID: 21300000, guid: 090ce067612a94784b5d8c3825721dbb, type: 3}
+  - Key: FX/spark
+    Sprite: {fileID: 21300000, guid: fe4615627dd774133a359ca36b840893, type: 3}
+  - Key: FX/splash
+    Sprite: {fileID: 21300000, guid: d885df3d112774c908d50369e8d91a3d, type: 3}
+  - Key: FX/stars
+    Sprite: {fileID: 21300000, guid: 305826ba18db942ddbaa5fb04c065a30, type: 3}
+  - Key: FX/swap_swirl
+    Sprite: {fileID: 21300000, guid: d182308df638a4345b38250b3ada496b, type: 3}
+  - Key: UI/backgrounds/key_art
+    Sprite: {fileID: 21300000, guid: 4a5e6a1f1e5e649ee91917284df1c3a1, type: 3}
+  - Key: UI/backgrounds/lobby
+    Sprite: {fileID: 21300000, guid: fdf688a96abb34b329842c33170ad070, type: 3}
+  - Key: UI/backgrounds/splash
+    Sprite: {fileID: 21300000, guid: 2d2f61cde7f79407389ffa711a38b240, type: 3}
+  - Key: UI/badges/bonk_lord
+    Sprite: {fileID: 21300000, guid: c860ecfb81e0044cc88ea901864214c1, type: 3}
+  - Key: UI/badges/click_click
+    Sprite: {fileID: 21300000, guid: cddd7571153c646be89e83f491e50367, type: 3}
+  - Key: UI/badges/pacifist
+    Sprite: {fileID: 21300000, guid: f13ce664c17ac4d17b81ab5a265ceb21, type: 3}
+  - Key: UI/badges/powder_monkey
+    Sprite: {fileID: 21300000, guid: e120c2a9f69874c51a03da9699916dff, type: 3}
+  - Key: UI/badges/regicide
+    Sprite: {fileID: 21300000, guid: f9d3fefff30b948539f88566ced204d8, type: 3}
+  - Key: UI/badges/sharpshooter
+    Sprite: {fileID: 21300000, guid: 257e99fc2c5b941969061bc4980262e0, type: 3}
+  - Key: UI/badges/swan_dive
+    Sprite: {fileID: 21300000, guid: ca7af5c8192dd4cb78b9501a5fe62221, type: 3}
+  - Key: UI/badges/wall_of_steel
+    Sprite: {fileID: 21300000, guid: db8a2cf7c121a486f9206a90f31c276d, type: 3}
+  - Key: UI/emotes/angry
+    Sprite: {fileID: 21300000, guid: 659ae15f9c76a497aa3e25ab2cf5d69f, type: 3}
+  - Key: UI/emotes/cry
+    Sprite: {fileID: 21300000, guid: 054af3b3f18bd438488f2b69fe2acbc8, type: 3}
+  - Key: UI/emotes/laugh
+    Sprite: {fileID: 21300000, guid: d402929d0b68847b5ad05cd85dca7c8d, type: 3}
+  - Key: UI/emotes/salute
+    Sprite: {fileID: 21300000, guid: a4806fae014ee41d18b2b5de1d67f8ce, type: 3}
+  - Key: UI/icons/actions/bull_rush
+    Sprite: {fileID: 21300000, guid: d699b74e72b0b472d879e377ef2c79e8, type: 3}
+  - Key: UI/icons/actions/catch_breath
+    Sprite: {fileID: 21300000, guid: 0bce51ca2caee44dd824206044db2f3d, type: 3}
+  - Key: UI/icons/actions/dash
+    Sprite: {fileID: 21300000, guid: d00f28317ba4246289047a5eec622ad5, type: 3}
+  - Key: UI/icons/actions/double_charge
+    Sprite: {fileID: 21300000, guid: d116b978828a3444fa3b565f86cc1174, type: 3}
+  - Key: UI/icons/actions/fire
+    Sprite: {fileID: 21300000, guid: 35d1930d370004e3e8a224d86f98639e, type: 3}
+  - Key: UI/icons/actions/grappin
+    Sprite: {fileID: 21300000, guid: d30149e0f30544a509ebc6e95c22ea1e, type: 3}
+  - Key: UI/icons/actions/keg
+    Sprite: {fileID: 21300000, guid: 31975561c62fe4faa8cb645727a03bb3, type: 3}
+  - Key: UI/icons/actions/move
+    Sprite: {fileID: 21300000, guid: 938702ed4b80f45cabd30e21c237d6a4, type: 3}
+  - Key: UI/icons/actions/parry
+    Sprite: {fileID: 21300000, guid: 28e09e3207d13446c9c73c6368dfe959, type: 3}
+  - Key: UI/icons/actions/reload
+    Sprite: {fileID: 21300000, guid: db288243678cb4a8081d37efc7546887, type: 3}
+  - Key: UI/icons/actions/shove
+    Sprite: {fileID: 21300000, guid: 2076247409d7a4bc5a493b1e4de38f95, type: 3}
+  - Key: UI/icons/actions/switcheroo
+    Sprite: {fileID: 21300000, guid: e123542123bff4414a5a43ef0b038356, type: 3}
+  - Key: UI/icons/status/crown_small
+    Sprite: {fileID: 21300000, guid: 7fc6fbeded9fe43af8fec917e7123257, type: 3}
+  - Key: UI/icons/status/grit
+    Sprite: {fileID: 21300000, guid: d9f06d3b930444a82a9d79eb30c43b2d, type: 3}
+  - Key: UI/icons/status/heart_empty
+    Sprite: {fileID: 21300000, guid: fff2ede29597f48b789d9914706e2f35, type: 3}
+  - Key: UI/icons/status/heart_full
+    Sprite: {fileID: 21300000, guid: 79b055555821b4fec9fe3d1fbfc9bf0f, type: 3}
+  - Key: UI/icons/status/lock_in
+    Sprite: {fileID: 21300000, guid: 9de3aaee302474f3b9f7b486e79299a0, type: 3}
+  - Key: UI/icons/status/musket_empty
+    Sprite: {fileID: 21300000, guid: 17dfc97265f93451885e734112fc7ee9, type: 3}
+  - Key: UI/icons/status/musket_loaded
+    Sprite: {fileID: 21300000, guid: 9f2a7432616244376b13d018d00bf10b, type: 3}
+  - Key: UI/icons/status/skull
+    Sprite: {fileID: 21300000, guid: 8c1a3a66f03ba4d04aff99ae11ae3227, type: 3}
+  - Key: UI/logo/logo
+    Sprite: {fileID: 21300000, guid: a9c28d6d446ef4f96b7eef2a4f5db732, type: 3}
+  - Key: UI/logo/logo_small
+    Sprite: {fileID: 21300000, guid: 2ad1ecf5c4cf648279b0124123d95c36, type: 3}
+  - Key: UI/panels/banner
+    Sprite: {fileID: 21300000, guid: 5e77416c9c8e44556a6adfdba21463b4, type: 3}
+  - Key: UI/panels/bubble
+    Sprite: {fileID: 21300000, guid: c111898dfe6fb4bd1b93e7995f5f3a04, type: 3}
+  - Key: UI/panels/button
+    Sprite: {fileID: 21300000, guid: 3ffe1f3b954814163874448ffcbbb16b, type: 3}
+  - Key: UI/panels/button_pressed
+    Sprite: {fileID: 21300000, guid: ce6e5e09d8c7348ed9cc550935d5dcc6, type: 3}
+  - Key: UI/panels/panel
+    Sprite: {fileID: 21300000, guid: f426785e56a9d47e186f0e1906670e36, type: 3}

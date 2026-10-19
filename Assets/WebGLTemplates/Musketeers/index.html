@@ -13,9 +13,10 @@
       <canvas id="unity-canvas" tabindex="-1"></canvas>
     </div>
     <div id="loader">
-      <div id="title">{{{ PRODUCT_NAME }}}</div>
+      <img id="logo" src="TemplateData/logo.png" alt="{{{ PRODUCT_NAME }}}" onerror="this.style.display='none';document.querySelector('#title').style.display='block';">
+      <div id="title" style="display:none">{{{ PRODUCT_NAME }}}</div>
       <div id="subtitle">Version {{{ PRODUCT_VERSION }}}</div>
-      <div id="bar"><div id="bar-fill"></div></div>
+      <div id="bar" class="indeterminate"><div id="bar-fill"></div></div>
       <div id="status">Loading...</div>
     </div>
     <div id="warning"></div>
@@ -63,9 +64,21 @@
         autoSyncPersistentDataPath: true,
       };
 
+      // Unity reports download progress only when the server sends Content-Length. Netlify doesn't,
+      // so the bar sweeps (indeterminate) until real in-between numbers show up, then fills normally.
+      var bar = document.querySelector("#bar");
+      var determinate = false;
       createUnityInstance(canvas, config, function (progress) {
-        fill.style.width = Math.round(progress * 100) + "%";
-        statusEl.textContent = progress < 0.9 ? "Loading... " + Math.round(progress * 100) + "%" : "Starting...";
+        if (!determinate && progress > 0.01 && progress < 0.85) {
+          determinate = true;
+          bar.classList.remove("indeterminate");
+        }
+        if (determinate) {
+          fill.style.width = Math.round(progress * 100) + "%";
+          statusEl.textContent = progress < 0.9 ? "Loading... " + Math.round(progress * 100) + "%" : "Starting...";
+        } else {
+          statusEl.textContent = progress < 0.9 ? "Loading the musketeers..." : "Starting...";
+        }
       }).then(function (unityInstance) {
         loader.classList.add("done");
         canvas.focus();
