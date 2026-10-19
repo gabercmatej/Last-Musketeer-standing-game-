@@ -43,6 +43,19 @@ namespace Musketeers.EditorTools.Studio
         public bool AnchorMode;
         public float Zoom = 1.1f;
         public readonly HashSet<UnityEngine.Object> Unsaved = new HashSet<UnityEngine.Object>();
+        public readonly StudioMaskSession Mask = new StudioMaskSession();
+        public bool MaskThisPose;                 // "This pose only" for item masks
+        public int CopySource;                    // "Copy mask from": roster index (default Matej)
+        public bool[] CopyTargets = { true, true, true, true, true, true, true, true };
+        public bool CopyAllPoses;
+        public FitClip Clipboard;
+        public bool HasClipboard;
+        public string ClipboardName = "";
+        public PoseKind ClipboardPose;
+        public bool CopyIncludeMask = true;
+        public bool PasteOpen;
+        public readonly HashSet<string> PasteChecked = new HashSet<string>();
+        public bool PasteOthersAllPoses;
         public int Rev;   // bumps whenever the composed images must be redrawn
 
         public StudioState(CharacterRoster roster, CosmeticCatalog catalog)
@@ -52,7 +65,10 @@ namespace Musketeers.EditorTools.Studio
             for (int i = 0; i < roster.Count; i++)
             {
                 if (roster.Get(i) != null && roster.Get(i).Id == "matej")
+                {
                     Char = i;
+                    CopySource = i;
+                }
             }
             var l = Character != null ? Character.DefaultLoadout : default;
             foreach (var slot in Loadout.Slots)
@@ -128,6 +144,7 @@ namespace Musketeers.EditorTools.Studio
             MusketAimed = Weapon == StudioWeapon.MusketAimed,
             Raised = Weapon == StudioWeapon.RapierRaised,
             Background = background,
+            NoMasks = !ShowMasks,
         };
 
         public void Wear(CosmeticSlot slot, string id)

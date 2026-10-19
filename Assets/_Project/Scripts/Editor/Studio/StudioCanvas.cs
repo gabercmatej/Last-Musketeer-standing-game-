@@ -12,7 +12,7 @@ namespace Musketeers.EditorTools.Studio
         public const int MaxSize = 720;
         const string TexKey = "canvas";
         const float HandleHit = 9f;
-        enum Grab { None, Move, Rotate, Scale, Anchor }
+        enum Grab { None, Move, Rotate, Scale, Anchor, Pen }
 
         readonly StudioState _s;
         readonly StudioTextures _tex;
@@ -38,6 +38,11 @@ namespace Musketeers.EditorTools.Studio
         }
 
         public bool Dragging => _grab != Grab.None;
+        public Rect LastRect { get; private set; }   // the square the image was last drawn into (window GUI coordinates)
+        public Vector2 PoseToGui(Vector2 pose) => ToGui(LastRect, pose);
+        public float PosePerPx => 1f / Mathf.Max(0.0001f, _k);
+        public int SelectedLayer => FindSelected();
+        bool PenActive => _s.Mask.Active && _s.Mask.Matches(_s);
         public IReadOnlyList<RigCompositor.ComposedLayer> Layers => _layers;
         public void Invalidate() => _rev = -1;
 
@@ -117,18 +122,27 @@ namespace Musketeers.EditorTools.Studio
             _rev = _s.Rev;
         }
 
-        public void Draw(int size)
+        // `area` = the space the layout gave the canvas; the square image sits centered in it.
+        public void Draw(Rect area, int size)
         {
-            var rect = GUILayoutUtility.GetRect(size, size, GUILayout.Width(size), GUILayout.Height(size));
+            var rect = new Rect(Mathf.Round(area.center.x - size * 0.5f), Mathf.Round(area.center.y - size * 0.5f), size, size);
             int id = GUIUtility.GetControlID(FocusType.Passive);
             var e = Event.current;
+            if (e.type != EventType.Layout)
+                LastRect = rect;
             _k = RigCompositor.Ppu * _s.Zoom * size / MaxSize;
             switch (e.GetTypeForControl(id))
             {
                 case EventType.MouseDown:
                     if (e.button == 0 && rect.Contains(e.mousePosition) && _size == size)
                     {
-                        Begin(rect, e);
+                        if (PenActive)
+                        {
+                            if (BeginPen(rect, e))
+                                _grab = Grab.Pen;
+                        }
+                        else
+                            Begin(rect, e);
                         if (_grab != Grab.None)
                             GUIUtility.hotControl = id;
                         e.Use();
@@ -146,6 +160,8 @@ namespace Musketeers.EditorTools.Studio
                     if (GUIUtility.hotControl == id)
                     {
                         GUIUtility.hotControl = 0;
+                        if (_grab == Grab.Pen)
+                            _s.Mask.Pen.MouseUp();
                         _grab = Grab.None;
                         _s.Touch();   // strip refreshes now that the drag is over
                         e.Use();
@@ -281,6 +297,11 @@ namespace Musketeers.EditorTools.Studio
         {
             var pp = ToPose(rect, e.mousePosition);
             var c = _s.Character;
+            if (_grab == Grab.Pen)
+            {
+                PenDrag(rect, e);
+                return;
+            }
             if (_grab == Grab.Anchor)
             {
                 var pf = PoseFitOf(c, true);
@@ -316,6 +337,195 @@ namespace Musketeers.EditorTools.Studio
             _s.Touch();
         }
 
+
+        // ---------- pen tool ----------
+
+        // Pose space <-> the space of the mask being edited (item-local, or pose space for body masks).
+        struct MaskSpace
+        {
+            public bool Item;
+            public LayerPlacement P;
+            public Vector2 ToLocal(Vector2 pose) => Item ? RigCompositor.ToLocal(P, pose) : pose;
+            public Vector2 ToPose(Vector2 local) => Item ? RigCompositor.ToPose(P, local) : local;
+            public float Scale => Item ? Mathf.Max(0.0001f, Mathf.Abs(P.Scale.x)) : 1f;
+        }
+
+        bool PenSpace(out MaskSpace sp)
+        {
+            sp = default;
+            if (_s.Mask.Body)
+                return true;
+            int idx = FindSelected();
+            if (idx < 0 || !_layers[idx].Placement.Valid)
+                return false;
+            sp = new MaskSpace { Item = true, P = _layers[idx].Placement };
+            return true;
+        }
+
+        void Edited(UnityEngine.Object owner)
+        {
+            if (owner is CosmeticDef cd)
+                cd.Tuned = true;
+            _s.MarkDirty(owner);
+            _s.Touch();
+        }
+
+        bool BindPen(bool create, out MaskSpace sp, out UnityEngine.Object owner)
+        {
+            owner = null;
+            if (!PenSpace(out sp))
+                return false;
+            var path = _s.Mask.Path(_s, create, out owner);
+            if (path == null)
+                return false;
+            _s.Mask.Pen.Bind(path);
+            _s.Mask.Pen.HitRadius = 8f / _k / sp.Scale;
+            return true;
+        }
+
+        bool BeginPen(Rect rect, Event e)
+        {
+            if (!BindPen(true, out var sp, out var owner))
+                return false;
+            Undo.IncrementCurrentGroup();
+            Undo.RecordObject(owner, "Mask edit");
+            _s.Mask.Pen.MouseDown(sp.ToLocal(ToPose(rect, e.mousePosition)), e.alt);
+            Edited(owner);
+            return true;
+        }
+
+        void PenDrag(Rect rect, Event e)
+        {
+            if (!BindPen(false, out var sp, out var owner))
+                return;
+            _s.Mask.Pen.MouseDrag(sp.ToLocal(ToPose(rect, e.mousePosition)), e.alt);
+            Edited(owner);
+        }
+
+        // Arrow keys with a selected pen point: move it by a pose-space delta.
+        public bool NudgePen(Vector2 poseDelta)
+        {
+            if (!PenActive || !BindPen(false, out var sp, out var owner) || _s.Mask.Pen.Selected < 0)
+                return false;
+            var origin = sp.Item ? sp.P.Position : Vector2.zero;
+            var local = sp.ToLocal(origin + poseDelta) - sp.ToLocal(origin);
+            Undo.RecordObject(owner, "Nudge mask point");
+            _s.Mask.Pen.Nudge(local);
+            Edited(owner);
+            return true;
+        }
+
+        public bool DeletePenPoint()
+        {
+            if (!PenActive || !BindPen(false, out _, out var owner) || _s.Mask.Pen.Selected < 0)
+                return false;
+            Undo.IncrementCurrentGroup();
+            Undo.RecordObject(owner, "Delete mask point");
+            _s.Mask.Pen.DeleteSelected();
+            Edited(owner);
+            return true;
+        }
+
+        // Keyboard fit edits: `change` gets the current fit, the anchor and whether the foot is mirrored.
+        public bool AdjustSelected(Func<ItemFit, Anchor, bool, ItemFit> change)
+        {
+            int idx = FindSelected();
+            if (idx < 0 || _s.Character == null)
+                return false;
+            var l = _layers[idx];
+            var target = StudioTargets.Resolve(_s, l.BackFoot);
+            if (!target.Valid)
+                return false;
+            var anchor = _s.Character.FitFor(_s.Pose).Get(target.Anchor);
+            bool mirrored = StudioTargets.Mirrored(_s.Character, _s.Pose, l.BackFoot);
+            var fit = change(FitEdit.Resolve(target.Fit, _s.CharId, _s.Pose), anchor, mirrored);
+            StudioEdit.Write(target.Fit, target.Owner, _s.Pose, _s.OverrideMusketeer ? _s.CharId : null, fit, _s.LinkAllPoses);
+            _s.MarkDirty(target.Owner);
+            _s.Touch();
+            return true;
+        }
+
+        static readonly Color CutRed = new Color(1f, 0.25f, 0.25f), KeepCyan = new Color(0.2f, 0.9f, 1f);
+
+        Vector2[] OutlineGui(Rect rect, BezierPath path, MaskSpace sp)
+        {
+            var poly = StudioPen.Polyline(path, 12);
+            var pts = new Vector2[poly.Length];
+            for (int i = 0; i < poly.Length; i++)
+                pts[i] = ToGui(rect, sp.ToPose(poly[i]));
+            return pts;
+        }
+
+        void StrokePath(Rect rect, BezierPath path, MaskSpace sp, Color col, float width)
+        {
+            if (path == null || path.Points == null || path.Points.Count < 2)
+                return;
+            var g = OutlineGui(rect, path, sp);
+            var v = new List<Vector3>(g.Length + 1);
+            foreach (var p in g)
+                v.Add(ToV3(p));
+            if (path.Closed)
+                v.Add(ToV3(g[0]));
+            Handles.color = col;
+            Handles.DrawAAPolyLine(width, v.ToArray());
+        }
+
+        // Selected item's masks as thin outlines (when "Show masks" is on).
+        void DrawMaskOutlines(Rect rect)
+        {
+            var t = StudioTargets.Resolve(_s);
+            if (!t.Valid)
+                return;
+            if (PenSpace(out _) && FindSelected() >= 0)
+            {
+                int idx = FindSelected();
+                var sp = new MaskSpace { Item = true, P = _layers[idx].Placement };
+                var path = t.Fit.Masks.For(_s.Pose, StudioMasks.DrawsFront(_s));
+                if (path != null)
+                    StrokePath(rect, path, sp, path.Invert ? KeepCyan : CutRed, 2f);
+            }
+            var c = _s.Character;
+            var pf = c != null && c.Fit != null ? c.Fit.Get(c.Resolve(_s.Pose)) : null;
+            if (pf == null)
+                return;
+            foreach (var id in StudioClipboard.BodyMaskIds(_s))
+                StrokePath(rect, pf.BodyMask(id), default, CutRed, 2f);
+        }
+
+        void DrawPen(Rect rect)
+        {
+            if (!BindPen(false, out var sp, out _))
+                return;
+            var path = _s.Mask.Pen.Path;
+            StrokePath(rect, path, sp, path.Invert && !_s.Mask.Body ? KeepCyan : CutRed, 2.5f);
+            var pts = path.Points;
+            var white = Color.white;
+            for (int i = 0; i < pts.Count; i++)
+            {
+                var pt = pts[i];
+                var g = ToGui(rect, sp.ToPose(pt.P));
+                bool sel = i == _s.Mask.Pen.Selected;
+                if (pt.In != Vector2.zero || pt.Out != Vector2.zero)
+                {
+                    Handles.color = new Color(1f, 1f, 1f, 0.85f);
+                    foreach (var h in new[] { pt.In, pt.Out })
+                    {
+                        if (h == Vector2.zero)
+                            continue;
+                        var hg = ToGui(rect, sp.ToPose(pt.P + h));
+                        Handles.DrawAAPolyLine(1.5f, ToV3(g), ToV3(hg));
+                        Handles.DrawSolidDisc(ToV3(hg), Vector3.forward, 4f);
+                        Handles.color = Color.black;
+                        Handles.DrawWireDisc(ToV3(hg), Vector3.forward, 4f);
+                        Handles.color = new Color(1f, 1f, 1f, 0.85f);
+                    }
+                }
+                float half = i == 0 && !path.Closed ? 6f : 4f;
+                EditorGUI.DrawRect(new Rect(g.x - half - 1, g.y - half - 1, half * 2 + 2, half * 2 + 2), Color.black);
+                EditorGUI.DrawRect(new Rect(g.x - half, g.y - half, half * 2, half * 2), sel ? new Color(1f, 0.9f, 0.2f) : white);
+            }
+        }
+
         // ---------- overlay ----------
 
         void Overlay(Rect rect)
@@ -325,6 +535,13 @@ namespace Musketeers.EditorTools.Studio
                 DrawAnchors(rect);
                 return;
             }
+            if (PenActive)
+            {
+                DrawPen(rect);
+                return;
+            }
+            if (_s.ShowMasks)
+                DrawMaskOutlines(rect);
             int idx = FindSelected();
             if (idx < 0 || !Geometry(idx, rect, out var c, out var rotBase, out var knob))
                 return;

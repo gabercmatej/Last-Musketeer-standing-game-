@@ -27,6 +27,7 @@ namespace Musketeers.EditorTools
             public bool MusketAimed;     // musket up in the front hand, rapier hidden
             public float AimExtra;       // north/south tilt on top of the aimed fit
             public bool Anchors;         // bake anchor dots (check sheets)
+            public bool NoMasks;         // skip item masks and the body's boot Hide polygons (Studio "Show masks" off); the hand overlay keeps its hand path
             public PoseKind? Onion;      // another pose drawn translucent on top
             public Color32 Background = new Color32(0, 0, 0, 0);
         }
@@ -99,13 +100,14 @@ namespace Musketeers.EditorTools
                             continue;
                         boots |= item.Slot == CosmeticSlot.Boots;
                         var l = From(p);
-                        SetMask(ref l, CosmeticLayout.ItemMask(item, art, kind));
+                        if (!opt.NoMasks)
+                            SetMask(ref l, CosmeticLayout.ItemMask(item, art, kind));
                         layers.Add(l);
                         info.Add(Info(item.Id, CosmeticLayout.PartFor(item.Slot, back), back, p, l));
                     }
                 }
             }
-            var bodyHide = boots ? new[] { fit.BootPathBack.Flatten(), fit.BootPathFront.Flatten() } : null;
+            var bodyHide = boots && !opt.NoMasks ? new[] { fit.BootPathBack.Flatten(), fit.BootPathFront.Flatten() } : null;
             layers.Add(new Layer { Order = 0, Sprite = art.Sprite, Pos = Vector2.zero, Scale = Vector2.one, Shade = 1f, Alpha = 1f, Hide = bodyHide });
             info.Add(new ComposedLayer { Key = "body", Part = RigPart.Body, Placement = new LayerPlacement { Valid = true, Sprite = art.Sprite, Scale = Vector2.one, Order = 0, Shade = 1f }, Sprite = art.Sprite });
             if (opt.Weapons)
@@ -121,7 +123,8 @@ namespace Musketeers.EditorTools
                     if (m.Valid)
                     {
                         var l = From(m);
-                        SetMask(ref l, musketDef.For(opt.MusketAimed).Masks.For(kind, false));
+                        if (!opt.NoMasks)
+                            SetMask(ref l, musketDef.For(opt.MusketAimed).Masks.For(kind, false));
                         layers.Add(l);
                         info.Add(Info("musket", RigPart.Musket, false, m, l));
                         musketShown = true;
@@ -132,7 +135,8 @@ namespace Musketeers.EditorTools
                 if (rapierShown)
                 {
                     var l = From(r);
-                    SetMask(ref l, rapierDef.For(opt.Raised).Masks.For(kind, false));
+                    if (!opt.NoMasks)
+                        SetMask(ref l, rapierDef.For(opt.Raised).Masks.For(kind, false));
                     layers.Add(l);
                     info.Add(Info("rapier", RigPart.Rapier, false, r, l));
                 }

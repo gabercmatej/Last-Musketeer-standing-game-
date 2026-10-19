@@ -146,7 +146,7 @@ namespace Musketeers.EditorTools.Studio
                 GUI.color = prev;
                 using (new EditorGUILayout.HorizontalScope())
                 {
-                    bool v1 = GUILayout.Toggle(item.EnabledInV1, "v1", EditorStyles.miniButton, GUILayout.Width(30));
+                    bool v1 = Pill(item.EnabledInV1, "v1", new Color(0.2f, 0.45f, 0.9f));
                     if (v1 != item.EnabledInV1)
                     {
                         Undo.RecordObject(item, "Enabled in v1");
@@ -162,13 +162,26 @@ namespace Musketeers.EditorTools.Studio
         void CheckToggle(IFitTarget t, UnityEngine.Object owner)
         {
             bool ck = FitEdit.IsChecked(t, _s.Pose);
-            bool now = GUILayout.Toggle(ck, "✔", EditorStyles.miniButton, GUILayout.Width(30));
+            bool now = Pill(ck, "✔", new Color(0.18f, 0.62f, 0.3f));
             if (now != ck)
             {
                 Undo.RecordObject(owner, "Checked " + t.Id);
                 FitEdit.SetChecked(t, _s.Pose, now);
                 _s.MarkDirty(owner);
             }
+        }
+
+        // A two-state pill that is unmistakable: on = coloured background and white text, off = dim grey.
+        static bool Pill(bool on, string label, Color onColor)
+        {
+            var r = GUILayoutUtility.GetRect(30, 18, GUILayout.Width(30), GUILayout.Height(18));
+            if (Event.current.type == EventType.Repaint)
+            {
+                EditorGUI.DrawRect(r, on ? onColor : new Color(0.24f, 0.24f, 0.26f));
+                var st = new GUIStyle(EditorStyles.miniBoldLabel) { alignment = TextAnchor.MiddleCenter, normal = { textColor = on ? Color.white : new Color(0.5f, 0.5f, 0.52f) } };
+                GUI.Label(r, label, st);
+            }
+            return GUI.Button(r, GUIContent.none, GUIStyle.none) ? !on : on;
         }
 
         static bool Thumbnail(Sprite sprite, bool dim, bool worn, bool selected)

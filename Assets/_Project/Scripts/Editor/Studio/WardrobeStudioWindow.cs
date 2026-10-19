@@ -15,6 +15,7 @@ namespace Musketeers.EditorTools.Studio
         StudioSlotsPanel _slots;
         StudioInspector _inspector;
         int _lastRev = -1;
+        int _canvasSize;
 
         [MenuItem("Musketeers/Wardrobe Studio")]
         [MenuItem("Tools/Musketeers/Wardrobe Studio")]
@@ -64,9 +65,21 @@ namespace Musketeers.EditorTools.Studio
         {
             if (_s == null)
                 return;
+            _s.RefreshUnsavedFromDirty();   // undone assets are still dirty in memory: keep the unsaved state
+            _s.Mask.Pen.Bind(null);
             _s.Touch();
             _canvas.Invalidate();
             Repaint();
+        }
+
+        // Fixed-height pieces under the canvas: legend line + the strip of three musketeers + spacing.
+        const float LegendH = 18f, ToolbarH = 22f, Gaps = 16f;
+
+        int EstimateCanvas()
+        {
+            float availW = position.width - StudioSlotsPanel.Width - StudioInspector.Width - 40;
+            float availH = position.height - StudioSave.BarHeight - ToolbarH - LegendH - (StudioStrip.Cell + 16) - Gaps;
+            return Mathf.Clamp((int)Mathf.Min(availW, availH) / 8 * 8, 200, StudioCanvas.MaxSize);
         }
 
         void OnGUI()
@@ -78,23 +91,45 @@ namespace Musketeers.EditorTools.Studio
                     Build();
                 return;
             }
+            var ev = Event.current;
+            if (ev.type == EventType.Layout)
+                _s.Mask.ValidateAgainst(_s);
+            if (StudioShortcuts.Handle(_s, _canvas, ev))
+            {
+                Repaint();
+                return;
+            }
             string title = StudioSave.Title(_s);
             if (titleContent.text != title)
                 titleContent = new GUIContent(title);
 
+            int size = _canvasSize > 0 ? _canvasSize : EstimateCanvas();
             StudioSave.DrawBar(_s);
             using (new EditorGUILayout.HorizontalScope())
             {
                 _slots.Draw();
-                using (new EditorGUILayout.VerticalScope())
+                using (new EditorGUILayout.VerticalScope(GUILayout.ExpandWidth(true), GUILayout.ExpandHeight(true)))
                 {
                     CanvasToolbar();
-                    float availW = position.width - StudioSlotsPanel.Width - StudioInspector.Width - 40;
-                    float availH = position.height - StudioSave.BarHeight - 28 - (StudioStrip.Cell + 24) - 16;
-                    int size = Mathf.Clamp((int)Mathf.Min(availW, availH) / 8 * 8, 360, StudioCanvas.MaxSize);
-                    _canvas.Draw(size);
-                    GUILayout.Space(4);
-                    _strip.Draw(_canvas.Dragging);
+                    // The canvas takes whatever height is left after the legend and the strip, so the strip is never cut off.
+                    var area = GUILayoutUtility.GetRect(10, 10000, 0, 10000, GUILayout.ExpandWidth(true), GUILayout.ExpandHeight(true));
+                    _canvas.Draw(area, size);
+                    if (ev.type != EventType.Layout && area.width > 1 && area.height > 1)
+                    {
+                        int fit = Mathf.Clamp((int)Mathf.Min(area.width, area.height) / 8 * 8, 200, StudioCanvas.MaxSize);
+                        if (fit != _canvasSize && ev.type == EventType.Repaint)
+                        {
+                            _canvasSize = fit;
+                            EditorApplication.delayCall += Repaint;
+                        }
+                    }
+                    GUILayout.Label(StudioShortcuts.Legend, EditorStyles.centeredGreyMiniLabel, GUILayout.Height(LegendH));
+                    using (new EditorGUILayout.HorizontalScope())
+                    {
+                        GUILayout.FlexibleSpace();
+                        _strip.Draw(_canvas.Dragging);
+                        GUILayout.FlexibleSpace();
+                    }
                 }
                 _inspector.Draw();
             }
