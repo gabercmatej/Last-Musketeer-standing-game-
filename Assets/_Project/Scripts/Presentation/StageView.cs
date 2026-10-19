@@ -191,7 +191,7 @@ namespace Musketeers.Presentation
                 var group = _spots[i].GetComponent<SortingGroup>();
                 group.sortingOrder = win ? 30 : 10 + i;
                 if (win)
-                    Place(i, new Vector3(-3.8f, FloorY - 0.45f, 0f), 2.9f, true);
+                    Place(i, new Vector3(-3.8f, FloorY - 0.45f, 0f), 2.7f, true);
                 else
                 {
                     // Losers flank the winner, the third one a step behind (the results card covers x > ~1).
@@ -213,6 +213,10 @@ namespace Musketeers.Presentation
                 _crown.transform.localScale = Vector3.one * 0.3f;
                 Tween.StopAll(_crown.transform);
                 Tween.LocalPositionY(_crown.transform, 1.55f, 0.8f, Ease.InOutSine, -1, CycleMode.Yoyo);
+                // The winner's name and points float above the Crown.
+                float above = 1.75f * _spots[winner].localScale.y;
+                if (_names[winner] != null) _names[winner].Offset = new Vector3(0f, above + 0.35f, 0f);
+                if (_tags[winner] != null) _tags[winner].Offset = new Vector3(0f, above + 0.02f, 0f);
             }
         }
     }

@@ -54,6 +54,10 @@ namespace Musketeers.Presentation
             _pieceRoot = new GameObject("Pieces").transform;
             _pieceRoot.SetParent(transform, false);
 
+            // A soft dark frame under the board so it reads against any background art.
+            var frame = _art.MakeRenderer("Frame", _tileRoot, PlaceholderArt.RoundedSquare, new Color(0.03f, 0.02f, 0.02f, 0.55f), Layers.Tile - 1);
+            frame.transform.localScale = new Vector3((Width + 0.45f) / 0.94f, (Height + 0.45f) / 0.94f, 1f);
+
             int n = Width * Height;
             _ground = new SpriteRenderer[n];
             _props = new SpriteRenderer[n];
