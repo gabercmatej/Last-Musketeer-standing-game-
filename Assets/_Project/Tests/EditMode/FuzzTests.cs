@@ -86,7 +86,7 @@ namespace Musketeers.Sim.Tests
 
         sealed class Report
         {
-            int _matches, _rounds, _turns, _draws, _suddenDeaths;
+            int _matches, _rounds, _turns, _draws;
             readonly int[] _byPlayers = new int[5];
             readonly int[] _winsByAbility = new int[4];
             readonly int[] _appearances = new int[4];
@@ -111,7 +111,6 @@ namespace Musketeers.Sim.Tests
                     _rounds++;
                     if (o.RoundResult.Winner < 0) _draws++;
                     else _roundWinsByAbility[(int)m.Abilities[o.RoundResult.Winner]]++;
-                    if (o.RoundResult.SuddenDeath) _suddenDeaths++;
                     if (_turnsThisRound > _maxTurnsInRound) _maxTurnsInRound = _turnsThisRound;
                     _turnsThisRound = 0;
                 }
@@ -184,7 +183,7 @@ namespace Musketeers.Sim.Tests
                 sb.AppendLine($"=== Fuzz summary: {_matches} bot matches on the {_map} (2p {_byPlayers[2]}, 3p {_byPlayers[3]}, 4p {_byPlayers[4]}) ===");
                 sb.AppendLine($"turns per round      avg {(double)_turns / _rounds:0.00}, max {_maxTurnsInRound}");
                 sb.AppendLine($"avg rounds per match {(double)_rounds / _matches:0.00}");
-                sb.AppendLine($"drawn rounds         {_draws} of {_rounds} ({100.0 * _draws / _rounds:0.0}%), sudden-death rounds {_suddenDeaths}");
+                sb.AppendLine($"drawn rounds         {_draws} of {_rounds} ({100.0 * _draws / _rounds:0.0}%)");
                 sb.AppendLine("match wins by ability (share of all wins | win rate when present):");
                 for (int a = 0; a < 4; a++)
                 {

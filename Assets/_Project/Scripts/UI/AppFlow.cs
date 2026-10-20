@@ -244,7 +244,15 @@ namespace Musketeers.UI
             RefreshStage();
             _rig.SetBackground(null, new Color(0.08f, 0.06f, 0.05f));
             _rig.FrameStage(StageView.Center, StageView.Width, StageView.Height);
-            _audio?.Music("Music/lobby");
+            PlayLobbyMusic();
+        }
+
+        // The lobby track of the selected map (MapDef.LobbyMusic); chunk 4 calls this again when the map changes.
+        public void PlayLobbyMusic()
+        {
+            var map = CurrentMap;
+            string key = map != null && !string.IsNullOrEmpty(map.LobbyMusic) ? map.LobbyMusic : "Music/arena_lobby";
+            _audio?.Music(key);
         }
 
         void RefreshStage()
@@ -392,13 +400,13 @@ namespace Musketeers.UI
             _board.Build(m.Round, m.Cfg, _setup.Characters, _setup.Names, SetupLoadouts(), BridgesOf(_setup.MapId));
             _rig.Fit(m.Round.Board.Width, m.Round.Board.Height);
             _director.ShowState(m.Round, m.Crowned);
-            _log.Line($"Round {m.RoundNumber}{(m.SuddenDeath ? " (sudden death)" : "")}: En garde!", "log-line--turn");
+            _log.Line($"Round {m.RoundNumber}: En garde!", "log-line--turn");
             if (m.Crowned >= 0)
             {
                 _log.Line($"{_setup.Names[m.Crowned]} wears the Crown", "log-line--big");
                 _audio?.Sfx("SFX/match/crown_gain", 0.8f);
             }
-            _hud.Banner(m.SuddenDeath ? "SUDDEN DEATH!" : "EN GARDE!", new Color(1f, 0.85f, 0.4f), 1.2f);
+            _hud.Banner("EN GARDE!", new Color(1f, 0.85f, 0.4f), 1.2f);
             _audio?.Sfx("SFX/match/round_start", 0.7f);
             _audio?.Announce(Callouts.Clip(Callout.EnGarde));
             _audio?.Music(MusicPicker.IsFinal(m.Round, m.Cfg) ? "Music/battle_final" : "Music/battle");
@@ -421,7 +429,7 @@ namespace Musketeers.UI
             bool canPlan = round.Units[_activeSlot].Alive && !_transport.AutoPlayHumans;
             _input.Active = canPlan;
             _planBar.SetVisible(true);
-            _hud.SetRound(_mc.Match.RoundNumber, _mc.Match.SuddenDeath, round.Turn);
+            _hud.SetRound(_mc.Match.RoundNumber, round.Turn);
             _hud.SetPhase(canPlan ? "Plan your moves" : "Watching");
             LoadActive();
             _audio?.Sfx("SFX/match/turn_start", 0.5f);
@@ -535,7 +543,6 @@ namespace Musketeers.UI
             _planBar.SetMessage("Resolving...");
             _hud.SetPhase("Resolving");
             _log.Turn(p);
-            _audio?.Sfx("SFX/match/reveal", 0.7f);
             _director.Play(p, p.CrownedBefore, () =>
             {
                 if (_mc == null)
@@ -558,6 +565,12 @@ namespace Musketeers.UI
             else
                 _director.Announce(Callout.Draw);
             _audio?.Sfx("SFX/match/points_tick", 0.8f);
+            if (r.Winner >= 0)
+            {
+                // Victory voice belongs to the round win, never to the results screen (FIXES_v0.2 §2.6).
+                var def = _art.Character(_setup.Characters[r.Winner]);
+                Tween(0.6f, () => _audio?.Line(def != null ? def.Id : null, "victory"));
+            }
         }
 
         void ContinueAfterRound()
@@ -589,11 +602,6 @@ namespace Musketeers.UI
             _audio?.Music("Music/results", 0.6f);
             _audio?.Sfx("SFX/match/match_win", 0.8f);
             _audio?.Announce(Callouts.Clip(Callout.LastMusketeer));
-            if (m.MatchWinner >= 0)
-            {
-                var def = _art.Character(_setup.Characters[m.MatchWinner]);
-                Tween(3.2f, () => _audio?.Line(def != null ? def.Id : null, "victory"));
-            }
             Tween(1.5f, () => _audio?.Sfx("SFX/match/award_reveal", 0.6f));
         }
 

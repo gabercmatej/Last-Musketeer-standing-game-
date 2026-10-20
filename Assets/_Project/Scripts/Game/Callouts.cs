@@ -8,6 +8,9 @@ namespace Musketeers.Game
 
     public static class Callouts
     {
+        // Bonk and Signature keep their banner but play no voice line (FIXES_v0.2 §2.6).
+        public static bool Voiced(Callout c) => c != Callout.Bonk && c != Callout.Signature;
+
         // The most important moment in a tick (later enum values win), so one tick gets one line.
         // turnStart: the log is a turn start, where falls are the crumbling arena, not a swan dive.
         public static Callout Top(EventLog tick, int crowned, bool turnStart = false)

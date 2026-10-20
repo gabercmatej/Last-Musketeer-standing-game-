@@ -204,7 +204,7 @@ namespace Musketeers.Presentation
             {
                 case Ability.Grappin:
                 {
-                    var hit = PlanProjection.TraceLine(s, b.Slot, from, a.Dir, cfg.GrappleRange, true, out Int2 end);
+                    var hit = PlanProjection.TraceLine(s, b.Slot, from, a.Dir, cfg.GrappleRange, true, out Int2 end, grappleWalls: true);
                     Line(wf, BoardMath.ToWorld(end), lineColor, 0.04f, Layers.PreviewOver);
                     Marker(BoardMath.ToWorld(end), lineColor);
                     if (hit == LineHit.Unit || hit == LineHit.Keg)

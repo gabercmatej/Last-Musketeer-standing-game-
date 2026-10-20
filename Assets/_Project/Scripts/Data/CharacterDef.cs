@@ -16,6 +16,13 @@ namespace Musketeers.Data
         [TextArea] public string AbilityDescription = "";
         public Sprite Portrait;                // menu/HUD; null = colored swatch
 
+        [Header("Character select (FIXES_v0.2 §2.3)")]
+        public string Title = "";
+        public string Strength = "";
+        public string Weakness = "";
+        [TextArea(3, 8)] public string Bio = "";
+        [TextArea(2, 6)] public string SignatureText = "";
+
         [Header("Poses (side view facing right; null = placeholder)")]
         public PoseArt Idle = new PoseArt();
         public PoseArt IdleB = new PoseArt();  // optional breathing frame

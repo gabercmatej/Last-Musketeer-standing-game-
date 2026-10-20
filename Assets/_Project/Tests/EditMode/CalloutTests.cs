@@ -79,5 +79,15 @@ namespace Musketeers.Sim.Tests
             var s = Scenario.From("A...B").Plan('A', Act.Move(Dir.E)).ResolveTick();
             Assert.That(Top(s), Is.EqualTo(Callout.None));
         }
+
+        [Test]
+        public void BonkAndSignature_AreBannerOnly()
+        {
+            Assert.That(Callouts.Voiced(Callout.Bonk), Is.False);
+            Assert.That(Callouts.Voiced(Callout.Signature), Is.False);
+            foreach (var c in new[] { Callout.Riposte, Callout.GuardBreak, Callout.SwanDive, Callout.Touche, Callout.DoubleKo,
+                                      Callout.CrownFalls, Callout.EnGarde, Callout.Draw, Callout.LastMusketeer })
+                Assert.That(Callouts.Voiced(c), Is.True, c.ToString());
+        }
     }
 }

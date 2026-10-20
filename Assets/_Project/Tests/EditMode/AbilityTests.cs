@@ -89,6 +89,46 @@ namespace Musketeers.Sim.Tests
         }
 
         [Test]
+        public void Grappin_CourtyardWall_PullsYouNextToIt()
+        {
+            With("@walls\nA....", Ability.Grappin)   // the wall is exactly 5 away
+                .Plan('A', Act.Sig(Dir.E))
+                .ResolveTick()
+                .AssertPos('A', 4, 0)
+                .AssertGrit('A', 0);
+        }
+
+        [Test]
+        public void Grappin_CourtyardWall_AlreadyNextToIt_YouStay()
+        {
+            var s = With("@walls\n.A", Ability.Grappin)
+                .Plan('A', Act.Sig(Dir.E))
+                .ResolveTick()
+                .AssertPos('A', 1, 0);
+            Assert.That(s.Find(SimEventKind.Grappled).Value.Reason, Is.EqualTo((byte)GrappleResult.PullSelf));
+        }
+
+        [Test]
+        public void Grappin_CourtyardWall_BeyondRange_Misses()
+        {
+            var s = With("@walls\nA.....", Ability.Grappin)   // the wall is 6 away
+                .Plan('A', Act.Sig(Dir.E))
+                .ResolveTick()
+                .AssertPos('A', 0, 0);
+            Assert.That(s.Find(SimEventKind.Grappled).Value.Reason, Is.EqualTo((byte)GrappleResult.Miss));
+        }
+
+        [Test]
+        public void Grappin_UnwalledBoardEdge_StillMisses()
+        {
+            var s = With("A....", Ability.Grappin)
+                .Plan('A', Act.Sig(Dir.E))
+                .ResolveTick()
+                .AssertPos('A', 0, 0);
+            Assert.That(s.Find(SimEventKind.Grappled).Value.Reason, Is.EqualTo((byte)GrappleResult.Miss));
+        }
+
+        [Test]
         public void Grappin_Nothing_InRange_MissesButSpendsGrit()
         {
             With("A.....B", Ability.Grappin)   // B is 6 away, range is 5
@@ -350,15 +390,108 @@ namespace Musketeers.Sim.Tests
         }
 
         [Test]
-        public void TripleCharge_WallSlamBetweenShots_EachShotSlamsAgain()
+        public void TripleCharge_WallSlamBetweenShots_EachShotSlamsAgain_ButDamageIsCapped()
         {
             With("A.B#....", Ability.TripleCharge)
                 .WithHp('B', 7)
                 .Plan('A', Act.Sig(Dir.E))
                 .ResolveTick()
                 .AssertPos('B', 2, 0)
-                .AssertHp('B', 1)   // 3 shots + 3 wall slams
+                .AssertHp('B', 4)   // 3 shots + 3 wall slams would be 6; capped at TripleChargeMaxDamage
+                .AssertEventCount(SimEventKind.WallSlam, 3)
+                .AssertEventCount(SimEventKind.ShotHit, 3)
+                .AssertEventCount(SimEventKind.Damaged, 3);
+        }
+
+        [Test]
+        public void TripleCharge_PinnedAgainstTheBoardWall_TakesThreeNotSix()
+        {
+            // Walled board: B stands on the last tile, every shot hits and slams.
+            var s = With("@walls\nAB", Ability.TripleCharge)
+                .WithHp('B', 9)
+                .Plan('A', Act.Sig(Dir.E))
+                .ResolveTick()
+                .AssertPos('B', 1, 0)
+                .AssertHp('B', 6)
                 .AssertEventCount(SimEventKind.WallSlam, 3);
+            Assert.That(s.Unit('B').LastAttacker, Is.EqualTo(0));
+        }
+
+        [Test]
+        public void TripleCharge_Unpinned_StillTakesThreeAndSlidesThree()
+        {
+            With("A.B......", Ability.TripleCharge)
+                .WithHp('B', 5)
+                .Plan('A', Act.Sig(Dir.E))
+                .ResolveTick()
+                .AssertPos('B', 5, 0)
+                .AssertHp('B', 2);
+        }
+
+        [Test]
+        public void TripleCharge_CapStillMovesTheTarget_WhenNoDamageIsLeft()
+        {
+            // Pillar far enough that the cap is reached by hits alone: 3 hits, 3 pushes, 3 damage.
+            With("A.B.....", Ability.TripleCharge)
+                .WithHp('B', 5)
+                .Plan('A', Act.Sig(Dir.E))
+                .ResolveTick()
+                .AssertPos('B', 5, 0)
+                .AssertHp('B', 2)
+                .AssertEventCount(SimEventKind.Pushed, 3);
+            // Wall slam on the final push: 3 hits + 1 slam would be 4, the slam is skipped but B still stops at the wall.
+            With("A.B..#..", Ability.TripleCharge)
+                .WithHp('B', 5)
+                .Plan('A', Act.Sig(Dir.E))
+                .ResolveTick()
+                .AssertPos('B', 4, 0)
+                .AssertHp('B', 2)
+                .AssertEvent(SimEventKind.WallSlam, 'B');
+        }
+
+        [Test]
+        public void TripleCharge_BystanderBonkedBySlide_IsCountedSeparately()
+        {
+            // B (hit) and C (bonked) each reach the cap on their own: 3 each, not 3 shared.
+            With("A.BC....", Ability.TripleCharge)
+                .WithHp('B', 7)
+                .WithHp('C', 7)
+                .Plan('A', Act.Sig(Dir.E))
+                .ResolveTick()
+                .AssertPos('B', 2, 0)
+                .AssertPos('C', 3, 0)
+                .AssertHp('B', 4)
+                .AssertHp('C', 4)
+                .AssertEventCount(SimEventKind.Bonk, 6);
+        }
+
+        [Test]
+        public void TripleCharge_ReflectedShotDamageToTheShooter_IsCappedToo()
+        {
+            // B parries: three ripostes hit A for 3 in total, which is exactly the cap; nothing more is lost.
+            With("A..B", Ability.TripleCharge)
+                .WithHp('A', 7)
+                .Plan('B', Act.Parry())
+                .Plan('A', Act.Sig(Dir.E))
+                .ResolveTick()
+                .AssertHp('A', 4)
+                .AssertEventCount(SimEventKind.Reflected, 3);
+        }
+
+        [Test]
+        public void TripleCharge_CapDoesNotLeakBetweenUses()
+        {
+            // Two uses on two ticks: each deals up to 3, so B loses 6 in total.
+            With("@walls\nAB", Ability.TripleCharge)
+                .WithHp('B', 9)
+                .Plan('A', Act.Sig(Dir.E))
+                .ResolveTick()
+                .AssertHp('B', 6)
+                .WithLoaded('A', true)
+                .WithGrit('A', 5)
+                .Plan('A', Act.Sig(Dir.E))
+                .ResolveTick()
+                .AssertHp('B', 3);
         }
 
         [Test]

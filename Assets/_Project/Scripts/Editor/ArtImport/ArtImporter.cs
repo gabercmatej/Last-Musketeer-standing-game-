@@ -341,6 +341,8 @@ namespace Musketeers.EditorTools.ArtImport
             Fit("UI/panels/button_pressed.png", 512, 512);
             Fit("UI/panels/banner.png", 1024, 1024);
             Fit("UI/panels/bubble.png", 256, 256);
+            foreach (var b in new[] { "settings", "lore", "fullscreen", "exit-fullscreen", "leave-game", "wardrobe", "change-player" })
+                Fit("UI/buttons/" + b + ".png", 256, 256);
 
             void Bg(string src, string dst)
             {
@@ -350,6 +352,10 @@ namespace Musketeers.EditorTools.ArtImport
             }
             Bg("UI/backgrounds/key_art.png", "UI/backgrounds/key_art.jpg");
             Bg("UI/backgrounds/lobby.png", "UI/backgrounds/lobby.jpg");
+            Bg("UI/backgrounds/main-menu-left.png", "UI/backgrounds/menu.jpg");
+            Bg("UI/backgrounds/lobby-bridge.png", "UI/backgrounds/lobby_bridge.jpg");
+            Bg("UI/backgrounds/results-lobby.png", "UI/backgrounds/results.jpg");
+            Bg("UI/backgrounds/results-lobby-bridge.png", "UI/backgrounds/results_bridge.jpg");
             if (File.Exists(Path.Combine(SrcArt, "UI/backgrounds/loading.png")))
                 Bg("UI/backgrounds/loading.png", "UI/backgrounds/loading.jpg");
             else

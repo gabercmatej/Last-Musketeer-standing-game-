@@ -298,6 +298,23 @@ namespace Musketeers.EditorTools.ArtImport
                 map.Theme = theme;
                 if (map.Layout == null)
                     log.Add($"MISSING {Data}/Maps/{id}.txt");
+                // Per-map lobby/results theming (FIXES §2.8); only fills empty fields so hand edits survive re-imports.
+                bool bridge = id == "bridge";
+                Sprite Bg(string n) => AssetDatabase.LoadAssetAtPath<Sprite>($"{Art}/UI/backgrounds/{n}.jpg");
+                if (map.LobbyBackground == null) map.LobbyBackground = Bg(bridge ? "lobby_bridge" : "lobby");
+                if (map.ResultsBackground == null) map.ResultsBackground = Bg(bridge ? "results_bridge" : "results");
+                if (string.IsNullOrEmpty(map.LobbyMusic) || map.LobbyMusic == "Music/arena_lobby")
+                    map.LobbyMusic = bridge ? "Music/bridge_lobby" : "Music/arena_lobby";
+                if (map.PodiumSpots == null || map.PodiumSpots.Length != 4 || map.PodiumSpots.All(v => v == Vector2.zero))
+                {
+                    // Both results arts share podium pixels (1672x941, top-left origin): feet of places 1..4.
+                    map.PodiumSpots = new[]
+                    {
+                        new Vector2(330f / 1672f, 1f - 505f / 941f), new Vector2(138f / 1672f, 1f - 560f / 941f),
+                        new Vector2(515f / 1672f, 1f - 560f / 941f), new Vector2(680f / 1672f, 1f - 605f / 941f),
+                    };
+                }
+                if (map.PodiumScale <= 0f) map.PodiumScale = 1f;
                 EditorUtility.SetDirty(map);
                 maps.Add(map);
             }

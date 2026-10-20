@@ -20,7 +20,6 @@ namespace Musketeers.Sim
         public int RoundNumber;
         public int Winner;                  // slot, or -1 for a draw
         public int Crowned;
-        public bool SuddenDeath;
         public List<PointGain> Gains;       // everything scored this round, LastStanding last
     }
 
@@ -82,8 +81,6 @@ namespace Musketeers.Sim
             {
                 // §3: spawns in slot order.
                 units[i] = Unit.Spawn(i, m.Characters[i], m.Abilities[i], m.Map.Spawns[i], cfg);
-                if (!m.Participants[i])
-                    units[i].Alive = false;
             }
             m.Round = new GameState(m.Map.Board.Clone(), units, new DeterministicRng(m.Rng.NextUInt()));
 
@@ -99,7 +96,7 @@ namespace Musketeers.Sim
         }
 
         // §2: +3 to the last musketeer standing (not on a draw), apply the round's gains, then check
-        // for a match winner or a sudden-death tiebreak.
+        // for the match end.
         static RoundResult EndRound(MatchState m)
         {
             var cfg = m.Cfg;
@@ -109,45 +106,36 @@ namespace Musketeers.Sim
                 m.RoundGains.Add(new PointGain { Player = winner, Amount = cfg.WinPoints, Reason = PointReason.LastStanding, Victim = SimEvent.None });
                 m.RoundWins[winner]++;
             }
+            var scored = new int[m.PlayerCount];
             foreach (var g in m.RoundGains)
+            {
                 m.Points[g.Player] += g.Amount;
+                scored[g.Player] += g.Amount;
+            }
+            m.RoundPoints.Add(scored);
 
             var result = new RoundResult
             {
                 RoundNumber = m.RoundNumber,
                 Winner = winner,
                 Crowned = m.Crowned,
-                SuddenDeath = m.SuddenDeath,
                 Gains = new List<PointGain>(m.RoundGains),
             };
 
-            if (m.SuddenDeath)
-            {
-                // The tiebreak round decides the match outright; a drawn one is replayed by the same players.
-                if (winner >= 0)
-                    FinishMatch(m, winner);
-                return result;
-            }
-
-            var tied = new List<int>();
-            int w = Scoring.MatchWinner(m.Points, m.RoundWins, cfg, tied);
-            if (w >= 0)
-            {
-                FinishMatch(m, w);
-            }
-            else if (tied.Count > 1)
-            {
-                m.SuddenDeath = true;
-                for (int i = 0; i < m.PlayerCount; i++)
-                    m.Participants[i] = tied.Contains(i);
-            }
+            if (Scoring.MatchIsOver(m.Points, cfg))
+                FinishMatch(m);
             return result;
         }
 
-        static void FinishMatch(MatchState m, int winner)
+        // §2: the winner is 1st place; on a full tie the co-winners share it and the lowest slot is MatchWinner.
+        static void FinishMatch(MatchState m)
         {
             m.MatchOver = true;
-            m.MatchWinner = winner;
+            m.Places = Scoring.Rank(m.Points, m.RoundPoints);
+            m.MatchWinner = -1;
+            for (int i = 0; i < m.Places.Length && m.MatchWinner < 0; i++)
+                if (m.Places[i] == 1)
+                    m.MatchWinner = i;
         }
     }
 }

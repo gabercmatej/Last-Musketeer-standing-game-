@@ -45,6 +45,9 @@ namespace Musketeers.Data
             Dust = "FX/dust", Splash = "FX/splash", Stars = "FX/stars", SwapSwirl = "FX/swap_swirl";
         public const string Logo = "UI/logo/logo", LogoSmall = "UI/logo/logo_small";
         public const string KeyArt = "UI/backgrounds/key_art", LobbyBackground = "UI/backgrounds/lobby", SplashArt = "UI/backgrounds/splash";
+        public const string MenuBackground = "UI/backgrounds/menu", LobbyBridge = "UI/backgrounds/lobby_bridge",
+            Results = "UI/backgrounds/results", ResultsBridge = "UI/backgrounds/results_bridge";
+        public static string UiButton(string name) => "UI/buttons/" + name;
         public const string Panel = "UI/panels/panel", Button = "UI/panels/button", ButtonPressed = "UI/panels/button_pressed",
             Banner = "UI/panels/banner", Bubble = "UI/panels/bubble";
         public const string HeartFull = "UI/icons/status/heart_full", HeartEmpty = "UI/icons/status/heart_empty", Grit = "UI/icons/status/grit",

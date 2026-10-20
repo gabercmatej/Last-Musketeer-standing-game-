@@ -55,8 +55,10 @@ namespace Musketeers.Sim
                 var u = units[i];
                 if (!c.Active[i] || !u.Alive || c.Act[i].Type != ActionType.Signature || u.Ability != Ability.TripleCharge)
                     continue;
+                c.BeginCappedUse();   // §4: the damage cap is per use
                 for (int shot = 0; shot < c.Cfg.TripleChargeShots && u.Alive; shot++)
                     FireTripleChargeShot(c, i, c.Act[i].Dir);
+                c.EndCappedUse();
             }
         }
 

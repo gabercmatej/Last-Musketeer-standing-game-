@@ -13,15 +13,18 @@ MonoBehaviour:
   m_Name: AudioLibrary
   m_EditorClassIdentifier: Musketeers.Data::Musketeers.Data.AudioLibrary
   Entries:
+  - Key: Music/arena_lobby
+    Clips:
+    - {fileID: 8300000, guid: 3896ea49e35554271a07cc76d746e269, type: 3}
   - Key: Music/battle
     Clips:
     - {fileID: 8300000, guid: 23eaf5f577deb4c99a709ea1ec209891, type: 3}
   - Key: Music/battle_final
     Clips:
     - {fileID: 8300000, guid: 1f7c94635d3e8464c996952f0637469f, type: 3}
-  - Key: Music/lobby
+  - Key: Music/bridge_lobby
     Clips:
-    - {fileID: 8300000, guid: 0112dd25ce00342dfa591ffced6dc3f9, type: 3}
+    - {fileID: 8300000, guid: 489bc6a1e1eff4674af23afa56d40958, type: 3}
   - Key: Music/menu
     Clips:
     - {fileID: 8300000, guid: de1dcd5ed7a6f4047adc85b68ca0a43a, type: 3}

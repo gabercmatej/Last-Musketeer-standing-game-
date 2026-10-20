@@ -49,6 +49,14 @@ MonoBehaviour:
     Sprite: {fileID: 21300000, guid: 4a5e6a1f1e5e649ee91917284df1c3a1, type: 3}
   - Key: UI/backgrounds/lobby
     Sprite: {fileID: 21300000, guid: fdf688a96abb34b329842c33170ad070, type: 3}
+  - Key: UI/backgrounds/lobby_bridge
+    Sprite: {fileID: 21300000, guid: e9bd8ca4c9a7440d7a59c38fbd690e91, type: 3}
+  - Key: UI/backgrounds/menu
+    Sprite: {fileID: 21300000, guid: 19c08cf1230514b38bee7bd941f1b84e, type: 3}
+  - Key: UI/backgrounds/results
+    Sprite: {fileID: 21300000, guid: b669389141fec4ac69be58ff23738f71, type: 3}
+  - Key: UI/backgrounds/results_bridge
+    Sprite: {fileID: 21300000, guid: 6d90a6383e721449d86fb13c81172842, type: 3}
   - Key: UI/backgrounds/splash
     Sprite: {fileID: 21300000, guid: 2d2f61cde7f79407389ffa711a38b240, type: 3}
   - Key: UI/badges/bonk_lord
@@ -67,6 +75,20 @@ MonoBehaviour:
     Sprite: {fileID: 21300000, guid: ca7af5c8192dd4cb78b9501a5fe62221, type: 3}
   - Key: UI/badges/wall_of_steel
     Sprite: {fileID: 21300000, guid: db8a2cf7c121a486f9206a90f31c276d, type: 3}
+  - Key: UI/buttons/change-player
+    Sprite: {fileID: 21300000, guid: dce96b89b83684d829576fb9bf0f1d41, type: 3}
+  - Key: UI/buttons/exit-fullscreen
+    Sprite: {fileID: 21300000, guid: a1ac71535fa7f48fd9c6bd6a08e02552, type: 3}
+  - Key: UI/buttons/fullscreen
+    Sprite: {fileID: 21300000, guid: 1d091d9a0f4054726ba29b693daae3d4, type: 3}
+  - Key: UI/buttons/leave-game
+    Sprite: {fileID: 21300000, guid: 7f6366880c0a349a38ea556666592691, type: 3}
+  - Key: UI/buttons/lore
+    Sprite: {fileID: 21300000, guid: 1a0285f3dc2d44184b7f3303e9d3d7bb, type: 3}
+  - Key: UI/buttons/settings
+    Sprite: {fileID: 21300000, guid: 7e20d798653434e1eaaf5ad06ccc9eab, type: 3}
+  - Key: UI/buttons/wardrobe
+    Sprite: {fileID: 21300000, guid: 9ee8de527317c4e028735a2527e4cb13, type: 3}
   - Key: UI/emotes/angry
     Sprite: {fileID: 21300000, guid: 659ae15f9c76a497aa3e25ab2cf5d69f, type: 3}
   - Key: UI/emotes/cry

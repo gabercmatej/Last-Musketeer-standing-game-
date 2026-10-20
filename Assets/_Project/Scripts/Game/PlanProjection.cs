@@ -183,7 +183,7 @@ namespace Musketeers.Game
                 case Ability.Grappin:
                 {
                     // Only a wall moves you: you fly to the tile before it.
-                    if (TraceLine(s, slot, p.Pos, dir, cfg.GrappleRange, true, out Int2 last) == LineHit.Obstacle)
+                    if (TraceLine(s, slot, p.Pos, dir, cfg.GrappleRange, true, out Int2 last, grappleWalls: true) == LineHit.Obstacle)
                         Land(s, ref p, last - d);
                     break;
                 }
@@ -224,7 +224,7 @@ namespace Musketeers.Game
 
         // Walks from origin (exclusive) up to range tiles and stops at the board edge, like the sim's
         // shot and hook traces. `last` is the hit tile, or the last tile reached.
-        public static LineHit TraceLine(GameState s, int self, Int2 origin, Dir dir, int range, bool stopAtUnits, out Int2 last)
+        public static LineHit TraceLine(GameState s, int self, Int2 origin, Dir dir, int range, bool stopAtUnits, out Int2 last, bool grappleWalls = false)
         {
             Int2 d = dir.ToInt2();
             last = origin;
@@ -232,7 +232,14 @@ namespace Musketeers.Game
             {
                 Int2 next = last + d;
                 if (!s.Board.InBounds(next))
+                {
+                    if (grappleWalls && s.Board.EdgeWalls)
+                    {
+                        last = next;   // the edge of a walled map counts as a pillar for the hook
+                        return LineHit.Obstacle;
+                    }
                     break;
+                }
                 last = next;
                 if (s.Board.Get(next).IsSolid())
                     return LineHit.Obstacle;

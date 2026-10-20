@@ -98,5 +98,35 @@ namespace Musketeers.Sim.Tests
             foreach (var b in new[] { "sharpshooter", "wall_of_steel", "bonk_lord", "swan_dive", "regicide", "powder_monkey", "pacifist", "click_click" })
                 Assert.That(art.Get(GameArt.Badge(b)), Is.Not.Null, b);
         }
+
+        [Test]
+        public void EveryMusketeer_HasBioContentWithoutEmDashes()
+        {
+            var roster = Load<CharacterRoster>("Assets/_Project/Data/CharacterRoster.asset");
+            foreach (var c in roster.Characters)
+            {
+                foreach (var (name, v) in new[] { ("Title", c.Title), ("Strength", c.Strength), ("Weakness", c.Weakness), ("Bio", c.Bio), ("SignatureText", c.SignatureText) })
+                {
+                    Assert.That(v, Is.Not.Null.And.Not.Empty, c.Id + " " + name);
+                    Assert.That(v.Contains("\u2014"), Is.False, c.Id + " " + name + " has an em dash");
+                }
+            }
+        }
+
+        [Test]
+        public void EveryMap_HasLobbyAndResultsTheming()
+        {
+            var catalog = Load<MapCatalog>("Assets/_Project/Data/MapCatalog.asset");
+            Assert.That(catalog.Maps.Length, Is.GreaterThan(0));
+            foreach (var m in catalog.Maps)
+            {
+                Assert.That(m.LobbyBackground, Is.Not.Null, m.Id + " lobby background");
+                Assert.That(m.ResultsBackground, Is.Not.Null, m.Id + " results background");
+                Assert.That(m.LobbyMusic, Is.Not.Empty, m.Id + " lobby music");
+                Assert.That(m.PodiumSpots.Length, Is.EqualTo(4), m.Id + " podium spots");
+                foreach (var v in m.PodiumSpots)
+                    Assert.That(v.x > 0f && v.x < 1f && v.y > 0f && v.y < 1f, Is.True, m.Id + " podium spot " + v);
+            }
+        }
     }
 }

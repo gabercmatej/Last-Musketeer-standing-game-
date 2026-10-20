@@ -40,7 +40,15 @@ namespace Musketeers.Sim
             {
                 Int2 next = last + d;
                 if (!s.Board.InBounds(next))
+                {
+                    // §4 Grappin: on a walled map the edge is a wall, like a pillar (the hook pulls you next to it).
+                    if (s.Board.EdgeWalls)
+                    {
+                        last = next;
+                        return LineHit.Obstacle;
+                    }
                     break;
+                }
                 last = next;
                 if (s.Board.Get(next).IsSolid())
                     return LineHit.Obstacle;

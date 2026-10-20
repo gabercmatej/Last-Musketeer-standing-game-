@@ -30,9 +30,13 @@ namespace Musketeers.Presentation
         int _next;
         readonly Dictionary<string, float> _lastPlayed = new Dictionary<string, float>();
 
-        public float MusicVolume { get; private set; } = 0.6f;
+        const float RampSeconds = 0.15f;     // full 0..1 sweep of an applied volume (no zipper noise on slider drags)
+
+        // Target (slider) values. What is actually applied ramps toward these in Update.
+        public float MusicVolume { get; private set; } = 0.48f;
         public float SfxVolume { get; private set; } = 0.8f;
-        public float VoiceVolume { get; private set; } = 0.9f;
+        public float VoiceVolume { get; private set; } = 0.72f;
+        float _musicApplied, _sfxApplied, _voiceApplied;
         public string CurrentMusic => _musicKey;
 
         void Awake()
@@ -48,6 +52,9 @@ namespace Musketeers.Presentation
             MusicVolume = Read(MusicKey, MusicVolume);
             SfxVolume = Read(SfxKey, SfxVolume);
             VoiceVolume = Read(VoiceKey, VoiceVolume);
+            _musicApplied = MusicVolume;
+            _sfxApplied = SfxVolume;
+            _voiceApplied = VoiceVolume;
         }
 
         void OnDestroy()
@@ -84,9 +91,6 @@ namespace Musketeers.Presentation
             VoiceVolume = Mathf.Clamp01(voice);
             if (save)
                 SaveVolumes();
-            _announcer.volume = VoiceVolume;
-            _character.volume = VoiceVolume;
-            ApplyMusicVolume();
         }
 
         public void SaveVolumes()
@@ -102,7 +106,7 @@ namespace Musketeers.Presentation
         // "SFX/actions/musket_fire" picks one of its variants. volume is relative (0..1).
         public void Sfx(string key, float volume = 1f)
         {
-            if (_library == null || SfxVolume <= 0f || Repeated(key))
+            if (_library == null || _sfxApplied <= 0f || Repeated(key))
                 return;
             var clip = _library.Pick(key);
             if (clip == null)
@@ -110,7 +114,7 @@ namespace Musketeers.Presentation
             var s = _sfx[_next];
             _next = (_next + 1) % _sfx.Length;
             s.pitch = 1f + Random.Range(-PitchJitter, PitchJitter);
-            s.PlayOneShot(clip, SfxVolume * volume);
+            s.PlayOneShot(clip, _sfxApplied * volume);
         }
 
         // Announcer lines replace each other; they never stack.
@@ -133,11 +137,11 @@ namespace Musketeers.Presentation
 
         void PlayVoice(AudioSource channel, AudioClip clip)
         {
-            if (clip == null || VoiceVolume <= 0f)
+            if (clip == null || (VoiceVolume <= 0f && _voiceApplied <= 0f))
                 return;
             channel.Stop();
             channel.clip = clip;
-            channel.volume = VoiceVolume;
+            channel.volume = _voiceApplied;
             channel.pitch = 1f;
             channel.Play();
         }
@@ -189,21 +193,27 @@ namespace Musketeers.Presentation
 
         void Update()
         {
+            float step = Time.unscaledDeltaTime / RampSeconds;
+            _musicApplied = Mathf.MoveTowards(_musicApplied, MusicVolume, step);
+            _sfxApplied = Mathf.MoveTowards(_sfxApplied, SfxVolume, step);
+            _voiceApplied = Mathf.MoveTowards(_voiceApplied, VoiceVolume, step);
+            _announcer.volume = _voiceApplied;
+            _character.volume = _voiceApplied;
             if (_fade < 1f)
             {
                 _fade = Mathf.Min(1f, _fade + Time.unscaledDeltaTime / _fadeTime);
-                ApplyMusicVolume();
                 if (_fade >= 1f)
                     (_aIsCurrent ? _musicB : _musicA).Stop();
             }
+            ApplyMusicVolume();
         }
 
         void ApplyMusicVolume()
         {
             var cur = _aIsCurrent ? _musicA : _musicB;
             var old = _aIsCurrent ? _musicB : _musicA;
-            cur.volume = MusicVolume * _fade;
-            old.volume = MusicVolume * (1f - _fade);
+            cur.volume = _musicApplied * _fade;
+            old.volume = _musicApplied * (1f - _fade);
         }
     }
 }

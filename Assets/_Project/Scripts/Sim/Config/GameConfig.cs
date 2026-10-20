@@ -49,6 +49,7 @@ namespace Musketeers.Sim
         public int KegDamage = 1;             // §6 Phase 5.3
         public int KegPush = 1;               // §6 Phase 5.3: orthogonal neighbours pushed 1 outward
         public int TripleChargeShots = 3;     // §4 Triple Charge: shots per charge (range is FireRange)
+        public int TripleChargeMaxDamage = 3; // §4 Triple Charge: max damage any one musketeer takes from one use
         public int TripleChargePush = 1;      // §4 Triple Charge: tiles each hit slides the target
         public int KillCreditTurns = 1;       // §6 Kill credit: last attacker counts this turn or last turn
     }

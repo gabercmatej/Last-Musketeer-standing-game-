@@ -23,10 +23,12 @@ namespace Musketeers.UI
             close.AddToClassList("btn--back");
             close.focusable = false;
             close.clicked += () => SetVisible(false);
+            // No sound while dragging; one preview when the pointer is released (inside or outside the slider).
             _music.RegisterValueChangedCallback(_ => Apply());
-            _sfx.RegisterValueChangedCallback(e => { Apply(); UiArt.Sfx("SFX/ui/ui_click"); });
+            _sfx.RegisterValueChangedCallback(_ => Apply());
             _voice.RegisterValueChangedCallback(_ => Apply());
-            _voice.RegisterCallback<PointerUpEvent>(_ => AudioService.Instance?.Announce("en_garde"), TrickleDown.TrickleDown);
+            RegisterPreview(_sfx, () => UiArt.Sfx("SFX/ui/ui_click"));
+            RegisterPreview(_voice, () => AudioService.Instance?.Announce("en_garde"));
             SetVisible(false);
         }
 
@@ -43,6 +45,24 @@ namespace Musketeers.UI
                 _sfx.SetValueWithoutNotify(a.SfxVolume);
                 _voice.SetValueWithoutNotify(a.VoiceVolume);
             }
+        }
+
+        // PointerUp fires for a click or a drag released over the slider; PointerCaptureOut covers a release
+        // outside it. Both can fire for one gesture, so a short guard keeps it to exactly one preview.
+        void RegisterPreview(Slider slider, System.Action preview)
+        {
+            float last = -1f;
+            void Fire()
+            {
+                float now = Time.unscaledTime;
+                if (last >= 0f && now - last < 0.3f)
+                    return;
+                last = now;
+                // Wait out the 0.15 s volume ramp so the preview plays at the new level.
+                slider.schedule.Execute(preview).ExecuteLater(170);
+            }
+            slider.RegisterCallback<PointerUpEvent>(_ => Fire(), TrickleDown.TrickleDown);
+            slider.RegisterCallback<PointerCaptureOutEvent>(_ => Fire(), TrickleDown.TrickleDown);
         }
 
         void Apply() => AudioService.Instance?.SetVolumes(_music.value, _sfx.value, _voice.value, save: false);

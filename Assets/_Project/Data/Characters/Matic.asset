@@ -17,8 +17,13 @@ MonoBehaviour:
   Color: {r: 0.93, g: 0.27, b: 0.3, a: 1}
   Ability: 1
   AbilityName: Switcheroo
-  AbilityDescription: Swap places with any musketeer you pick, wherever they are. Fails if you stand on a cracked tile.
+  AbilityDescription: Click any musketeer to swap places with them, wherever they are when the swap happens. Fails if you're standing on a cracked tile.
   Portrait: {fileID: 21300000, guid: b42afe4bd9a92419ca86516e59869668, type: 3}
+  Title: The Chiseled
+  Strength: Abs
+  Weakness: Buzzcuts
+  Bio: Sculptors in Florence have asked to borrow his torso. Matic would agree, if they promised to keep the clippers away. The last barber who came near him with a buzzcut in mind was swapped into the Seine before he finished his sentence.
+  SignatureText: Click any musketeer to swap places with them, wherever they are when the swap happens. Fails if you're standing on a cracked tile.
   Idle:
     Sprite: {fileID: 21300000, guid: fb6875f613821438e97dc9081e2a50e9, type: 3}
     Front: 0

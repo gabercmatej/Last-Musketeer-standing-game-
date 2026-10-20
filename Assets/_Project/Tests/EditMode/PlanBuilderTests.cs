@@ -152,6 +152,24 @@ namespace Musketeers.Sim.Tests
         }
 
         [Test]
+        public void Grappin_OnAWalledMap_ProjectsToTheTileNextToTheWall()
+        {
+            var s = Scenario.From("@walls\nA....").WithAbility('A', Ability.Grappin).WithGrit('A', 5);
+            var b = Builder(s);
+            Assert.That(b.Choose(ActionType.Signature) && b.CommitDirection(Dir.E));
+            Assert.That(b.Projection.States[1].Pos, Is.EqualTo(new Int2(4, 0)));
+        }
+
+        [Test]
+        public void Grappin_OnAnUnwalledMap_EdgeIsAMissInTheProjection()
+        {
+            var s = Scenario.From("A....").WithAbility('A', Ability.Grappin).WithGrit('A', 5);
+            var b = Builder(s);
+            Assert.That(b.Choose(ActionType.Signature) && b.CommitDirection(Dir.E));
+            Assert.That(b.Projection.States[1].Pos, Is.EqualTo(new Int2(0, 0)));
+        }
+
+        [Test]
         public void Switcheroo_ProjectsOntoTheTargetsTile()
         {
             var s = Scenario.From("A....#\n......\n.....B").WithAbility('A', Ability.Switcheroo).WithGrit('A', 5);

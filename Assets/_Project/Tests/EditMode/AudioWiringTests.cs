@@ -15,7 +15,8 @@ namespace Musketeers.Sim.Tests
         {
             "Music/battle",
             "Music/battle_final",
-            "Music/lobby",
+            "Music/arena_lobby",
+            "Music/bridge_lobby",
             "Music/menu",
             "Music/results",
             "SFX/abilities/bull_rush",
@@ -54,7 +55,6 @@ namespace Musketeers.Sim.Tests
             "SFX/match/lock_in",
             "SFX/match/match_win",
             "SFX/match/points_tick",
-            "SFX/match/reveal",
             "SFX/match/round_start",
             "SFX/match/round_win",
             "SFX/match/tile_crumble",

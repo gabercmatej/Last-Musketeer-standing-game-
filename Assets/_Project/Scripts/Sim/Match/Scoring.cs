@@ -59,30 +59,44 @@ namespace Musketeers.Sim
             }
         }
 
-        // §2 match end, checked at the end of a round. Returns the winner, -1 if the match goes on, or
-        // fills `tied` with the players who must play a sudden-death round (and returns -1).
-        // Top points ≥ PointsToWin decide; a tie on points goes to most round wins; still tied → sudden death.
-        public static int MatchWinner(int[] points, int[] roundWins, GameConfig cfg, List<int> tied)
+        // §2 ranking: total points, then the last round's points, then the round before, and so on back.
+        // Equal in every round = a shared place (competition ranking: 1, 1, 3). Places are 1-based per slot.
+        public static int[] Rank(int[] points, List<int[]> roundPoints)
         {
-            tied.Clear();
-            int max = int.MinValue;
-            for (int i = 0; i < points.Length; i++)
-                if (points[i] > max) max = points[i];
-            if (max < cfg.PointsToWin)
-                return SimEvent.None;
-
-            int bestWins = int.MinValue;
-            for (int i = 0; i < points.Length; i++)
-                if (points[i] == max && roundWins[i] > bestWins) bestWins = roundWins[i];
-            for (int i = 0; i < points.Length; i++)
-                if (points[i] == max && roundWins[i] == bestWins) tied.Add(i);
-            if (tied.Count == 1)
+            int n = points.Length;
+            var places = new int[n];
+            for (int i = 0; i < n; i++)
             {
-                int w = tied[0];
-                tied.Clear();
-                return w;
+                int ahead = 0;
+                for (int j = 0; j < n; j++)
+                    if (j != i && Compare(j, i, points, roundPoints) > 0)
+                        ahead++;
+                places[i] = ahead + 1;
             }
-            return SimEvent.None;
+            return places;
+        }
+
+        // > 0 when a ranks above b.
+        static int Compare(int a, int b, int[] points, List<int[]> roundPoints)
+        {
+            if (points[a] != points[b])
+                return points[a] > points[b] ? 1 : -1;
+            for (int r = roundPoints.Count - 1; r >= 0; r--)
+            {
+                int[] rp = roundPoints[r];
+                if (rp[a] != rp[b])
+                    return rp[a] > rp[b] ? 1 : -1;
+            }
+            return 0;
+        }
+
+        // §2 match end, checked at the end of a round: the match is over once the top total reaches PointsToWin.
+        public static bool MatchIsOver(int[] points, GameConfig cfg)
+        {
+            for (int i = 0; i < points.Length; i++)
+                if (points[i] >= cfg.PointsToWin)
+                    return true;
+            return false;
         }
     }
 }

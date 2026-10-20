@@ -1,8 +1,9 @@
+using System.Collections.Generic;
 using NUnit.Framework;
 
 namespace Musketeers.Sim.Tests
 {
-    // GAME_DESIGN §2 scoring, Crown, tiebreak and the round lifecycle, driven through MatchRunner.
+    // GAME_DESIGN §2 scoring, Crown, ranking and the round lifecycle, driven through MatchRunner.
     public class ScoringTests
     {
         // Spawn 1 at (1,1), spawn 2 at (5,1): 4 apart on one row, so they can shoot each other.
@@ -158,50 +159,105 @@ namespace Musketeers.Sim.Tests
         }
 
         [Test]
-        public void TieOnPoints_MostRoundWinsWins()
+        public void TieOnPoints_DecidedByTheLastRound()
         {
             var m = Match(Duel, Two);
             m.Points[0] = 11; m.Points[1] = 11;
-            m.RoundWins[0] = 1; m.RoundWins[1] = 2;
-            MutualKill(m);   // 12 vs 12
+            m.RoundWins[0] = 5; m.RoundWins[1] = 0;   // round wins no longer matter
+            m.RoundPoints.Add(new[] { 6, 5 });
+            MutualKill(m);   // 12 vs 12, this round 1 vs 1: tied last round, so the round before decides
             Assert.That(m.MatchOver, Is.True);
-            Assert.That(m.MatchWinner, Is.EqualTo(1));
-        }
-
-        [Test]
-        public void StillTied_SuddenDeathBetweenTiedPlayersOnly_ThenItsWinnerTakesTheMatch()
-        {
-            var m = Match(Trio, Three);
-            m.Points[0] = 11; m.Points[1] = 11;
-            m.RoundWins[0] = 1; m.RoundWins[1] = 1;
-            var o = MutualKill(m);   // slot 2 survives: +3 to them, 12/12/3
-            Assert.That(o.RoundResult.Winner, Is.EqualTo(2));
-            Assert.That(m.Points, Is.EqualTo(new[] { 12, 12, 3 }));
-            Assert.That(m.MatchOver, Is.False);
-            Assert.That(m.SuddenDeath, Is.True);
-            Assert.That(m.Participants, Is.EqualTo(new[] { true, true, false }));
-            Assert.That(m.Round.Units[2].Alive, Is.False, "slot 2 sits out the tiebreak");
-            Assert.That(m.Round.Units[0].Alive && m.Round.Units[1].Alive, Is.True);
-            Assert.That(m.Crowned, Is.EqualTo(-1));
-
-            o = AKillsB(m);
-            Assert.That(o.RoundResult.SuddenDeath, Is.True);
-            Assert.That(m.MatchOver, Is.True);
+            Assert.That(m.Places, Is.EqualTo(new[] { 1, 2 }));
             Assert.That(m.MatchWinner, Is.EqualTo(0));
         }
 
         [Test]
-        public void SuddenDeath_Draw_IsReplayed()
+        public void TieOnPoints_AtMatchEnd_GoesToWhoScoredMoreInTheFinalRound()
+        {
+            var m = Match(Duel, Two);
+            m.Points[0] = 8; m.Points[1] = 12;
+            m.RoundPoints.Add(new[] { 0, 12 });
+            AKillsB(m);   // 12 vs 12; this round A scored 4, B 0
+            Assert.That(m.MatchOver, Is.True);
+            Assert.That(m.Places, Is.EqualTo(new[] { 1, 2 }));
+            Assert.That(m.MatchWinner, Is.EqualTo(0));
+        }
+
+        [Test]
+        public void Match_DoesNotEndBelowPointsToWin()
+        {
+            var m = Match(Duel, Two);
+            m.Points[0] = 7;
+            AKillsB(m);   // 11
+            Assert.That(m.MatchOver, Is.False);
+            Assert.That(m.Places, Is.Null);
+            Assert.That(m.RoundPoints.Count, Is.EqualTo(1));
+            Assert.That(m.RoundPoints[0], Is.EqualTo(new[] { 4, 0 }));
+        }
+
+        [Test]
+        public void FullTieAtTheTop_ShareFirstPlace_LowestSlotIsMatchWinner()
         {
             var m = Match(Duel, Two);
             m.Points[0] = 11; m.Points[1] = 11;
-            MutualKill(m);                   // 12/12, 0/0 wins: sudden death
-            Assert.That(m.SuddenDeath, Is.True);
-            int round = m.RoundNumber;
-            MutualKill(m);                   // drawn tiebreak
-            Assert.That(m.MatchOver, Is.False);
-            Assert.That(m.SuddenDeath, Is.True);
-            Assert.That(m.RoundNumber, Is.EqualTo(round + 1));
+            m.RoundPoints.Add(new[] { 5, 5 });
+            MutualKill(m);   // 12 vs 12, equal in every round
+            Assert.That(m.MatchOver, Is.True);
+            Assert.That(m.Places, Is.EqualTo(new[] { 1, 1 }));
+            Assert.That(m.MatchWinner, Is.EqualTo(0));
+        }
+
+        [Test]
+        public void RoundPoints_IncludeTheLastStandingBonus()
+        {
+            var m = Match(Duel, Two);
+            AKillsB(m);
+            Assert.That(m.RoundPoints.Count, Is.EqualTo(1));
+            Assert.That(m.RoundPoints[0], Is.EqualTo(new[] { 4, 0 }));
+        }
+
+        [Test]
+        public void Rank_ByPoints()
+        {
+            var places = Scoring.Rank(new[] { 5, 9, 2 }, new List<int[]>());
+            Assert.That(places, Is.EqualTo(new[] { 2, 1, 3 }));
+        }
+
+        [Test]
+        public void Rank_TieOnPoints_LastRoundDecides()
+        {
+            var rounds = new List<int[]> { new[] { 6, 1, 0 }, new[] { 1, 6, 0 } };
+            Assert.That(Scoring.Rank(new[] { 7, 7, 0 }, rounds), Is.EqualTo(new[] { 2, 1, 3 }));
+        }
+
+        [Test]
+        public void Rank_TieOnLastRound_RoundBeforeDecides()
+        {
+            var rounds = new List<int[]> { new[] { 2, 5, 0 }, new[] { 3, 3, 0 }, new[] { 4, 4, 0 } };
+            Assert.That(Scoring.Rank(new[] { 9, 12, 0 }, rounds), Is.EqualTo(new[] { 2, 1, 3 }));   // points differ: sanity
+            Assert.That(Scoring.Rank(new[] { 9, 9, 0 }, rounds), Is.EqualTo(new[] { 2, 1, 3 }));
+        }
+
+        [Test]
+        public void Rank_FullTie_SharesThePlace_AndTheNextPlaceSkips()
+        {
+            var rounds = new List<int[]> { new[] { 3, 3, 1, 0 }, new[] { 4, 4, 0, 0 } };
+            Assert.That(Scoring.Rank(new[] { 7, 7, 1, 0 }, rounds), Is.EqualTo(new[] { 1, 1, 3, 4 }));
+            Assert.That(Scoring.Rank(new[] { 7, 5, 5, 5 }, new List<int[]> { new[] { 0, 0, 0, 0 } }), Is.EqualTo(new[] { 1, 2, 2, 2 }));
+        }
+
+        [Test]
+        public void MatchState_HashCoversRoundPointsAndPlaces()
+        {
+            var m = Match(Duel, Two);
+            uint h0 = m.ComputeHash();
+            var c = m.Clone();
+            c.RoundPoints.Add(new[] { 1, 0 });
+            Assert.That(c.ComputeHash(), Is.Not.EqualTo(h0));
+            var d = m.Clone();
+            d.Places = new[] { 1, 2 };
+            Assert.That(d.ComputeHash(), Is.Not.EqualTo(h0));
+            Assert.That(d.Clone().ComputeHash(), Is.EqualTo(d.ComputeHash()));
         }
 
         [Test]

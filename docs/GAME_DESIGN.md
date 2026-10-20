@@ -32,7 +32,7 @@ This document is the **source of truth for the rules**. Every number here lives 
 - **Kill:** +1
 - **Kill on the Crowned:** +2 instead of +1 (see Crown)
 - **Draw** (everyone left dies on the same tick): nobody gets the +3; kills still count.
-- **Tiebreak** at 12+: most round wins. If still tied, play a sudden-death round between only the tied players.
+- **Match end and ranking:** the match ends at the end of the round in which the top total reaches the points target (12 by default). Players are ranked by total points; a tie is decided by the points scored in the last round, then the round before it, and so on backwards. Equal in every round = a **shared place** (1st, 1st, 3rd). The winner is 1st place (co-winners share it). There is no sudden death.
 
 ### The Crown (bounty)
 At the start of each round, the player with strictly the most match points wears the **Crown** (it glows, has a crown icon, and the announcer calls it out). If there's a tie for first, nobody is crowned. This turns free-for-all into temporary alliances against the leader.
@@ -55,7 +55,7 @@ At the start of each round, the player with strictly the most match points wears
 
 Kegs (section 5) are objects that sit on a floor tile and behave like crates for movement.
 
-**Walled edges.** A map whose first line is `@walls` has solid walls around it: the outside counts as a **pillar**. You can't walk, dash or Bull Rush off it, a push into the edge is a **Wall Slam**, and kicked kegs stop there. Shots, Grappin hooks and keg throws still end at the edge. Crumbling still makes pits inside. Without `@walls` the outside is a pit. Lines starting with `@` are directives and aren't part of the grid.
+**Walled edges.** A map whose first line is `@walls` has solid walls around it: the outside counts as a **pillar**. You can't walk, dash or Bull Rush off it, a push into the edge is a **Wall Slam**, and kicked kegs stop there. Shots and keg throws still end at the edge; a Grappin hook treats the wall like a pillar (see Grappin). Crumbling still makes pits inside. Without `@walls` the outside is a pit. Lines starting with `@` are directives and aren't part of the grid.
 
 ### Map 1: "The Courtyard" (ships first, walled)
 Top row is y = 8. The first line `@walls` is a directive.
@@ -152,9 +152,10 @@ Each turn you plan **3 actions**, one per tick. Unplanned ticks become **Idle**:
 - **Grappin** (Matej). Fire a hook in a direction, range 5. The first thing it touches decides the result:
   - A **unit**: yank it to the tile right next to you (it passes over pits safely).
   - A **pillar, crate or keg**: pull yourself to the tile right before it. Exception: a keg is pulled to you instead, so it lands on the tile next to you.
+  - On a **walled map** the edge wall counts as a pillar: the hook pulls you to the tile next to it (already next to the wall = you stay).
   - **Nothing:** the hook misses, and the Grit is still spent.
 - **Switcheroo** (Matic). Pick **any living musketeer** and swap positions with them, wherever they are when it resolves (no range, no line of sight). It **fails** (the Grit is still spent) if Matic stands on a warned tile when it resolves, or if the target is dead. The target is credited to Matic for kill credit. Kegs can't be swapped.
-- **Triple Charge** (Aljaž). Needs a loaded musket, and unloads it. Fires **3 shots in a row down one line**, each with range 5 (`FireRange`) from the shooter. Each shot that hits a unit deals **1 damage and pushes it 1 tile** away (normal push rules: Wall Slam, Bonk, fall), so the next shot meets it one tile further along: up to 3 hits of 1 damage, each knocking back 1 tile. A target pinned against a wall or another musketeer also takes the Wall Slam / Bonk damage each time. No pierce. A **crate** is destroyed (the next shot can pass), a **keg** is detonated and stops the shot, a pillar stops it. It **can be parried**: each shot that meets a parrying unit does nothing to it and is reflected like a normal shot.
+- **Triple Charge** (Aljaž). Needs a loaded musket, and unloads it. Fires **3 shots in a row down one line**, each with range 5 (`FireRange`) from the shooter. Each shot that hits a unit deals **1 damage and pushes it 1 tile** away (normal push rules: Wall Slam, Bonk, fall), so the next shot meets it one tile further along: up to 3 hits of 1 damage, each knocking back 1 tile. A target pinned against a wall or another musketeer also takes the Wall Slam / Bonk damage, but **at most 3 damage to any one musketeer per use** (`TripleChargeMaxDamage`), Wall Slam and Bonk damage included, a bystander bonked by the slide counted separately and a reflected shot counted too; the knockback still happens. No pierce. A **crate** is destroyed (the next shot can pass), a **keg** is detonated and stops the shot, a pillar stops it. It **can be parried**: each shot that meets a parrying unit does nothing to it and is reflected like a normal shot.
 - **Bull Rush** (Nik). Charge up to 3 tiles in a direction, stopping before any pillar, crate, keg, unit or pit. If the charge stopped because of a **unit**, that unit is **pushed 4 tiles**. If it stopped because of a **keg**, the keg is kicked.
 
 ### Invalid actions (fizzles)
@@ -209,7 +210,7 @@ These resolve one at a time in **initiative order**, each using the positions le
    - A **unit** is hit for 1 damage and stops the shot.
 2. **Parry:** a normal shot that hits a parrying unit does no damage and is **reflected**. A new shot traces from the parrying unit in the opposite direction, with full range, and hits the first thing it meets. A reflected shot can't be reflected again.
 3. Apply all shot damage at once. Two players who shoot each other both get hit.
-4. **Triple Charge**, after the shots above have landed: each Triple Charge, in initiative order, fires its 3 shots one after another on the live board. Each traces from the shooter with range 5 and ends on the first thing it meets. A unit hit takes 1 damage and slides 1 tile away (credit to the shooter); the next shot traces again from the shooter, so it follows the target. A crate is destroyed at once, a keg is detonated (it explodes in Phase 5), a parrying unit takes no damage, isn't pushed, and reflects the shot (1 damage to the first thing it meets on the way back, no push, not reflectable again).
+4. **Triple Charge**, after the shots above have landed: each Triple Charge, in initiative order, fires its 3 shots one after another on the live board. Each traces from the shooter with range 5 and ends on the first thing it meets. A unit hit takes 1 damage and slides 1 tile away (credit to the shooter); once a unit has taken 3 damage from this one use (shots, Wall Slam, Bonk, a reflected shot), further damage from it is skipped but pushes and slams still happen; the next shot traces again from the shooter, so it follows the target. A crate is destroyed at once, a keg is detonated (it explodes in Phase 5), a parrying unit takes no damage, isn't pushed, and reflects the shot (1 damage to the first thing it meets on the way back, no push, not reflectable again).
 
 ### Phase 5: Kegs
 1. **Landing:** a newly thrown keg lands on its target tile. If that tile isn't empty floor (it has a unit, keg, crate, pillar or pit), the keg **explodes on impact** (a direct hit).
@@ -252,7 +253,7 @@ Each unit remembers its **last attacker**, meaning whoever last damaged, pushed,
 Ranked by fun-per-hour-of-work. Days 5–6 of the build plan.
 
 1. **Reveal phase:** all arrows are shown before playback.
-2. **Announcer banners** for named moments: `BONK!`, `RIPOSTE!`, `GUARD BREAK!`, `SWAN DIVE!` (self ring-out), `DOUBLE KO!`, `TOUCHÉ!` (kill by reflected shot), `THE CROWN FALLS!`, `EN GARDE!` (round start), `THE LAST MUSKETEER STANDING` (match win).
+2. **Announcer banners** for named moments: `BONK!`, `RIPOSTE!`, `GUARD BREAK!`, `SWAN DIVE!` (self ring-out), `DOUBLE KO!`, `TOUCHÉ!` (kill by reflected shot), `THE CROWN FALLS!`, `EN GARDE!` (round start), `THE LAST MUSKETEER STANDING` (match win). `BONK!` and the signature-move banner are banner-only (no voice line). There is no reveal sound; the victory voice plays for the round winner at round end, never on the results screen.
 3. **Kill-cam:** at round end, replay the deciding turn at 0.5× speed with a camera push-in. This is free, because the simulation is deterministic: store the turn's start state and plans, then replay them.
 4. **Quick rematch:** the results screen has **Rematch**, and play restarts when everyone presses it, or after 10 seconds.
 5. **Post-match awards** (computed from the event log). Rename them to inside jokes:
@@ -282,6 +283,8 @@ Ranked by fun-per-hour-of-work. Days 5–6 of the build plan.
 4. **Arena:** the match. Emotes on **Z / X / C / V**.
 5. **Scoreboard** between rounds (points with reasons, portraits).
 6. **Results:** the winner in their victory pose, everyone's portraits, final points and badges. Then back to the **Lobby** for the next match.
+
+Each map defines its own lobby background, lobby music and results podium art (`MapDef`); the lobby switches when the map changes and the results show the art of the map that was played. In-match music is the same on every map.
 
 Offline (vs bots) the lobby is local; online (Day 5) the same lobby is shared and adds the items below.
 
@@ -327,7 +330,7 @@ Offline (vs bots) the lobby is local; online (Day 5) the same lobby is shared an
 | PlanningSeconds | 30 |
 | RevealSeconds | 1.5 |
 | FireRange | 5 |
-| TripleChargeShots / TripleChargePush | 3 / 1 |
+| TripleChargeShots / TripleChargePush / TripleChargeMaxDamage | 3 / 1 / 3 |
 | KegThrowRange / KegFuseTicks / MaxKegsPerPlayer | 3 / 3 / 1 |
 | KegKickDistance | 3 |
 | Costs: Dash / Parry / Keg / Signature | 1 / 1 / 2 / 5 |

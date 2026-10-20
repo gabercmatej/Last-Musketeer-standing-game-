@@ -3,9 +3,9 @@ using System.Collections.Generic;
 
 namespace Musketeers.Sim
 {
-    // Everything above one round (GAME_DESIGN §2): points, round wins, the Crown, sudden death and
+    // Everything above one round (GAME_DESIGN §2): points, round wins, the Crown, the ranking and
     // the current round's GameState. Plain data; MatchRunner drives it. Players are slots 0..n-1 and
-    // keep their slot (and spawn) every round; a player sitting out a sudden-death round is a dead unit.
+    // keep their slot (and spawn) every round.
     public sealed class MatchState
     {
         public GameConfig Cfg;
@@ -14,10 +14,10 @@ namespace Musketeers.Sim
         public int[] Characters;        // CharacterDef index per player slot
         public int[] Points;
         public int[] RoundWins;
-        public bool[] Participants;     // who plays the current round
+        public List<int[]> RoundPoints = new List<int[]>();   // per finished round: points each player scored in it (§2 tiebreak)
+        public int[] Places;            // 1-based place per slot (shared on a full tie); null until the match is over
         public int RoundNumber;         // 1-based, 0 before the first round
         public int Crowned = -1;        // §2 Crown for the current round, -1 for nobody
-        public bool SuddenDeath;        // the current round is a tiebreak between Participants only
         public bool MatchOver;
         public int MatchWinner = -1;
         public GameState Round;
@@ -37,10 +37,10 @@ namespace Musketeers.Sim
                 Characters = (int[])Characters.Clone(),
                 Points = (int[])Points.Clone(),
                 RoundWins = (int[])RoundWins.Clone(),
-                Participants = (bool[])Participants.Clone(),
+                RoundPoints = CloneRounds(RoundPoints),
+                Places = Places != null ? (int[])Places.Clone() : null,
                 RoundNumber = RoundNumber,
                 Crowned = Crowned,
-                SuddenDeath = SuddenDeath,
                 MatchOver = MatchOver,
                 MatchWinner = MatchWinner,
                 Round = Round?.Clone(),
@@ -48,6 +48,14 @@ namespace Musketeers.Sim
                 Rng = Rng.Clone(),
                 RoundGains = new List<PointGain>(RoundGains),
             };
+        }
+
+        static List<int[]> CloneRounds(List<int[]> src)
+        {
+            var l = new List<int[]>(src.Count);
+            foreach (var r in src)
+                l.Add((int[])r.Clone());
+            return l;
         }
 
         public uint ComputeHash()
@@ -60,11 +68,17 @@ namespace Musketeers.Sim
                 h.Add(Characters[i]);
                 h.Add(Points[i]);
                 h.Add(RoundWins[i]);
-                h.Add(Participants[i]);
             }
             h.Add(RoundNumber);
             h.Add(Crowned);
-            h.Add(SuddenDeath);
+            h.Add(RoundPoints.Count);
+            foreach (var r in RoundPoints)
+                foreach (int v in r)
+                    h.Add(v);
+            h.Add(Places != null ? Places.Length : -1);
+            if (Places != null)
+                foreach (int v in Places)
+                    h.Add(v);
             h.Add(MatchOver);
             h.Add(MatchWinner);
             h.Add(Rng.State);
@@ -94,9 +108,6 @@ namespace Musketeers.Sim
                     characters[i] = i;
             }
             int n = abilities.Length;
-            var participants = new bool[n];
-            for (int i = 0; i < n; i++)
-                participants[i] = true;
             return new MatchState
             {
                 Cfg = cfg,
@@ -105,7 +116,6 @@ namespace Musketeers.Sim
                 Characters = (int[])characters.Clone(),
                 Points = new int[n],
                 RoundWins = new int[n],
-                Participants = participants,
                 Stats = new MatchStats(n),
                 Rng = new DeterministicRng(seed),
             };

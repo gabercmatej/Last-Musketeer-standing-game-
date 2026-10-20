@@ -11,6 +11,21 @@ namespace Musketeers.Sim
         public readonly bool[] Active;         // passed Phase 0 (paid, not fizzled)
         public readonly int[] Order;           // slots in initiative order
 
+        // §4 Triple Charge cap: while one charge fires its shots, damage per unit from that use is counted here.
+        public bool CapActive;
+        public int[] CapTaken;
+
+        public void BeginCappedUse()
+        {
+            CapActive = true;
+            if (CapTaken == null)
+                CapTaken = new int[S.Units.Length];
+            else
+                System.Array.Clear(CapTaken, 0, CapTaken.Length);
+        }
+
+        public void EndCappedUse() => CapActive = false;
+
         public TickContext(GameState s, GameConfig cfg, EventLog log, int tick, TurnPlan[] plans)
         {
             S = s;

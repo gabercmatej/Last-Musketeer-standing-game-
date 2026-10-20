@@ -73,8 +73,19 @@ namespace Musketeers.Sim
         static void Damage(TickContext c, int target, int amount, int attacker, DamageKind kind, bool credit = true)
         {
             var u = c.S.Units[target];
-            u.Hp = Math.Max(0, u.Hp - amount);
-            c.Log.Add(SimEventKind.Damaged, unit: target, other: attacker, to: u.Pos, amount: amount, reason: (byte)kind);
+            if (c.CapActive)
+            {
+                // §4 Triple Charge: at most TripleChargeMaxDamage to one unit per use; the rest is skipped
+                // (pushes, slams and events still happen, credit is unchanged).
+                int allowed = Math.Max(0, c.Cfg.TripleChargeMaxDamage - c.CapTaken[target]);
+                amount = Math.Min(amount, allowed);
+                c.CapTaken[target] += amount;
+            }
+            if (amount > 0)
+            {
+                u.Hp = Math.Max(0, u.Hp - amount);
+                c.Log.Add(SimEventKind.Damaged, unit: target, other: attacker, to: u.Pos, amount: amount, reason: (byte)kind);
+            }
             if (credit)
                 Credit(c, target, attacker);
         }

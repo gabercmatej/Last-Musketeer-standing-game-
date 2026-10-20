@@ -92,13 +92,13 @@ namespace Musketeers.Sim.Tests
         }
 
         [Test]
-        public void Grappin_MissesAtTheWall_ShotsStopAtTheEdge()
+        public void Grappin_HitsTheWallLikeAPillar()
         {
             Scenario.From("@walls\nA..")
                 .WithAbility('A', Ability.Grappin).WithGrit('A', 5)
                 .Plan('A', Act.Sig(Dir.E))
                 .ResolveTick()
-                .AssertPos('A', 0, 0)
+                .AssertPos('A', 2, 0)
                 .AssertAlive('A');
         }
 
@@ -111,7 +111,7 @@ namespace Musketeers.Sim.Tests
                 .ResolveTick()
                 .AssertPos('B', 2, 0)
                 .AssertEventCount(SimEventKind.WallSlam, 3)
-                .AssertHp('B', 3);
+                .AssertHp('B', 6);   // 3 hits + 3 slams, capped at 3 damage per use
         }
 
         [Test]

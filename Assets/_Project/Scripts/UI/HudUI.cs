@@ -171,9 +171,9 @@ namespace Musketeers.UI
             }
         }
 
-        public void SetRound(int round, bool suddenDeath, int turn)
+        public void SetRound(int round, int turn)
         {
-            _round.text = suddenDeath ? $"Round {round}: SUDDEN DEATH" : $"Round {round}";
+            _round.text = $"Round {round}";
             _turn.text = $"Turn {turn}";
         }
 

@@ -96,7 +96,8 @@ namespace Musketeers.Presentation
 
         public void Announce(Callout c)
         {
-            _audio?.Announce(Callouts.Clip(c));
+            if (Callouts.Voiced(c))
+                _audio?.Announce(Callouts.Clip(c));
             Announced?.Invoke(c);
         }
 

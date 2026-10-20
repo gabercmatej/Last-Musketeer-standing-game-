@@ -32,7 +32,7 @@ namespace Musketeers.UI
 
         public void Show(RoundResult r, MatchState m, string[] names, Color[] colors, Sprite[] portraits)
         {
-            _title.text = r.SuddenDeath ? $"Round {r.RoundNumber} (sudden death)" : $"Round {r.RoundNumber}";
+            _title.text = $"Round {r.RoundNumber}";
             _subtitle.text = r.Winner >= 0 ? $"{names[r.Winner]} is the last musketeer standing!" : "A draw. Nobody is left standing.";
             if (r.Winner >= 0)
                 _subtitle.style.color = colors[r.Winner];
