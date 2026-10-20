@@ -54,3 +54,5 @@ node_modules/
 # Unity scene recovery backups
 /Assets/_Recovery/
 /Assets/_Recovery.meta
+/Assets/Screenshots/
+/Assets/Screenshots.meta

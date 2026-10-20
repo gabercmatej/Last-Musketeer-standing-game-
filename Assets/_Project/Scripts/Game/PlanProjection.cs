@@ -4,7 +4,7 @@ namespace Musketeers.Game
 {
     // Why an action would fizzle (or can't be planned). Mirrors §6 Phase 0 so the planning UI
     // can grey out what the sim would refuse (GAME_DESIGN §5 Invalid actions).
-    public enum PlanIssue : byte { None, NoGrit, Unloaded, KegActive, OutOfRange, Dead, PlanFull, AlreadyLoaded }
+    public enum PlanIssue : byte { None, NoGrit, Unloaded, KegActive, OutOfRange, Dead, PlanFull, AlreadyLoaded, Warned }
 
     public struct TickProjection
     {
@@ -54,7 +54,7 @@ namespace Musketeers.Game
             {
                 p.States[t] = cur;
                 var a = plan[t];
-                var issue = Check(s.Board, cfg, cur, a, u.Ability, true);
+                var issue = Check(s.Board, cfg, cur, a, u.Ability, true, Crumble.IsWarned(s, cur.Pos, cfg));
                 p.Issues[t] = a.Type == ActionType.Idle ? PlanIssue.None : issue;
                 if (issue == PlanIssue.None && cur.Alive)
                 {
@@ -75,8 +75,8 @@ namespace Musketeers.Game
             return p;
         }
 
-        // §6 Phase 0 requirements. withTarget=false skips the keg range (no target chosen yet).
-        public static PlanIssue Check(Board board, GameConfig cfg, TickProjection p, PlannedAction a, Ability ability, bool withTarget)
+        // §6 Phase 0 requirements (onWarned: the projected tile is on the ring glowing this turn). withTarget=false skips the keg range (no target chosen yet).
+        public static PlanIssue Check(Board board, GameConfig cfg, TickProjection p, PlannedAction a, Ability ability, bool withTarget, bool onWarned = false)
         {
             if (!p.Alive)
                 return PlanIssue.Dead;
@@ -98,6 +98,8 @@ namespace Musketeers.Game
                 case ActionType.Signature:
                     if (p.Grit < cfg.SignatureCost) return PlanIssue.NoGrit;
                     if (ability == Ability.TripleCharge && !p.Loaded) return PlanIssue.Unloaded;
+                    // §6 Phase 2b: Switcheroo fails from a warned tile (this turn's ring), so it can't be planned there.
+                    if (ability == Ability.Switcheroo && onWarned) return PlanIssue.Warned;
                     return PlanIssue.None;
                 default:
                     return PlanIssue.None;

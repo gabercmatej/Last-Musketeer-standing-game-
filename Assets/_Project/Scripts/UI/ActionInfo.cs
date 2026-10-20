@@ -101,6 +101,7 @@ namespace Musketeers.UI
                 case PlanIssue.KegActive: return "You already have a keg out";
                 case PlanIssue.OutOfRange: return "Out of range";
                 case PlanIssue.Dead: return "You'd be dead by then";
+                case PlanIssue.Warned: return "Can't swap from a cracked tile";
                 case PlanIssue.PlanFull: return "Plan is full: click a slot to replace it, or Backspace";
                 default: return "";
             }

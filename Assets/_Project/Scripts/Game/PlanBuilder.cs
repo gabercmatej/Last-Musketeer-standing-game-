@@ -58,7 +58,7 @@ namespace Musketeers.Game
         {
             if (IsFull)
                 return PlanIssue.PlanFull;
-            return PlanProjection.Check(_s.Board, _cfg, CursorState, new PlannedAction(type), Ability, false);
+            return PlanProjection.Check(_s.Board, _cfg, CursorState, new PlannedAction(type), Ability, false, Crumble.IsWarned(_s, CursorState.Pos, _cfg));
         }
 
         // Starts an action. Directional and keg actions wait for CommitDirection / CommitTarget.

@@ -221,6 +221,7 @@ namespace Musketeers.UI
                 case PlanIssue.KegActive: return "fizzles: keg out";
                 case PlanIssue.OutOfRange: return "fizzles: range";
                 case PlanIssue.Dead: return "you're gone";
+                case PlanIssue.Warned: return "fizzles: cracked tile";
                 default: return "";
             }
         }

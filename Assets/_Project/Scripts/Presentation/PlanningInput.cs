@@ -7,7 +7,7 @@ using UnityEngine.InputSystem;
 namespace Musketeers.Presentation
 {
     // Keyboard + mouse planning (BUILD_PLAN Day 3). No browser-reserved keys:
-    //   1 Move  2 Dash  3 Fire  4 Reload  5 Parry  6 Shove  7 Keg  8 Catch Breath  Q Signature
+    //   1 Move  2 Dash  3 Catch Breath  4 Fire  5 Reload  6 Shove  7 Parry  8 Keg  Q Signature
     //   WASD / arrows: direction (with nothing chosen, a direction key is a Move)
     //   mouse: click an in-line tile for a direction, a tile for the keg, an adjacent tile to move
     //   Switcheroo: click the musketeer to swap with

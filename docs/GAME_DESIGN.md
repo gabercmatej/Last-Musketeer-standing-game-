@@ -106,7 +106,7 @@ All four musketeers have identical base stats. They differ only in their **signa
 
 | Stat | Value |
 |---|---|
-| HP | **3** |
+| HP (hearts per round) | **3** by default; the host sets 1-5 in the lobby |
 | Grit (energy) | starts at **2**, max **5**, **+1 at the start of every turn after the first** |
 | Musket | starts **loaded** |
 
@@ -154,7 +154,7 @@ Each turn you plan **3 actions**, one per tick. Unplanned ticks become **Idle**:
   - A **pillar, crate or keg**: pull yourself to the tile right before it. Exception: a keg is pulled to you instead, so it lands on the tile next to you.
   - **Nothing:** the hook misses, and the Grit is still spent.
 - **Switcheroo** (Matic). Pick **any living musketeer** and swap positions with them, wherever they are when it resolves (no range, no line of sight). It **fails** (the Grit is still spent) if Matic stands on a warned tile when it resolves, or if the target is dead. The target is credited to Matic for kill credit. Kegs can't be swapped.
-- **Triple Charge** (Aljaž). Needs a loaded musket, and unloads it. Fires **3 shots in a row down one line**, each with range 5 (`FireRange`) from the shooter. Each shot that hits a unit deals **1 damage and pushes it 1 tile** away (normal push rules: Wall Slam, Bonk, fall), so the next shot meets it one tile further along: up to 3 damage and 3 tiles of knockback. No pierce. A **crate** is destroyed (the next shot can pass), a **keg** is detonated and stops the shot, a pillar stops it. It **can be parried**: each shot that meets a parrying unit does nothing to it and is reflected like a normal shot.
+- **Triple Charge** (Aljaž). Needs a loaded musket, and unloads it. Fires **3 shots in a row down one line**, each with range 5 (`FireRange`) from the shooter. Each shot that hits a unit deals **1 damage and pushes it 1 tile** away (normal push rules: Wall Slam, Bonk, fall), so the next shot meets it one tile further along: up to 3 hits of 1 damage, each knocking back 1 tile. A target pinned against a wall or another musketeer also takes the Wall Slam / Bonk damage each time. No pierce. A **crate** is destroyed (the next shot can pass), a **keg** is detonated and stops the shot, a pillar stops it. It **can be parried**: each shot that meets a parrying unit does nothing to it and is reflected like a normal shot.
 - **Bull Rush** (Nik). Charge up to 3 tiles in a direction, stopping before any pillar, crate, keg, unit or pit. If the charge stopped because of a **unit**, that unit is **pushed 4 tiles**. If it stopped because of a **keg**, the keg is kicked.
 
 ### Invalid actions (fizzles)
@@ -292,7 +292,7 @@ Offline (vs bots) the lobby is local; online (Day 5) the same lobby is shared an
   - Player list.
   - Character picker: 4 portraits, with already-taken characters greyed out.
   - Ready toggle.
-  - Host only: **Add Bot**, **Remove Bot**, match settings (planning time 15/20/25/30 s, points to win 8/12/16, map), and **Start**. Start needs at least 2 players and everyone human ready.
+  - Host only: **Add Bot**, **Remove Bot**, match settings (planning time, points to win 10-30 (default 12), hearts per round 1-5 (default 3), and map), and **Start**. Start needs at least 2 players and everyone human ready.
 - **Version check:** clients send their build version when they join. If it doesn't match the host's, they're kicked with the message "New version is out. Refresh the page (Cmd/Ctrl+Shift+R)." This is required, because the simulation runs on every machine, and a tab left open from an older deploy would otherwise desync.
 - **Disconnects:**
   - If a client leaves or closes the tab, their musketeer just Catches Breath every tick, and it can still be killed.
@@ -320,7 +320,7 @@ Offline (vs bots) the lobby is local; online (Day 5) the same lobby is shared an
 | Knob | Default |
 |---|---|
 | BoardWidth / BoardHeight (both maps) | 15 / 9 |
-| MaxHp | 3 |
+| MaxHp | 3 (lobby: hearts per round 1-5) |
 | StartGrit / MaxGrit / GritPerTurn | 2 / 5 / 1 |
 | StartLoaded (muskets start loaded, §4) | true |
 | TicksPerTurn | 3 |
@@ -333,6 +333,6 @@ Offline (vs bots) the lobby is local; online (Day 5) the same lobby is shared an
 | Costs: Dash / Parry / Keg / Signature | 1 / 1 / 2 / 5 |
 | GrappleRange / BullRushDistance / BullRushPush | 5 / 3 / 4 |
 | CrumbleStartTurn / CrumbleEvery | 5 / 2 |
-| PointsToWin / WinPoints / KillPoints / CrownKillPoints | 12 / 3 / 1 / 2 |
+| PointsToWin / WinPoints / KillPoints / CrownKillPoints | 12 (lobby: 10-30) / 3 / 1 / 2 |
 
 Balance with bot simulations (build plan Day 6), then with friends.

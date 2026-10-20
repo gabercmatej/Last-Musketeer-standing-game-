@@ -40,8 +40,8 @@ namespace Musketeers.Sim.Tests
             }
             string summary = r.Summary();
             TestContext.Progress.WriteLine(summary);
-            UnityEngine.Debug.Log(summary);
-            // The console only shows the first lines; keep the full report where it can be read (Library is git-ignored).
+            // The full report goes to the test output and a file (Library is git-ignored), not the console: the MCP
+            // console reader tags logs written during a test run as exceptions, which would hide real errors.
             System.IO.File.WriteAllText($"Library/fuzz-summary-{mapName}.txt", summary);
             // Bots must never walk or dash into a pit on their own, not even after a blocked move.
             // (A bot blasted off course by its own keg can't foresee that; it shows as "no credit".)
@@ -124,15 +124,19 @@ namespace Musketeers.Sim.Tests
 
             void CountActions(EventLog log)
             {
+                var charges = new HashSet<int>();   // (unit, tick) pairs already counted as one Triple Charge
                 foreach (var e in log.Events)
                 {
                     switch (e.Kind)
                     {
-                        case SimEventKind.ShotFired: _actions[e.Reason == (byte)ShotKind.TripleCharge ? 1 : 0]++; break;
+                        case SimEventKind.ShotFired:
+                            if (e.Reason != (byte)ShotKind.TripleCharge) _actions[0]++;
+                            else if (charges.Add(e.Unit * 16 + e.Tick)) _actions[1]++;   // only the first of its 3 shots
+                            break;
                         case SimEventKind.KegThrown: _actions[2]++; break;
                         case SimEventKind.ParryRaised: _actions[3]++; break;
                         case SimEventKind.Grappled: _actions[4]++; break;
-                        case SimEventKind.Swapped: _actions[5]++; break;
+                        case SimEventKind.Swapped: if (e.Amount > 0) _actions[5]++; break;   // a failed swap moves nobody
                         case SimEventKind.BullRushed: _actions[6]++; break;
                         case SimEventKind.KegExploded: _actions[7]++; break;
                         case SimEventKind.Shoved: _actions[8]++; break;
@@ -149,9 +153,9 @@ namespace Musketeers.Sim.Tests
                 {
                     if (e.Kind == SimEventKind.Damaged)
                         lastKind[e.Unit] = (DamageKind)e.Reason;
-                    if (e.Kind == SimEventKind.Pushed || (e.Kind == SimEventKind.Grappled && e.Other >= 0) || (e.Kind == SimEventKind.Swapped && e.Other >= 0))
+                    if (e.Kind == SimEventKind.Pushed || (e.Kind == SimEventKind.Grappled && e.Other >= 0) || (e.Kind == SimEventKind.Swapped && e.Amount > 0 && e.Other >= 0))
                         displaced.Add(e.Kind == SimEventKind.Pushed ? e.Unit : e.Other);
-                    if (e.Kind == SimEventKind.Swapped && e.Other >= 0)
+                    if (e.Kind == SimEventKind.Swapped && e.Amount > 0 && e.Other >= 0)
                         displaced.Add(e.Unit);
                     if (e.Kind != SimEventKind.Died)
                         continue;

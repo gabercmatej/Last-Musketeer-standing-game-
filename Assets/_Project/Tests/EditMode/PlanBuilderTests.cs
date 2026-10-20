@@ -164,6 +164,26 @@ namespace Musketeers.Sim.Tests
         }
 
         [Test]
+        public void Switcheroo_FromTheWarnedRing_IsAnIssue_AndKeepsThePosition()
+        {
+            // Turn 5 warns ring 0 (the outer ring); A stands on it, so the sim would fail the swap.
+            var s = Scenario.From("A....\n.....\n.....\n.....\n....B").WithAbility('A', Ability.Switcheroo).WithGrit('A', 5).WithTurn(5);
+            var b = Builder(s);
+            Assert.That(b.IssueFor(ActionType.Signature), Is.EqualTo(PlanIssue.Warned));
+            Assert.That(b.Choose(ActionType.Signature), Is.False);
+
+            // A plan that already holds the swap (made before the ring warned) reports it per tick.
+            var plan = new TurnPlan(0) { A0 = PlannedAction.Switcheroo(1) };
+            var proj = PlanProjection.Project(s.State, 0, plan, s.Config);
+            Assert.That(proj.Issues[0], Is.EqualTo(PlanIssue.Warned));
+            Assert.That(proj.States[1].Pos, Is.EqualTo(s.State.Units[0].Pos), "a failed swap moves nobody");
+
+            // Off the ring it is fine.
+            var safe = Scenario.From(".....\n.A...\n.....\n.....\n....B").WithAbility('A', Ability.Switcheroo).WithGrit('A', 5).WithTurn(5);
+            Assert.That(Builder(safe).IssueFor(ActionType.Signature), Is.EqualTo(PlanIssue.None));
+        }
+
+        [Test]
         public void Switcheroo_IsPlannedByTargetSlot_NotYourself_NotTheDead()
         {
             var s = Scenario.From("A...B\n.....\nC...D").WithAbility('A', Ability.Switcheroo).WithGrit('A', 5);

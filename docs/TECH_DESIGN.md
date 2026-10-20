@@ -94,9 +94,9 @@ Assets/_Project/
 // Pure C#. No UnityEngine.
 public enum Dir : byte { N, E, S, W }
 public enum ActionType : byte { Idle, CatchBreath, Move, Dash, Fire, Reload, Parry, Shove, Keg, Signature }  // Idle = 0 = unplanned
-public enum Ability : byte { Grappin, Switcheroo, DoubleCharge, BullRush }
+public enum Ability : byte { Grappin, Switcheroo, TripleCharge, BullRush }
 
-public struct PlannedAction { public ActionType Type; public Dir Dir; public Int2 Target; }
+public struct PlannedAction { public ActionType Type; public Dir Dir; public Int2 Target; public byte Unit; }   // Unit = Switcheroo target slot; must be serialized (NetSerialization) on Day 5
 public struct TurnPlan { public byte Slot; public PlannedAction A0, A1, A2; }   // fixed size, no allocs
 
 public sealed class GameState {
