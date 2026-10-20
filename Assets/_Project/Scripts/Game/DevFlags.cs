@@ -13,6 +13,8 @@ namespace Musketeers.Game
         public static bool AutoPlay;
         // Start a vs-bots match straight away on load (with AutoPlay); 0 = off, else player count.
         public static int AutoStartPlayers;
+        // The lobby renders as a non-host: read-only game-master panel, Ready toggle (you start Not ready).
+        public static bool LobbyAsGuest;
         // Planning seconds override for quick checks; 0 = GameConfig.PlanningSeconds.
         public static float PlanningSeconds;
     }

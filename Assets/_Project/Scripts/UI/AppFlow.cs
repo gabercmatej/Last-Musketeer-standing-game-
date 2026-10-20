@@ -32,6 +32,8 @@ namespace Musketeers.UI
         [SerializeField] private StyleSheet _styles;
         [SerializeField] private TextAsset _tips;
         [SerializeField] private TextAsset _credits;
+        [SerializeField] private TextAsset _lore;
+        [SerializeField] private TextAsset _howToPlay;
         [SerializeField] private ArtLibrary _art;
         [SerializeField] private BoardView _board;
         [SerializeField] private StageView _stage;
@@ -51,7 +53,10 @@ namespace Musketeers.UI
         LogPanelUI _log;
         ScoreboardUI _scoreboard;
         ResultsUI _results;
-        SettingsUI _settings;
+        InfoWindowUI _info;
+        CharacterSelectUI _charSelect;
+        ConfirmDialog _confirm;
+        bool _charSelectFromLobby;
         VisualElement _root;
         LobbyModel _model;
         Screen _screen;
@@ -98,10 +103,11 @@ namespace Musketeers.UI
             var loading = AddScreen(_loadingUxml);
             var settings = AddScreen(_settingsUxml);
             UiArt.WireButtonSounds(_root);
+            _confirm = new ConfirmDialog(_root);   // added last: it sits above every screen
 
             _model = new LobbyModel(_art.Roster, _art.Cosmetics, _art.Maps != null ? _art.Maps.Count : 1);
             _menu = new MainMenuUI(menu);
-            _lobby = new LobbyUI(lobby, _model, _art);
+            _lobby = new LobbyUI(lobby, _model, _art, _confirm);
             _loading = new LoadingUI(loading, _tips);
             _hud = new HudUI(hud);
             _hud.BindArena(_rig);
@@ -109,19 +115,31 @@ namespace Musketeers.UI
             _log = new LogPanelUI(hud);
             _scoreboard = new ScoreboardUI(score);
             _results = new ResultsUI(results);
-            _settings = new SettingsUI(settings, _credits);
+            _info = new InfoWindowUI(settings, _credits, _lore, _howToPlay);
+            _charSelect = new CharacterSelectUI(menu, _model, _art);
 
-            _menu.PlayClicked += ShowLobby;
-            _menu.SettingsClicked += () => _settings.SetVisible(true);
+            _menu.PlayClicked += ShowCharacterSelect;
+            _menu.LoreClicked += () => _info.OpenTab(InfoWindowUI.Tab.Lore);
+            _menu.SettingsClicked += () => _info.OpenTab(InfoWindowUI.Tab.Settings);
+            _charSelect.Selected += c =>
+            {
+                _model.Character = c;
+                _model.Save();
+                ShowLobby();
+            };
+            _charSelect.Back += () => { if (_charSelectFromLobby) ShowLobby(); else ShowMenu(); };
             _lobby.BackClicked += ShowMenu;
             _lobby.StartClicked += () => StartWithLoading(NewSetup(null));
-            _lobby.Changed += RefreshStage;
+            _lobby.SettingsClicked += () => _info.OpenTab(InfoWindowUI.Tab.Settings);
+            _lobby.ChangeMusketeerClicked += ChangeMusketeer;
+            _lobby.Changed += () => { RefreshStage(); ApplyLobbyTheme(false); };
+            _lobby.ReadyChanged += () => _stage.SetReady(_model.Ready());
             _lobby.WardrobeToggled += open => { if (open) _stage.Focus(0); else _stage.Unfocus(); };
             _lobby.Wardrobe.Equipped += () => { _stage.SetLoadout(0, _model.MyLoadout); _stage.Bounce(0); };
             _hud.SpeedClicked += CycleSpeed;
             _hud.LogClicked += () => _log.SetOpen(!_log.Open);
             _hud.QuitClicked += ShowLobby;
-            _hud.SettingsClicked += () => _settings.SetVisible(true);
+            _hud.SettingsClicked += () => _info.OpenTab(InfoWindowUI.Tab.Settings);
             _planBar.ActionClicked += t => _input.ChooseAction(t);
             _planBar.SlotClicked += t => { if (_planning && !_builder.Locked) _builder.SelectSlot(t); };
             _planBar.LockClicked += ToggleLock;
@@ -216,6 +234,7 @@ namespace Musketeers.UI
         void HideAll()
         {
             _menu.SetVisible(false);
+            _charSelect.Hide();
             _lobby.SetVisible(false);
             _hud.SetVisible(false);
             _scoreboard.SetVisible(false);
@@ -233,39 +252,70 @@ namespace Musketeers.UI
             _audio?.Music("Music/menu");
         }
 
+        // Menu (valid name) -> Pick your Musketeer -> Lobby. The lobby's Change Musketeer (chunk 4) calls this too.
+        public void ShowCharacterSelect()
+        {
+            Teardown();
+            HideAll();
+            _stage.Hide();
+            _screen = Screen.Menu;
+            _charSelectFromLobby = false;
+            _model.Name = _menu.PlayerName;
+            _charSelect.Show(_model.Character);
+        }
+
+        // Lobby -> Change Musketeer: the same overlay; Back and Select both return to the lobby.
+        void ChangeMusketeer()
+        {
+            _charSelectFromLobby = true;
+            _lobby.SetVisible(false);
+            _stage.Hide();
+            _charSelect.Show(_model.Character);
+        }
+
         public void ShowLobby()
         {
             Teardown();
             HideAll();
             _screen = Screen.Lobby;
+            _charSelectFromLobby = false;
             _model.Name = _menu.PlayerName;
+            bool host = !(DevFlags.Available && DevFlags.LobbyAsGuest);
+            if (host != _model.IsHost)
+                _model.SetHost(host);
             _lobby.Refresh();
             _lobby.SetVisible(true);
             RefreshStage();
             _rig.SetBackground(null, new Color(0.08f, 0.06f, 0.05f));
             _rig.FrameStage(StageView.Center, StageView.Width, StageView.Height);
+            ApplyLobbyTheme(true);
+        }
+
+        // The selected map's lobby art and music (MapDef). A map change fades the background and crossfades the
+        // music; ShowLobby (also after Results -> Play again) applies it instantly.
+        void ApplyLobbyTheme(bool instant)
+        {
+            var map = CurrentMap;
+            var art = map != null && map.LobbyBackground != null ? map.LobbyBackground : UiArt.Get(GameArt.LobbyBackground);
+            _stage.SetBackground(art, instant ? 0f : 0.4f);
             PlayLobbyMusic();
         }
 
-        // The lobby track of the selected map (MapDef.LobbyMusic); chunk 4 calls this again when the map changes.
+        // The lobby track of the selected map (MapDef.LobbyMusic).
         public void PlayLobbyMusic()
         {
             var map = CurrentMap;
             string key = map != null && !string.IsNullOrEmpty(map.LobbyMusic) ? map.LobbyMusic : "Music/arena_lobby";
-            _audio?.Music(key);
+            _audio?.Music(key, 1.0f);
         }
 
         void RefreshStage()
         {
             var chars = _model.Characters();
             var names = new string[chars.Length];
-            var tags = new string[chars.Length];
             for (int i = 0; i < chars.Length; i++)
-            {
-                names[i] = i == 0 && !string.IsNullOrEmpty(_model.Name) ? _model.Name : _art.CharacterName(chars[i]);
-                tags[i] = i == 0 ? (string.IsNullOrEmpty(_model.Name) ? "You" : _art.CharacterName(chars[i])) : "Bot";
-            }
-            _stage.Show(chars.Length, chars, names, tags, _model.Loadouts());
+                names[i] = i != 0 ? "Bot" : !string.IsNullOrEmpty(_model.Name) ? _model.Name : _art.CharacterName(chars[i]);
+            _stage.Show(chars.Length, chars, names, null, _model.Loadouts(), _model.Ready());
             if (_lobby.Wardrobe.Open)
                 _stage.Focus(0);
         }
@@ -669,8 +719,12 @@ namespace Musketeers.UI
                         Emote(i);
                 }
             }
-            if (kb != null && kb.escapeKey.wasPressedThisFrame && _settings.Open)
-                _settings.SetVisible(false);
+            if (kb != null && kb.escapeKey.wasPressedThisFrame && _confirm.Open)
+                _confirm.Cancel();
+            else if (kb != null && kb.escapeKey.wasPressedThisFrame && _info.Open)
+                _info.Close();
+            else if (_charSelect.Visible && !_info.Open && !_confirm.Open)
+                _charSelect.Tick();
             if (!inMatch || _screen != Screen.Match)
                 return;
 
@@ -719,6 +773,48 @@ namespace Musketeers.UI
             _model.Map = Mathf.Clamp(map, 0, _model.MapCount - 1);
             StartWithLoading(NewSetup(null));
         }
+
+        public void DevShowCharacterSelect(int character)
+        {
+            ShowCharacterSelect();
+            _charSelect.Show(character);
+        }
+
+        // tab: 0 Lore, 1 How to play, 2 Settings.
+        public void DevOpenWindow(int tab) => _info.OpenTab((InfoWindowUI.Tab)Mathf.Clamp(tab, 0, 2));
+
+        public void DevCloseWindow() => _info.Close();
+
+        public void DevPlayWithName(string name)
+        {
+            if (_screen != Screen.Menu || _charSelect.Visible)
+                ShowMenu();
+            _menu.SetName(name);
+            _menu.Play();
+        }
+
+        // Lobby as a non-host (read-only GM panel, Ready toggle); re-renders the lobby.
+        public void DevLobbyAsGuest(bool on)
+        {
+            DevFlags.LobbyAsGuest = on;
+            if (_screen == Screen.Lobby && _charSelect.Visible == false)
+                ShowLobby();
+            else
+                _model.SetHost(!on);
+        }
+
+        // Screenshots: make a bot Not ready (or revert), switch the map with the stepper, press the lobby buttons.
+        public void DevSetBotReady(int slot, bool ready)
+        {
+            _model.DevSetBotReady(slot, ready);
+            _stage.SetReady(_model.Ready());
+        }
+
+        public void DevStepMap(int d) => _lobby.StepMap(d);
+        public void DevAskLeave() => _lobby.AskLeave();
+        public void DevPressStart() => _lobby.PressStart();
+        public void DevChangeMusketeer() => ChangeMusketeer();
+        public void DevCloseConfirm() => _confirm.Hide();
 
         public void DevOpenWardrobe(bool open)
         {

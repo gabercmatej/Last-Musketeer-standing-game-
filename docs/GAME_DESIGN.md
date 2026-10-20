@@ -274,11 +274,14 @@ Ranked by fun-per-hour-of-work. Days 5–6 of the build plan.
 ## 9. Screen flow, lobby and online
 
 ### Screens (one scene; the UI switches between them)
-1. **Main menu:** splash art and logo, name field (remembered), **Play vs Bots**, **Host**, **Join** (code field), **Settings** (Music / SFX / Voice volume, credits), Fullscreen.
-2. **Lobby** (Among Us style): the musketeers stand on a tavern stage.
-   - Character picker: 4 portraits, taken characters greyed out.
-   - **Wardrobe** panel with **Hat / Face / Cape / Boots** tabs and a live preview on the stage. Your outfit is saved per character (PlayerPrefs). Bots wear no cosmetics. Only items enabled for v1 are shown.
-   - Map choice: **Courtyard** or **Bridge**. Add Bot / Remove Bot (2–4 players). **Start**.
+1. **Main menu:** menu art with the panel on the right: name field (remembered; 1-20 characters, letters, numbers, spaces and `.'-`, shakes with a hint when invalid), **Play vs Bots**, **Host**, **Join** (code field). Top-right: **Lore**, **Settings**, **Fullscreen**. Lore, **How to play** and Settings share one tabbed window.
+1b. **Character select** ("Pick your Musketeer"): four portraits and a bio panel (title, strength, weakness, story, signature); **Select** or **Back**. Online, a musketeer someone else holds can be previewed but shows "Taken by <name>".
+2. **Lobby** (Among Us style): the musketeers stand on the stage of the selected map's lobby art (no bottom bar).
+   - **Names and status:** the player name above each musketeer in their colour (bots show "Bot"), a **Ready** (green) or **Not ready** (red) line under the feet. Bots are always ready.
+   - **Top-left, game-master panel:** map (every `MapDef`, with its description), points to win 10-30, hearts 1-5, Players 2-4 (- Bot / + Bot). Read-only ("Set by the host") for a non-host.
+   - **Top-right:** **Menu** (asks "Leave lobby?"), **Settings**, **Fullscreen**.
+   - **Bottom-left:** **Wardrobe** (Hat / Face / Cape / Boots tabs on the right half, live preview on your musketeer, only enabled items, saved per character, bots wear nothing) and **Change Musketeer** (reopens character select; Back or Select returns to the lobby).
+   - **Bottom-right:** the host's **Start** (asks "Not everyone is ready. Start anyway?" if anyone is not ready); a non-host gets a **Ready / Not ready** toggle instead.
 3. **Loading screen:** splash art, a random gameplay tip and a bar, for a few seconds.
 4. **Arena:** the match. Emotes on **Z / X / C / V**.
 5. **Scoreboard** between rounds (points with reasons, portraits).

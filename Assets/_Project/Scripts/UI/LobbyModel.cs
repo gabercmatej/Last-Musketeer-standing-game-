@@ -22,6 +22,8 @@ namespace Musketeers.UI
         readonly CharacterRoster _roster;
         readonly CosmeticCatalog _catalog;
         readonly Loadout[] _bots = new Loadout[4];
+        readonly string[] _takenBy = new string[4];   // Day 5: who holds each musketeer; offline everyone is free
+        readonly bool[] _botNotReady = new bool[4];   // dev/screenshots only: bots are always ready otherwise
 
         public string Name = "";
         public int Character;
@@ -33,6 +35,56 @@ namespace Musketeers.UI
         int _hearts = DefaultHearts;
         public int PointsToWin { get => _pointsToWin; set => _pointsToWin = Mathf.Clamp(value, MinPointsToWin, MaxPointsToWin); }
         public int Hearts { get => _hearts; set => _hearts = Mathf.Clamp(value, MinHearts, MaxHearts); }
+
+        // Day-5 lobby state, local for now (FIXES_v0.2 §2.4): offline you are the host, everyone is ready.
+        // A non-host (dev flag, later a joined player) has a Ready toggle and starts Not ready.
+        public bool IsHost { get; private set; } = true;
+        public bool MyReady { get; private set; } = true;
+
+        public void SetHost(bool host)
+        {
+            IsHost = host;
+            MyReady = host;
+        }
+
+        public void ToggleReady()
+        {
+            if (!IsHost)
+                MyReady = !MyReady;
+        }
+
+        // Slot 0 is you: a host counts as ready; bots are always ready.
+        public bool IsReady(int slot)
+        {
+            if (slot == 0)
+                return IsHost || MyReady;
+            return slot < 0 || slot >= _botNotReady.Length || !_botNotReady[slot];
+        }
+
+        public bool[] Ready()
+        {
+            var r = new bool[Players];
+            for (int i = 0; i < r.Length; i++)
+                r[i] = IsReady(i);
+            return r;
+        }
+
+        public bool AllReady()
+        {
+            for (int i = 0; i < Players; i++)
+            {
+                if (!IsReady(i))
+                    return false;
+            }
+            return true;
+        }
+
+        // Dev only (screenshot of the "Start anyway?" dialog).
+        public void DevSetBotReady(int slot, bool ready)
+        {
+            if (slot > 0 && slot < _botNotReady.Length)
+                _botNotReady[slot] = !ready;
+        }
 
         public int RosterCount => _roster != null ? _roster.Count : 4;
 
@@ -49,6 +101,17 @@ namespace Musketeers.UI
             for (int i = 1; i < 4; i++)
                 RerollBot(i);
         }
+
+        // Who else holds this musketeer (null = free). Always null offline; Day 5 / dev sets it.
+        public string TakenBy(int character) => character >= 0 && character < _takenBy.Length ? _takenBy[character] : null;
+
+        public void SetTaken(int character, string name)
+        {
+            if (character >= 0 && character < _takenBy.Length)
+                _takenBy[character] = string.IsNullOrEmpty(name) ? null : name;
+        }
+
+        public bool CanPick(int character) => character >= 0 && character < RosterCount && TakenBy(character) == null;
 
         // Copies the lobby's rules into a match setup (hearts per round, points to win).
         public void ApplyTo(MatchSetup setup)

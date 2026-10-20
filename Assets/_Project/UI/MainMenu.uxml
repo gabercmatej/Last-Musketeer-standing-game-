@@ -2,33 +2,68 @@
     <ui:VisualElement name="menu" class="screen menu-screen">
         <ui:VisualElement name="menu-bg" class="fill-bg" picking-mode="Ignore" />
         <ui:VisualElement class="menu-shade" picking-mode="Ignore" />
+        <ui:VisualElement name="menu-corner" class="corner-row" picking-mode="Ignore" />
         <ui:VisualElement class="menu-layout" picking-mode="Ignore">
-            <ui:VisualElement class="menu-left" picking-mode="Ignore">
-                <ui:VisualElement name="menu-logo" class="menu-logo" picking-mode="Ignore" />
-                <ui:Label name="menu-title" text="The Last Musketeer Standing" class="title title--hero" />
-            </ui:VisualElement>
             <ui:VisualElement class="panel menu-panel">
+                <ui:Label name="menu-title" text="The Last Musketeer Standing" class="title menu-title" />
                 <ui:Label text="Your name" class="section-label" />
-                <ui:TextField name="name-field" max-length="16" class="field" />
-                <ui:Button name="play-bots" text="Play vs Bots" class="btn btn--big" />
+                <ui:TextField name="name-field" max-length="20" class="field" />
+                <ui:Label name="name-hint" text="" class="name-hint" />
+                <ui:Button name="play-bots" text="Play vs Bots" class="btn btn--big menu-play" />
                 <ui:VisualElement class="menu-row">
                     <ui:Button name="host" text="Host" class="btn btn--half" />
                     <ui:Button name="join" text="Join" class="btn btn--half" />
                 </ui:VisualElement>
                 <ui:Label text="Online play is coming tomorrow." class="note" />
-                <ui:VisualElement class="menu-row">
-                    <ui:Button name="settings" text="Settings" class="btn btn--half btn--quiet" />
-                    <ui:Button name="fullscreen" text="Fullscreen" class="btn btn--half btn--quiet" />
-                </ui:VisualElement>
                 <ui:VisualElement name="dev-row" class="menu-row dev-row">
                     <ui:Label text="DEV" class="badge badge--dev" />
                     <ui:Label text="Seed" class="dev-label" />
                     <ui:TextField name="seed-field" max-length="10" class="field field--seed" />
-                    <ui:Label text="blank = random, F2 = plan every unit" class="dev-label" />
+                    <ui:Label text="blank = random, F2 = control all" class="dev-label dev-hint" />
                 </ui:VisualElement>
             </ui:VisualElement>
         </ui:VisualElement>
-        <ui:Label text="Plan in secret. Everything resolves at once. Be the last one standing." class="tagline" picking-mode="Ignore" />
         <ui:Label name="menu-version" text="" class="corner-note" />
+    </ui:VisualElement>
+
+    <ui:VisualElement name="charselect" class="screen charselect">
+        <ui:VisualElement name="charselect-bg" class="fill-bg" picking-mode="Ignore" />
+        <ui:VisualElement class="charselect-shade" picking-mode="Ignore" />
+        <ui:Label text="Pick your Musketeer" class="title charselect-title" picking-mode="Ignore" />
+        <ui:VisualElement class="charselect-body" picking-mode="Ignore">
+            <ui:VisualElement name="cs-picker" class="cs-picker" />
+            <ui:VisualElement class="panel cs-bio">
+                <ui:VisualElement class="cs-head">
+                    <ui:VisualElement name="cs-portrait" class="cs-portrait" picking-mode="Ignore" />
+                    <ui:VisualElement class="cs-headtext">
+                        <ui:Label name="cs-name" text="" class="cs-name name-clip" />
+                        <ui:Label name="cs-title" text="" class="cs-title name-clip" />
+                        <ui:VisualElement class="cs-stat">
+                            <ui:Label text="Strength" class="cs-stat-label" />
+                            <ui:Label name="cs-strength" text="" class="cs-stat-value name-clip" />
+                        </ui:VisualElement>
+                        <ui:VisualElement class="cs-stat">
+                            <ui:Label text="Weakness" class="cs-stat-label" />
+                            <ui:Label name="cs-weakness" text="" class="cs-stat-value name-clip" />
+                        </ui:VisualElement>
+                    </ui:VisualElement>
+                </ui:VisualElement>
+                <ui:Label name="cs-bio" text="" class="cs-story" />
+                <ui:VisualElement class="cs-sig">
+                    <ui:VisualElement name="cs-sig-icon" class="cs-sig-icon" picking-mode="Ignore" />
+                    <ui:VisualElement class="cs-sig-text">
+                        <ui:VisualElement class="cs-sig-head">
+                            <ui:Label name="cs-sig-name" text="" class="cs-sig-name" />
+                            <ui:Label name="cs-sig-cost" text="" class="cs-sig-cost" />
+                        </ui:VisualElement>
+                        <ui:Label name="cs-sig-desc" text="" class="cs-sig-desc" />
+                    </ui:VisualElement>
+                </ui:VisualElement>
+            </ui:VisualElement>
+        </ui:VisualElement>
+        <ui:VisualElement class="charselect-buttons">
+            <ui:Button name="cs-back" text="Back" class="btn btn--back cs-back" />
+            <ui:Button name="cs-select" text="Select" class="btn btn--big btn--primary" />
+        </ui:VisualElement>
     </ui:VisualElement>
 </ui:UXML>

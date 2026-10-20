@@ -1,0 +1,5 @@
+Every turn, everyone plans 3 actions in secret. When the timer ends (or all of you lock in), all plans play out at the same moment, one tick at a time.
+
+Last musketeer standing wins the round. Points decide the match, and whoever wears the Crown becomes the target. Grit pays for the strong moves, and Catch Breath earns you more.
+
+<color=#FFCE60><b>Fire beats standing still. Parry beats Fire. Shove beats Parry. Moving beats everything, if you guess right.</b></color>

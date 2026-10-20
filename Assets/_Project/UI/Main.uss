@@ -240,6 +240,13 @@
 
 .dev-row {
     margin-top: 8px;
+    flex-wrap: wrap;
+}
+
+.dev-hint {
+    width: 100%;
+    margin: 2px 4px 0 4px;
+    white-space: normal;
 }
 
 .dev-label {
@@ -270,166 +277,315 @@
     top: 0;
     bottom: 0;
     flex-direction: row;
-    align-items: flex-end;
-    justify-content: space-between;
-    padding: 30px 40px 26px 40px;
-}
-
-.menu-left {
-    width: 560px;
     align-items: center;
-    align-self: center;
+    justify-content: flex-end;
+    padding: 70px 48px 30px 40px;
 }
 
-.menu-logo {
-    width: 520px;
-    height: 290px;
-    -unity-background-scale-mode: scale-to-fit;
-}
-
-.tagline {
-    position: absolute;
-    left: 24px;
-    bottom: 14px;
-    color: var(--ink);
-    font-size: 15px;
-    -unity-text-align: middle-center;
+.menu-title {
+    font-size: 40px;
     white-space: normal;
+    margin-bottom: 10px;
+}
+
+.menu-play {
+    width: auto;
+    margin: 12px 0 8px 0;
+    min-height: 78px;
+    font-size: 32px;
+}
+
+.name-hint {
+    color: rgb(255, 120, 96);
+    font-size: 14px;
+    margin: 4px 0 0 2px;
+    min-height: 18px;
+    white-space: normal;
+}
+
+.field--error > .unity-text-field__input,
+.field--error .unity-base-text-field__input {
+    border-color: rgb(255, 98, 86);
+    border-width: 2px;
+}
+
+.corner-row {
+    position: absolute;
+    right: 24px;
+    top: 16px;
+    flex-direction: row;
+    align-items: flex-start;
+}
+
+.icon-btn {
+    background-color: rgba(0, 0, 0, 0);
+    border-width: 0;
+    padding: 0;
+    margin: 0 0 0 14px;
+    width: 76px;
+    align-items: center;
+    transition-property: scale;
+    transition-duration: 0.1s;
+}
+
+.icon-btn:hover {
+    scale: 1.06 1.06;
+}
+
+.icon-btn:active {
+    scale: 0.96 0.96;
+}
+
+.icon-btn__img {
+    width: 58px;
+    height: 58px;
+    -unity-background-scale-mode: scale-to-fit;
+    -unity-background-image-tint-color: rgb(222, 222, 222);
+    align-items: center;
+    justify-content: center;
+}
+
+.icon-btn:hover > .icon-btn__img {
+    -unity-background-image-tint-color: rgb(255, 255, 255);
+}
+
+.icon-btn__img--fallback {
+    background-color: var(--navy);
+    border-color: var(--gold-dark);
+    border-width: 2px;
+    border-radius: 8px;
+}
+
+.icon-btn__initial {
+    font-size: 26px;
+    color: var(--gold);
+}
+
+.icon-btn__caption {
+    font-size: 13px;
+    color: rgb(255, 243, 214);
+    margin-top: 2px;
     -unity-text-outline-width: 1px;
-    -unity-text-outline-color: rgba(0, 0, 0, 0.85);
-    margin-top: 6px;
+    -unity-text-outline-color: rgba(10, 6, 4, 0.8);
+    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.8);
+    white-space: nowrap;
+}
+
+/* Every name label: one line, "..." when it does not fit. Needs a constrained width (max-width or flex-shrink). */
+.name-clip {
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    -unity-text-overflow-position: end;
 }
 
 .menu-panel {
-    width: 340px;
+    width: 360px;
     padding: 20px 24px;
 }
 
 /* ---------- lobby ---------- */
 
-.lobby-top {
+.gm-panel {
     position: absolute;
-    left: 12px;
-    right: 12px;
-    top: 10px;
-    flex-direction: row;
-    align-items: center;
-    justify-content: space-between;
+    left: 14px;
+    top: 12px;
+    width: 300px;
+    padding: 16px 20px 14px 20px;
+    -unity-slice-scale: 0.36px;
 }
 
-.lobby-title {
-    font-size: 46px;
+.gm-header {
+    -unity-font-definition: url("/Assets/_Project/Art/Fonts/PirataOne-Regular.ttf");
+    font-size: 26px;
+    color: var(--gold);
+    -unity-text-align: middle-center;
+    -unity-text-outline-width: 1px;
+    -unity-text-outline-color: rgb(40, 22, 6);
+    margin-bottom: 6px;
 }
 
-.map-choice {
-    flex-direction: row;
-    align-items: center;
-    width: 380px;
+.gm-label {
+    font-size: 14px;
+    color: var(--ink-dim);
 }
 
-.map-text {
+.gm-label--row {
     flex-grow: 1;
+}
+
+.gm-map {
+    margin-bottom: 6px;
+}
+
+.gm-map-row {
+    flex-direction: row;
     align-items: center;
+}
+
+.gm-step {
+    width: 34px;
+    min-height: 28px;
+    font-size: 17px;
+    margin: 2px;
+    padding: 0;
+}
+
+.gm-bot {
+    min-height: 28px;
+    margin: 2px;
+    padding: 2px 8px;
+    font-size: 13px;
+}
+
+.gm-row {
+    flex-direction: row;
+    align-items: center;
+    margin-top: 2px;
+}
+
+.gm-value {
+    font-size: 20px;
+    color: var(--gold);
+    min-width: 38px;
+    -unity-text-align: middle-center;
+}
+
+.gm-value--tight {
+    min-width: 30px;
+}
+
+.gm-value-box {
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    min-width: 62px;
+}
+
+.gm-heart {
+    width: 20px;
+    height: 20px;
+    -unity-background-scale-mode: scale-to-fit;
 }
 
 .map-name {
-    font-size: 17px;
+    flex-grow: 1;
+    flex-shrink: 1;
+    font-size: 18px;
     color: var(--gold);
+    -unity-text-align: middle-center;
 }
 
 .map-desc {
-    font-size: 11px;
+    font-size: 12px;
     color: var(--ink-dim);
     white-space: normal;
-    -unity-text-align: middle-center;
+    -unity-text-align: upper-center;
+    margin: 0 4px 2px 4px;
+    min-height: 30px;
 }
 
-.lobby-bottom {
+.gm-panel--readonly .gm-step,
+.gm-panel--readonly .gm-bot {
+    display: none;
+}
+
+.lobby-bl {
     position: absolute;
-    left: 40px;
-    right: 40px;
-    bottom: 12px;
+    left: 24px;
+    bottom: 10px;
     flex-direction: row;
-    align-items: center;
-    padding: 16px 26px;
+    align-items: flex-end;
 }
 
-.lobby-col {
-    flex-grow: 1;
+.lobby-bl .icon-btn {
+    margin: 0 18px 0 0;
 }
 
-.lobby-col--narrow {
-    flex-grow: 0;
-    width: 200px;
-    margin: 0 14px;
+.lobby-br {
+    position: absolute;
+    right: 28px;
+    bottom: 22px;
+    align-items: flex-end;
 }
 
-.char-picker {
-    flex-direction: row;
+.lobby-br .btn--start {
+    width: 240px;
+    min-height: 72px;
+    font-size: 30px;
+    margin: 0;
 }
 
-.char-pick {
-    width: 84px;
-    height: 84px;
-    margin-right: 10px;
-    border-radius: 42px;
-    border-width: 3px;
-    border-color: rgba(255, 255, 255, 0.15);
-    background-color: rgba(0, 0, 0, 0.35);
-    -unity-background-scale-mode: scale-and-crop;
-    transition-property: border-color, scale, opacity;
-    transition-duration: 0.1s;
+.btn--ready-on {
+    -unity-background-image-tint-color: rgb(170, 255, 170);
 }
 
-.char-pick:hover {
-    scale: 1.05 1.05;
+.icon-btn--big {
+    width: 104px;
 }
 
-.char-pick--on {
-    border-color: var(--gold);
-    scale: 1.08 1.08;
+.icon-btn--big > .icon-btn__img {
+    width: 76px;
+    height: 76px;
 }
 
-.ability-text {
-    font-size: 13px;
-    color: var(--ink-dim);
-    white-space: normal;
-    margin-top: 6px;
-    max-width: 440px;
+.icon-btn--big > .icon-btn__caption {
+    font-size: 15px;
 }
 
-.player-count {
-    font-size: 26px;
+.confirm-panel {
+    width: 600px;
+    padding: 30px 36px 24px 36px;
+    align-items: stretch;
+}
+
+.confirm-message {
+    -unity-font-definition: url("/Assets/_Project/Art/Fonts/PirataOne-Regular.ttf");
+    font-size: 34px;
     color: var(--gold);
-    width: 34px;
     -unity-text-align: middle-center;
+    white-space: normal;
+    -unity-text-outline-width: 1px;
+    -unity-text-outline-color: rgb(40, 22, 6);
+    margin-bottom: 14px;
+}
+
+.confirm-row {
+    flex-direction: row;
+    justify-content: center;
+}
+
+.confirm-btn {
+    flex-grow: 1;
+    flex-basis: 0;
+    margin: 4px 8px;
+    font-size: 22px;
 }
 
 .wardrobe {
     position: absolute;
-    right: 14px;
-    top: 92px;
-    bottom: 14px;
-    width: 420px;
+    right: 24px;
+    top: 118px;
+    bottom: 24px;
+    width: 470px;
+    padding: 28px 34px 20px 34px;
     display: none;
 }
 
-.tabs {
-    flex-direction: row;
-    justify-content: center;
+.wardrobe .info-tab {
+    font-size: 18px;
+    min-height: 42px;
+}
+
+.wardrobe .info-close {
+    width: 150px;
+    min-height: 46px;
+    font-size: 20px;
+    margin-left: 8px;
+}
+
+.wardrobe .title--panel {
     margin-bottom: 6px;
-}
-
-.tab {
-    flex-grow: 1;
-    flex-basis: 0;
-    font-size: 14px;
-    opacity: 0.6;
-}
-
-.tab--on {
-    opacity: 1;
-    -unity-background-image-tint-color: rgb(255, 236, 180);
 }
 
 .wardrobe-grid {
@@ -524,32 +680,370 @@
     border-radius: 7px;
 }
 
-/* ---------- settings ---------- */
+/* ---------- info window: Lore / How to play / Settings ---------- */
 
-.settings-panel {
-    width: 520px;
-    max-height: 640px;
+.info-window {
+    width: 780px;
+    height: 600px;
+    padding: 28px 40px 22px 40px;
+}
+
+.info-tabs {
+    flex-direction: row;
+    margin-bottom: 8px;
+}
+
+.info-tab {
+    width: auto;
+    flex-grow: 1;
+    flex-basis: 0;
+    font-size: 22px;
+    min-height: 50px;
+    margin: 0 3px;
+    opacity: 0.6;
+}
+
+.info-tab--on {
+    opacity: 1;
+}
+
+.info-page {
+    padding-top: 8px;
+    flex-grow: 1;
+    flex-shrink: 1;
+    min-height: 0;
+}
+
+.info-scroll {
+    flex-grow: 1;
+}
+
+.info-title {
+    font-size: 40px;
+    margin-bottom: 8px;
+}
+
+.info-text {
+    font-size: 16px;
+    color: var(--ink);
+    white-space: normal;
+    padding: 0 8px 8px 8px;
+}
+
+.info-scroll .unity-scroller__low-button,
+.info-scroll .unity-scroller__high-button {
+    display: none;
+}
+
+.info-scroll .unity-base-slider--vertical,
+.info-scroll .unity-scroller--vertical {
+    width: 12px;
+}
+
+.info-scroll .unity-base-slider__tracker {
+    background-color: rgba(4, 8, 28, 0.6);
+    border-width: 0;
+    border-radius: 6px;
+}
+
+.info-scroll .unity-base-slider__dragger {
+    background-color: var(--gold-dark);
+    border-width: 0;
+    border-radius: 6px;
+    width: 12px;
+}
+
+.info-close {
+    align-self: center;
+    width: 160px;
+    min-height: 52px;
+    font-size: 22px;
+    margin-top: 6px;
+}
+
+.howto-table {
+    margin: 6px 8px 8px 8px;
+}
+
+.howto-row {
+    flex-direction: row;
+    align-items: center;
+    padding: 1px 0;
+    border-bottom-width: 1px;
+    border-bottom-color: var(--line);
+}
+
+.howto-icon {
+    width: 30px;
+    height: 30px;
+    margin-right: 10px;
+    -unity-background-scale-mode: scale-to-fit;
+}
+
+.howto-name {
+    width: 120px;
+    font-size: 16px;
+    color: var(--gold);
+}
+
+.howto-cost {
+    width: 110px;
+    font-size: 13px;
+    color: var(--ink-dim);
+}
+
+.howto-desc {
+    flex-grow: 1;
+    flex-shrink: 1;
+    font-size: 14px;
+    white-space: normal;
 }
 
 .volume {
-    margin: 6px 0;
+    margin: 8px 0;
 }
 
 .volume > .unity-label {
     color: var(--ink);
-    min-width: 130px;
-    font-size: 15px;
+    min-width: 150px;
+    font-size: 16px;
 }
 
 .credits-scroll {
-    height: 170px;
-    margin-bottom: 8px;
+    flex-grow: 1;
+    margin-bottom: 4px;
 }
 
 .credits {
     font-size: 11px;
     color: var(--ink-dim);
     white-space: normal;
+}
+
+/* ---------- character select ---------- */
+
+.charselect-shade {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    background-color: rgba(4, 6, 16, 0.9);
+}
+
+.charselect-title {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 22px;
+    font-size: 54px;
+}
+
+.charselect-body {
+    position: absolute;
+    left: 60px;
+    right: 60px;
+    top: 100px;
+    bottom: 110px;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+}
+
+.cs-picker {
+    width: 150px;
+    justify-content: center;
+    align-items: center;
+}
+
+.cs-pick-holder {
+    width: 112px;
+    height: 112px;
+    margin: 7px 0;
+    align-items: center;
+    justify-content: center;
+}
+
+.cs-pick-glow {
+    position: absolute;
+    left: -10px;
+    right: -10px;
+    top: -10px;
+    bottom: -10px;
+    border-radius: 66px;
+    display: none;
+}
+
+.cs-pick {
+    width: 96px;
+    height: 96px;
+    border-radius: 48px;
+    border-width: 4px;
+    background-color: rgba(0, 0, 0, 0.35);
+    -unity-background-scale-mode: scale-and-crop;
+    transition-property: scale;
+    transition-duration: 0.1s;
+    opacity: 0.85;
+}
+
+.cs-pick:hover {
+    scale: 1.05 1.05;
+    opacity: 1;
+}
+
+.cs-pick--on {
+    scale: 1.14 1.14;
+    border-width: 6px;
+    opacity: 1;
+}
+
+.cs-ribbon {
+    position: absolute;
+    bottom: 6px;
+    background-color: rgb(190, 50, 44);
+    color: var(--ink);
+    font-size: 11px;
+    padding: 1px 8px;
+    border-radius: 4px;
+    display: none;
+}
+
+.cs-bio {
+    width: 720px;
+    flex-shrink: 1;
+    margin-left: 24px;
+    padding: 26px 34px;
+    max-height: 100%;
+}
+
+.cs-head {
+    flex-direction: row;
+    align-items: center;
+    margin-bottom: 8px;
+}
+
+.cs-portrait {
+    width: 132px;
+    height: 132px;
+    border-radius: 66px;
+    border-width: 5px;
+    background-color: rgba(0, 0, 0, 0.35);
+    -unity-background-scale-mode: scale-and-crop;
+    margin-right: 20px;
+    flex-shrink: 0;
+}
+
+.cs-headtext {
+    flex-grow: 1;
+    flex-shrink: 1;
+    min-width: 0;
+}
+
+.cs-name {
+    -unity-font-definition: url("/Assets/_Project/Art/Fonts/PirataOne-Regular.ttf");
+    font-size: 50px;
+    -unity-text-outline-width: 1.5px;
+    -unity-text-outline-color: rgb(20, 10, 4);
+}
+
+.cs-title {
+    font-size: 19px;
+    color: var(--ink-dim);
+    margin-bottom: 6px;
+}
+
+.cs-stat {
+    flex-direction: row;
+    align-items: baseline;
+}
+
+.cs-stat-label {
+    width: 96px;
+    font-size: 14px;
+    color: var(--gold);
+}
+
+.cs-stat-value {
+    flex-shrink: 1;
+    min-width: 0;
+    font-size: 17px;
+    color: var(--ink);
+}
+
+.cs-story {
+    font-size: 16px;
+    color: var(--ink);
+    white-space: normal;
+    margin: 6px 0 12px 0;
+}
+
+.cs-sig {
+    flex-direction: row;
+    align-items: center;
+    background-color: rgba(4, 8, 28, 0.55);
+    border-color: var(--gold-dark);
+    border-width: 1px;
+    border-radius: 8px;
+    padding: 10px 14px;
+}
+
+.cs-sig-icon {
+    width: 54px;
+    height: 54px;
+    margin-right: 14px;
+    flex-shrink: 0;
+    -unity-background-scale-mode: scale-to-fit;
+}
+
+.cs-sig-text {
+    flex-grow: 1;
+    flex-shrink: 1;
+    min-width: 0;
+}
+
+.cs-sig-head {
+    flex-direction: row;
+    align-items: baseline;
+}
+
+.cs-sig-name {
+    font-size: 22px;
+    color: var(--gold);
+    margin-right: 12px;
+}
+
+.cs-sig-cost {
+    font-size: 14px;
+    color: var(--ink-dim);
+}
+
+.cs-sig-desc {
+    font-size: 14px;
+    color: var(--ink);
+    white-space: normal;
+}
+
+.charselect-buttons {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 24px;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+}
+
+.charselect-buttons .cs-back {
+    width: 160px;
+    min-height: 66px;
+    font-size: 24px;
+}
+
+.charselect-buttons .btn--big {
+    min-height: 66px;
+    font-size: 28px;
+    width: 300px;
+    margin-left: 20px;
 }
 
 /* ---------- HUD ----------
@@ -1235,6 +1729,12 @@
 
 .total-name {
     flex-grow: 1;
+    flex-shrink: 1;
+    min-width: 0;
+    max-width: 240px;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
     font-size: 16px;
 }
 
@@ -1265,6 +1765,11 @@
 }
 
 .winner {
+    max-width: 520px;
+    align-self: center;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
     -unity-font-definition: url("/Assets/_Project/Art/Fonts/PirataOne-Regular.ttf");
     font-size: 50px;
     -unity-text-align: middle-center;
@@ -1323,12 +1828,34 @@
 }
 
 .unit-name {
+    max-width: 130px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    -unity-text-overflow-position: end;
     font-size: 12px;
 }
 
 .stage-name {
-    font-size: 20px;
+    max-width: 220px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    -unity-text-overflow-position: end;
+    font-size: 27px;
+    -unity-font-style: bold;
+    background-color: rgba(10, 10, 24, 0.5);
+    border-radius: 12px;
+    padding: 0 12px 1px 12px;
     -unity-text-outline-width: 1.5px;
+    -unity-text-outline-color: rgba(14, 8, 4, 0.95);
+    text-shadow: 0 2px 3px rgba(0, 0, 0, 0.8);
+}
+
+.stage-status {
+    font-size: 17px;
+    -unity-font-style: bold;
+    -unity-text-outline-width: 1.5px;
+    -unity-text-outline-color: rgba(10, 6, 4, 0.95);
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.8);
 }
 
 .stage-tag {

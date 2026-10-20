@@ -175,6 +175,23 @@ namespace Musketeers.Sim.Tests
         }
 
         [Test]
+        public void LobbyTakenState_OfflineFree_AndTakenCannotBePicked()
+        {
+            var model = new LobbyModel(null, null, 1);
+            for (int c = 0; c < 4; c++)
+            {
+                Assert.That(model.TakenBy(c), Is.Null);
+                Assert.That(model.CanPick(c), Is.True);
+            }
+            model.SetTaken(2, "Nik");
+            Assert.That(model.TakenBy(2), Is.EqualTo("Nik"));
+            Assert.That(model.CanPick(2), Is.False);
+            Assert.That(model.CanPick(1), Is.True);
+            model.SetTaken(2, null);
+            Assert.That(model.CanPick(2), Is.True);
+        }
+
+        [Test]
         public void LobbyRules_ClampToTheirRanges_AndApplyToTheSetup()
         {
             var model = new LobbyModel(null, null, 1);

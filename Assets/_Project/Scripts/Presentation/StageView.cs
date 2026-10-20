@@ -13,19 +13,25 @@ namespace Musketeers.Presentation
         public static readonly Vector3 Center = new Vector3(100f, 0f, 0f);
         public const float Width = 16f;
         public const float Height = 9f;
-        const float FloorY = -2.15f;
-        const float Scale = 2.35f;
-        static readonly float[] SpotX = { -4.8f, -1.6f, 1.6f, 4.8f };
+        // Feet on the stage floor of the lobby art (about 71% down the screen); the line-up is nudged right so the
+        // game-master panel in the top-left corner never covers the first musketeer.
+        const float FloorY = -1.9f;
+        const float Scale = 2.15f;
+        const float LineupShift = 1.6f;
+        const float BackgroundFill = 1.15f;
 
         [SerializeField] private ArtLibrary _art;
         [SerializeField] private WorldLabels _labels;
 
-        SpriteRenderer _bg;
+        SpriteRenderer _bg, _bgFront;
+        Sprite _bgSprite;
         Transform _root;
         readonly CharacterRig[] _rigs = new CharacterRig[4];
         readonly Transform[] _spots = new Transform[4];
         readonly WorldLabel[] _names = new WorldLabel[4];
         readonly WorldLabel[] _tags = new WorldLabel[4];
+        readonly WorldLabel[] _status = new WorldLabel[4];
+        readonly bool[] _hasStatus = new bool[4];
         SpriteRenderer _crown;
         int _count;
 
@@ -39,12 +45,45 @@ namespace Musketeers.Presentation
             _root.SetParent(transform, false);
             _root.localPosition = Center;
             _bg = _art.MakeRenderer("Background", _root, _art.Sprite(GameArt.LobbyBackground, null), Color.white, -100);
-            if (_bg.sprite != null)
+            _bgFront = _art.MakeRenderer("BackgroundFront", _root, null, new Color(1f, 1f, 1f, 0f), -99);
+            _bgSprite = _bg.sprite;
+            Cover(_bg);
+        }
+
+        // Cover-fit: the art fills the stage frame, cropping what does not fit.
+        static void Cover(SpriteRenderer r)
+        {
+            if (r.sprite == null)
+                return;
+            var b = r.sprite.bounds.size;
+            float k = Mathf.Max(Width * BackgroundFill / b.x, Height * BackgroundFill / b.y);
+            r.transform.localScale = new Vector3(k, k, 1f);
+        }
+
+        // Swaps the stage background (a map's lobby art). fade > 0 crossfades: the new art fades in over the old.
+        public void SetBackground(Sprite sprite, float fade)
+        {
+            Ensure();
+            if (sprite == null || sprite == _bgSprite)
+                return;
+            _bgSprite = sprite;
+            Tween.StopAll(_bgFront);
+            if (fade <= 0f || !_root.gameObject.activeInHierarchy)
             {
-                var b = _bg.sprite.bounds.size;
-                float k = Mathf.Max(Width * 1.15f / b.x, Height * 1.15f / b.y);
-                _bg.transform.localScale = new Vector3(k, k, 1f);
+                _bg.sprite = sprite;
+                Cover(_bg);
+                _bgFront.color = new Color(1f, 1f, 1f, 0f);
+                return;
             }
+            _bgFront.sprite = sprite;
+            Cover(_bgFront);
+            _bgFront.color = new Color(1f, 1f, 1f, 0f);
+            Tween.Alpha(_bgFront, 1f, fade, Ease.InOutSine).OnComplete(() =>
+            {
+                _bg.sprite = sprite;
+                Cover(_bg);
+                _bgFront.color = new Color(1f, 1f, 1f, 0f);
+            });
         }
 
         public void Hide()
@@ -55,11 +94,13 @@ namespace Musketeers.Presentation
             {
                 _names[i]?.SetVisible(false);
                 _tags[i]?.SetVisible(false);
+                _status[i]?.SetVisible(false);
             }
         }
 
-        // Rebuilds the line-up: characters[i] wearing loadouts[i], named names[i]; tags (e.g. "Bot") under names.
-        public void Show(int count, int[] characters, string[] names, string[] tags, Loadout[] loadouts)
+        // Rebuilds the line-up: characters[i] wearing loadouts[i], named names[i]. Under the name goes either a
+        // status line (ready[] given: "Ready" green / "Not ready" red, the lobby) or tags[i] (results points).
+        public void Show(int count, int[] characters, string[] names, string[] tags, Loadout[] loadouts, bool[] ready = null)
         {
             Ensure();
             _root.gameObject.SetActive(true);
@@ -74,6 +115,8 @@ namespace Musketeers.Presentation
                 _rigs[i] = null;
                 _names[i]?.SetVisible(false);
                 _tags[i]?.SetVisible(false);
+                _status[i]?.SetVisible(false);
+                _hasStatus[i] = ready != null && i < ready.Length;
                 if (i >= count)
                     continue;
                 var spot = new GameObject("Spot " + i);
@@ -90,23 +133,44 @@ namespace Musketeers.Presentation
                 rig.ShowWeapons(false);
                 _spots[i] = spot.transform;
                 _rigs[i] = rig;
-                Place(i, new Vector3(Spot(i, count), FloorY, 0f), Scale, true);
 
                 _names[i] = _names[i] ?? _labels.Create("", "stage-name");
                 _names[i].Text = names[i];
-                _names[i].Element.style.color = Color.Lerp(_art.CharacterColor(characters[i]), Color.white, 0.35f);
+                _names[i].Element.style.color = Color.Lerp(_art.CharacterColor(characters[i]), Color.white, 0.3f);
                 _names[i].Follow = spot.transform;
                 _tags[i] = _tags[i] ?? _labels.Create("", "stage-tag");
                 _tags[i].Text = tags != null && i < tags.Length ? tags[i] : "";
                 _tags[i].Follow = spot.transform;
+                _status[i] = _status[i] ?? _labels.Create("", "stage-status");
+                _status[i].Follow = spot.transform;
+                if (_hasStatus[i])
+                    SetStatus(i, ready[i]);
+                Place(i, new Vector3(Spot(i, count), FloorY, 0f), Scale, true);
                 SetLabelsVisible(i, true);
+            }
+        }
+
+        // The lobby's Ready / Not ready line under a name (Bots are always ready).
+        void SetStatus(int i, bool ready)
+        {
+            var l = _status[i];
+            l.Text = ready ? "Ready" : "Not ready";
+            l.Element.style.color = ready ? new Color(0.42f, 0.89f, 0.42f) : new Color(1f, 0.42f, 0.42f);
+        }
+
+        public void SetReady(bool[] ready)
+        {
+            for (int i = 0; i < _count && ready != null && i < ready.Length; i++)
+            {
+                if (_status[i] != null && _hasStatus[i])
+                    SetStatus(i, ready[i]);
             }
         }
 
         static float Spot(int i, int count)
         {
-            float spacing = count <= 2 ? 4.2f : count == 3 ? 3.6f : 3.2f;
-            return (i - (count - 1) * 0.5f) * spacing;
+            float spacing = count <= 2 ? 4.2f : count == 3 ? 3.4f : 2.95f;
+            return (i - (count - 1) * 0.5f) * spacing + LineupShift;
         }
 
         void Place(int i, Vector3 local, float scale, bool instant)
@@ -125,15 +189,17 @@ namespace Musketeers.Presentation
                 Tween.LocalPosition(t, local, 0.35f, Ease.OutCubic);
                 Tween.Scale(t, scale, 0.35f, Ease.OutCubic);
             }
-            float top = 1.42f * scale;
-            if (_names[i] != null) _names[i].Offset = new Vector3(0f, top + 0.35f, 0f);
+            float top = 1.36f * scale;
+            if (_names[i] != null) _names[i].Offset = new Vector3(0f, top + 0.45f, 0f);
             if (_tags[i] != null) _tags[i].Offset = new Vector3(0f, top + 0.02f, 0f);
+            if (_status[i] != null) _status[i].Offset = new Vector3(0f, -0.34f, 0f);   // under the feet, on the plain floor
         }
 
         void SetLabelsVisible(int i, bool on)
         {
             _names[i]?.SetVisible(on);
-            _tags[i]?.SetVisible(on && !string.IsNullOrEmpty(_tags[i].Text));
+            _tags[i]?.SetVisible(on && !_hasStatus[i] && !string.IsNullOrEmpty(_tags[i].Text));
+            _status[i]?.SetVisible(on && _hasStatus[i]);
         }
 
         public void SetLoadout(int slot, Loadout loadout) => _rigs[Mathf.Clamp(slot, 0, 3)]?.SetLoadout(loadout);
@@ -147,6 +213,7 @@ namespace Musketeers.Presentation
                 if (_spots[i] == null) continue;
                 _spots[i].gameObject.SetActive(me);
                 SetLabelsVisible(i, me);
+                _status[i]?.SetVisible(false);   // the Ready line is lobby-wide news, not for the fitting room
                 if (me)
                 {
                     Place(i, new Vector3(-3.2f, FloorY + 0.1f, 0f), 3.3f, false);

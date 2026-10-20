@@ -108,6 +108,8 @@ namespace Musketeers.EditorTools
             Set(flow, "_settingsUxml", Load<VisualTreeAsset>($"{UiDir}/Settings.uxml"));
             Set(flow, "_tips", Load<TextAsset>($"{DataDir}/Text/tips.txt"));
             Set(flow, "_credits", Load<TextAsset>($"{DataDir}/Text/credits.txt"));
+            Set(flow, "_lore", Load<TextAsset>($"{DataDir}/Text/lore.txt"));
+            Set(flow, "_howToPlay", Load<TextAsset>($"{DataDir}/Text/howtoplay.txt"));
             Set(flow, "_hudUxml", Load<VisualTreeAsset>($"{UiDir}/Hud.uxml"));
             Set(flow, "_scoreboardUxml", Load<VisualTreeAsset>($"{UiDir}/Scoreboard.uxml"));
             Set(flow, "_resultsUxml", Load<VisualTreeAsset>($"{UiDir}/Results.uxml"));

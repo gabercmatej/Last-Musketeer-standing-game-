@@ -1,15 +1,34 @@
 <ui:UXML xmlns:ui="UnityEngine.UIElements">
     <ui:VisualElement name="settings" class="screen screen--modal">
-        <ui:VisualElement class="panel settings-panel">
-            <ui:Label text="Settings" class="title title--panel" />
-            <ui:Slider name="music-volume" label="Music" low-value="0" high-value="1" class="volume" />
-            <ui:Slider name="sfx-volume" label="Sound effects" low-value="0" high-value="1" class="volume" />
-            <ui:Slider name="voice-volume" label="Voices" low-value="0" high-value="1" class="volume" />
-            <ui:Label text="Credits" class="section-label" />
-            <ui:ScrollView class="credits-scroll">
-                <ui:Label name="credits" text="" class="credits" />
-            </ui:ScrollView>
-            <ui:Button name="settings-close" text="Close" class="btn" />
+        <ui:VisualElement name="info-window" class="panel info-window">
+            <ui:VisualElement class="info-tabs">
+                <ui:Button name="tab-lore" text="Lore" class="btn info-tab" />
+                <ui:Button name="tab-howto" text="How to play" class="btn info-tab" />
+                <ui:Button name="tab-settings" text="Settings" class="btn info-tab" />
+            </ui:VisualElement>
+            <ui:VisualElement name="page-lore" class="info-page">
+                <ui:ScrollView class="info-scroll">
+                    <ui:Label text="The Last Musketeer Standing" class="title info-title" />
+                    <ui:Label name="lore-text" text="" class="info-text" />
+                </ui:ScrollView>
+            </ui:VisualElement>
+            <ui:VisualElement name="page-howto" class="info-page">
+                <ui:ScrollView class="info-scroll">
+                    <ui:Label name="howto-text" text="" class="info-text" />
+                    <ui:VisualElement name="howto-table" class="howto-table" />
+                </ui:ScrollView>
+            </ui:VisualElement>
+            <ui:VisualElement name="page-settings" class="info-page">
+                <ui:Label text="Settings" class="title info-title" />
+                <ui:Slider name="music-volume" label="Music" low-value="0" high-value="1" class="volume" />
+                <ui:Slider name="sfx-volume" label="Sound effects" low-value="0" high-value="1" class="volume" />
+                <ui:Slider name="voice-volume" label="Voices" low-value="0" high-value="1" class="volume" />
+                <ui:Label text="Credits" class="section-label" />
+                <ui:ScrollView class="credits-scroll info-scroll">
+                    <ui:Label name="credits" text="" class="credits" />
+                </ui:ScrollView>
+            </ui:VisualElement>
+            <ui:Button name="settings-close" text="Close" class="btn info-close" />
         </ui:VisualElement>
     </ui:VisualElement>
 </ui:UXML>

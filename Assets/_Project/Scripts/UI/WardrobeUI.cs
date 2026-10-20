@@ -37,8 +37,7 @@ namespace Musketeers.UI
                 var s = slot;
                 var b = new Button(() => SelectTab(s)) { text = slot.ToString(), focusable = false };
                 b.AddToClassList("btn");
-                b.AddToClassList("btn--small");
-                b.AddToClassList("tab");
+                b.AddToClassList("info-tab");
                 tabs.Add(b);
                 _tabs.Add(b);
             }
@@ -70,7 +69,7 @@ namespace Musketeers.UI
         void Rebuild()
         {
             for (int i = 0; i < _tabs.Count; i++)
-                _tabs[i].EnableInClassList("tab--on", Loadout.Slots[i] == _slot);
+                _tabs[i].EnableInClassList("info-tab--on", Loadout.Slots[i] == _slot);
             _grid.Clear();
             var current = _model.MyLoadout.Get(_slot);
             _grid.Add(Tile(null, current));

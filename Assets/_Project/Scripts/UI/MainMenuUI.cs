@@ -1,25 +1,30 @@
 using System;
 using Musketeers.Data;
 using Musketeers.Game;
+using PrimeTween;
 using UnityEngine;
 using UnityEngine.UIElements;
 
 namespace Musketeers.UI
 {
-    // Title screen (GAME_DESIGN §9): splash art and logo, name (remembered), Play vs Bots, Settings,
-    // Fullscreen. Host/Join are shown but wait for Day 5's online play.
+    // Title screen (GAME_DESIGN §9): Matej's menu art on the left, the panel on the right (name, Play vs Bots,
+    // Host/Join), Lore / Settings / Fullscreen top-right. Host/Join wait for Day 5's online play.
     public sealed class MainMenuUI
     {
         const string NameKey = "Musketeers.PlayerName";
 
-        public event Action PlayClicked;
+        public event Action PlayClicked;     // name is valid and saved
+        public event Action LoreClicked;
         public event Action SettingsClicked;
 
         readonly VisualElement _root;
+        readonly VisualElement _shakeTarget;
         readonly TextField _name;
         readonly TextField _seed;
+        readonly Label _hint;
+        Tween _shake;
 
-        public string PlayerName => (_name.value ?? "").Trim();
+        public string PlayerName => NameRules.Clean(_name.value);
 
         public uint? DevSeed => DevFlags.Available && uint.TryParse(_seed.value?.Trim(), out uint s) ? s : (uint?)null;
 
@@ -28,37 +33,76 @@ namespace Musketeers.UI
             _root = menuRoot.Q("menu");
             _name = menuRoot.Q<TextField>("name-field");
             _seed = menuRoot.Q<TextField>("seed-field");
+            _hint = menuRoot.Q<Label>("name-hint");
+            _shakeTarget = _name;
+            _name.maxLength = NameRules.MaxLength;
             _name.value = PlayerPrefs.GetString(NameKey, "");
+            _name.RegisterValueChangedCallback(_ => ClearHint());
 
-            // Matej's splash art already has the logo painted in; the separate logo (or, without art, the
-            // text title) only shows when there's no splash.
-            bool splash = UiArt.Set(menuRoot.Q("menu-bg"), UiArt.Get(GameArt.SplashArt) ?? UiArt.Get(GameArt.KeyArt), new Color(0.08f, 0.07f, 0.12f));
-            bool logo = !splash && UiArt.Set(menuRoot.Q("menu-logo"), GameArt.Logo);
-            menuRoot.Q("menu-title").style.display = splash || logo ? DisplayStyle.None : DisplayStyle.Flex;
-            menuRoot.Q("menu-logo").style.display = logo ? DisplayStyle.Flex : DisplayStyle.None;
+            // Matej's menu art already has the logo painted in, so the title only shows when the art is missing.
+            bool art = UiArt.Set(menuRoot.Q("menu-bg"), UiArt.Get(GameArt.MenuBackground), new Color(0.08f, 0.07f, 0.12f));
+            menuRoot.Q("menu-title").style.display = art ? DisplayStyle.None : DisplayStyle.Flex;
             menuRoot.Q<Label>("menu-version").text = "v" + Application.version;
 
-            var play = menuRoot.Q<Button>("play-bots");
-            play.clicked += Play;
+            var corner = menuRoot.Q("menu-corner");
+            CornerButtons.Add(corner, "lore", "Lore", "The story and how to play", () => LoreClicked?.Invoke());
+            CornerButtons.Add(corner, "settings", "Settings", "Volume and credits", () => SettingsClicked?.Invoke());
+            CornerButtons.AddFullscreen(corner);
+
+            menuRoot.Q<Button>("play-bots").clicked += Play;
             var host = menuRoot.Q<Button>("host");
             var join = menuRoot.Q<Button>("join");
             host.SetEnabled(false);
             join.SetEnabled(false);
             host.tooltip = join.tooltip = "Online play is coming tomorrow.";
-            menuRoot.Q<Button>("settings").clicked += () => SettingsClicked?.Invoke();
-            menuRoot.Q<Button>("fullscreen").clicked += () => Screen.fullScreen = !Screen.fullScreen;
             menuRoot.Q("dev-row").style.display = DevFlags.Available ? DisplayStyle.Flex : DisplayStyle.None;
+            ClearHint();
             foreach (var b in _root.Query<Button>().ToList())
                 b.focusable = false;
         }
 
-        public void SetVisible(bool visible) => _root.style.display = visible ? DisplayStyle.Flex : DisplayStyle.None;
-
-        void Play()
+        public void SetVisible(bool visible)
         {
-            PlayerPrefs.SetString(NameKey, PlayerName);
+            _root.style.display = visible ? DisplayStyle.Flex : DisplayStyle.None;
+            if (!visible)
+                ClearHint();
+        }
+
+        public void SetName(string raw) => _name.value = raw;
+
+        // Public so MCP screenshots can trigger the error state.
+        public void Play()
+        {
+            string cleaned = PlayerName;
+            if (!NameRules.IsValid(cleaned, out string hint))
+            {
+                ShowError(hint);
+                return;
+            }
+            _name.SetValueWithoutNotify(cleaned);
+            PlayerPrefs.SetString(NameKey, cleaned);
             PlayerPrefs.Save();
             PlayClicked?.Invoke();
+        }
+
+        void ShowError(string hint)
+        {
+            _hint.text = hint;
+            _name.AddToClassList("field--error");
+            UiArt.Sfx("SFX/ui/ui_error");
+            _shake.Stop();
+            _shakeTarget.style.translate = new Translate(0, 0);
+            _shake = Tween.Custom(0f, 1f, 0.35f, t =>
+            {
+                float x = Mathf.Sin(t * 3f * 2f * Mathf.PI) * (1f - t) * 12f;
+                _shakeTarget.style.translate = new Translate(x, 0);
+            }, Ease.Linear).OnComplete(() => _shakeTarget.style.translate = new Translate(0, 0));
+        }
+
+        void ClearHint()
+        {
+            _hint.text = "";
+            _name.RemoveFromClassList("field--error");
         }
     }
 }
