@@ -10,6 +10,7 @@ namespace Musketeers.Presentation
     //   1 Move  2 Dash  3 Fire  4 Reload  5 Parry  6 Shove  7 Keg  8 Catch Breath  Q Signature
     //   WASD / arrows: direction (with nothing chosen, a direction key is a Move)
     //   mouse: click an in-line tile for a direction, a tile for the keg, an adjacent tile to move
+    //   Switcheroo: click the musketeer to swap with
     //   Backspace undo, Space lock in / unlock, Esc or right-click cancel, Tab next unit (control-all)
     public sealed class PlanningInput : MonoBehaviour
     {
@@ -92,7 +93,7 @@ namespace Musketeers.Presentation
             {
                 if (!kb[key].wasPressedThisFrame)
                     continue;
-                if (Builder.HasPending && PlanBuilder.NeedsDirection(Builder.Pending))
+                if (Builder.PendingTakesDirection)
                     Builder.CommitDirection(dir);
                 else if (!Builder.HasPending && Builder.Choose(ActionType.Move))
                     Builder.CommitDirection(dir);
@@ -120,7 +121,13 @@ namespace Musketeers.Presentation
             if (tile.HasValue && !Builder.Locked && Builder.HasPending)
             {
                 var from = Builder.CursorState.Pos;
-                if (PlanBuilder.NeedsDirection(Builder.Pending) && TryDirection(from, tile.Value, out Dir d))
+                if (Builder.PendingNeedsUnit)
+                {
+                    int over = PickUnit(tile.Value);
+                    if (over >= 0 && Builder.IsSwitcherooTarget(over))
+                        hover = PlannedAction.Switcheroo(over);
+                }
+                else if (Builder.PendingTakesDirection && TryDirection(from, tile.Value, out Dir d))
                     hover = Builder.Directional(Builder.Pending, d);
                 else if (PlanBuilder.NeedsTarget(Builder.Pending) && Builder.TargetIssue(tile.Value) == PlanIssue.None)
                     hover = new PlannedAction(Builder.Pending, Dir.N, tile.Value);
@@ -133,6 +140,12 @@ namespace Musketeers.Presentation
                 return;
 
             int unit = UnitAtTile != null ? UnitAtTile(tile.Value) : -1;
+            // Switcheroo: clicking a highlighted musketeer (or its tile) picks the target.
+            if (!Builder.Locked && Builder.PendingNeedsUnit)
+            {
+                Builder.CommitUnit(PickUnit(tile.Value));
+                return;
+            }
             if (Builder.Locked || !Builder.HasPending)
             {
                 if (unit >= 0 && unit != Builder.Slot)
@@ -152,9 +165,22 @@ namespace Musketeers.Presentation
             {
                 if (PlanBuilder.NeedsTarget(Builder.Pending))
                     Builder.CommitTarget(hover.Value.Target);
+                else if (hover.Value.Type == ActionType.Signature && Builder.PendingNeedsUnit)
+                    Builder.CommitUnit(hover.Value.Unit);
                 else
                     Builder.CommitDirection(hover.Value.Dir);
             }
+        }
+
+        // The musketeer under a tile; a head poking into the row above counts for the tile below it.
+        int PickUnit(Int2 tile)
+        {
+            if (UnitAtTile == null)
+                return -1;
+            int u = UnitAtTile(tile);
+            if (u < 0 && tile.Y > 0)
+                u = UnitAtTile(new Int2(tile.X, tile.Y - 1));
+            return u;
         }
 
         static bool TryDirection(Int2 from, Int2 to, out Dir d)

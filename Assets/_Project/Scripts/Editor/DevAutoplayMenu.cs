@@ -10,6 +10,7 @@ namespace Musketeers.EditorTools
 
         [MenuItem("Tools/Musketeers/Dev/Autoplay on Courtyard")] static void Courtyard() => EditorPrefs.SetString(Key, "courtyard");
         [MenuItem("Tools/Musketeers/Dev/Autoplay on Bridge")] static void Bridge() => EditorPrefs.SetString(Key, "bridge");
-        [MenuItem("Tools/Musketeers/Dev/Autoplay off")] static void Off() => EditorPrefs.DeleteKey(Key);
+        [MenuItem("Tools/Musketeers/Dev/Autoplay off")] static void Off() { EditorPrefs.DeleteKey(Key); EditorPrefs.DeleteKey("Musketeers.DevHumanMap"); }
+        [MenuItem("Tools/Musketeers/Dev/Human match on Courtyard (control all)")] static void HumanCourtyard() { EditorPrefs.DeleteKey(Key); EditorPrefs.SetString("Musketeers.DevHumanMap", "courtyard"); }
     }
 }

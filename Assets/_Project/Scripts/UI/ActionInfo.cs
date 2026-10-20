@@ -173,6 +173,8 @@ namespace Musketeers.UI
             if (a.Type == ActionType.Idle)
                 return "";
             string n = Name(a.Type, c);
+            if (a.Type == ActionType.Signature && c != null && c.Ability == Ability.Switcheroo)
+                return n;   // picks a musketeer, not a direction
             if (PlanBuilder.NeedsDirection(a.Type))
                 return $"{n} {a.Dir}";
             if (a.Type == ActionType.Keg)

@@ -16,7 +16,7 @@ namespace Musketeers.Presentation
         const float MusketScale = 0.82f;   // the loaded/unloaded indicator: big enough to read at a glance
         const float MusketSlot = 0.72f;    // horizontal room the icon takes next to the hearts
         public const float FeetY = -0.3f;    // feet sit low on the tile; the body rises into the row above
-        public const float RigScale = 1.62f;  // musketeers fill their tile (the art is ~1.3 tiles tall at 1.0)
+        public const float RigScale = 1.35f;  // a musketeer is ~1.5 tiles tall (1.62 was too big)
 
         public int Slot { get; private set; }
         public Int2 GridPos { get; private set; }
@@ -30,6 +30,7 @@ namespace Musketeers.Presentation
         CharacterRig _rig;
         SpriteRenderer _shadow;
         SpriteRenderer _shield;
+        Tween _shieldTween;
         SpriteRenderer _select;
         SpriteRenderer _crown;
         SpriteRenderer _musketIcon;
@@ -70,9 +71,10 @@ namespace Musketeers.Presentation
             _rig = rigGo.AddComponent<CharacterRig>();
             _rig.Build(art, art.Character(character), loadout, Color);
 
-            _shield = art.MakeRenderer("Shield", _bodyRoot, PlaceholderArt.Ring, new Color(0.7f, 0.95f, 1f, 0.85f), 40);
-            _shield.transform.localPosition = new Vector3(0f, FeetY + 0.62f, 0f);
-            _shield.transform.localScale = new Vector3(1.05f, 1.55f, 1f);
+            // Parry: a shimmering crescent in the musketeer's colour held out in front (it flips with facing).
+            _shield = art.MakeRenderer("Shield", _bodyRoot, PlaceholderArt.Crescent, ShieldColor(1f), 40);
+            _shield.transform.localPosition = new Vector3(0.38f, FeetY + 0.62f, 0f);
+            _shield.transform.localScale = new Vector3(1.7f, 1.7f, 1f);
             _shield.enabled = false;
 
             // Status over the head: hearts, then the musket icon.
@@ -119,6 +121,7 @@ namespace Musketeers.Presentation
         void OnDestroy()
         {
             _name?.Destroy();
+            _shieldTween.Stop();
             Tween.StopAll(transform);
             if (_bodyRoot != null)
                 Tween.StopAll(_bodyRoot);
@@ -154,10 +157,30 @@ namespace Musketeers.Presentation
 
         public void SetSelected(bool selected) => _select.enabled = selected && _alive;
 
+        Color ShieldColor(float a)
+        {
+            var c = Color.Lerp(Color, Color.white, 0.35f);
+            c.a = a;
+            return c;
+        }
+
         public void SetParry(bool on)
         {
-            _shield.enabled = on && _alive;
-            _rig.SetRapier(on && _alive);
+            on = on && _alive;
+            _shieldTween.Stop();
+            _shield.enabled = on;
+            _rig.SetRapier(on);
+            if (!on)
+                return;
+            float side = _rig.FacingRight ? 1f : -1f;
+            _shield.flipX = side < 0f;
+            _shield.transform.localPosition = new Vector3(0.38f * side, FeetY + 0.62f, 0f);
+            // Gentle shimmer: the arc breathes in size and brightness.
+            _shieldTween = Tween.Custom(this, 0f, 1f, 0.45f, (self, v) =>
+            {
+                self._shield.color = self.ShieldColor(Mathf.Lerp(0.55f, 1f, v));
+                self._shield.transform.localScale = new Vector3(1.7f, 1.7f, 1f) * Mathf.Lerp(0.94f, 1.06f, v);
+            }, Ease.InOutSine, cycles: -1, cycleMode: CycleMode.Yoyo);
         }
 
         public void SetHp(int hp)

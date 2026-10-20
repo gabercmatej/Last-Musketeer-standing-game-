@@ -316,7 +316,10 @@ namespace Musketeers.Presentation
                     if (u == null) return 0f;
                     At(delay, () =>
                     {
-                        _fx.Burst(GameArt.Spark, PlaceholderArt.Ring, Riposte, u.transform.localPosition + new Vector3(0.15f, 0.25f, 0f), 0.5f, 1.1f, S(0.35f));
+                        var front = new Vector3(u.Rig != null && !u.Rig.FacingRight ? -0.4f : 0.4f, 0.3f, 0f);
+                        _fx.Burst(GameArt.Spark, PlaceholderArt.Star, Riposte, u.transform.localPosition + front, 0.5f, 1.3f, S(0.35f), 20f);
+                        _fx.Flash(u.transform.localPosition + front, Color.white, 0.3f, 0.9f, S(0.2f), PlaceholderArt.SoftCircle);
+                        u.Flash(Color.white, S(0.15f));
                         _fx.Popup(e.Keg >= 0 ? "BLOCKED" : "PARRY!", u.transform.localPosition + Vector3.up * 0.7f, Riposte, S(0.7f));
                     });
                     Sfx(delay, "SFX/actions/parry_clang");

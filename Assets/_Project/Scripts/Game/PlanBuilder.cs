@@ -66,7 +66,7 @@ namespace Musketeers.Game
         {
             if (IssueFor(type) != PlanIssue.None)
                 return false;
-            if (NeedsDirection(type) || NeedsTarget(type))
+            if (TakesDirection(type) || NeedsUnit(type) || NeedsTarget(type))
             {
                 HasPending = true;
                 Pending = type;
@@ -77,48 +77,35 @@ namespace Musketeers.Game
             return true;
         }
 
+        // Switcheroo picks a musketeer, not a direction (FIXES §3.2 rule 5).
+        public bool NeedsUnit(ActionType t) => t == ActionType.Signature && Ability == Ability.Switcheroo;
+
+        // Directional for this musketeer: the static rule minus a Switcheroo signature.
+        public bool TakesDirection(ActionType t) => NeedsDirection(t) && !NeedsUnit(t);
+
+        public bool PendingTakesDirection => HasPending && TakesDirection(Pending);
+        public bool PendingNeedsUnit => HasPending && NeedsUnit(Pending);
+
         public bool CommitDirection(Dir dir)
         {
-            if (!HasPending || !NeedsDirection(Pending))
+            if (!PendingTakesDirection)
                 return false;
-            var a = Directional(Pending, dir);
-            if (a.Type == ActionType.Signature && Ability == Ability.Switcheroo && !SwitcherooTargetValid(a.Unit))
-                return false;
-            Place(a);
+            Place(new PlannedAction(Pending, dir));
             return true;
         }
 
-        // The action for a direction pick. Switcheroo targets a musketeer, not a direction (FIXES §3.2 rule 5);
-        // until the click-to-target UI exists (Plan 007 task 3) the direction picks the nearest other
-        // living musketeer on that side.
-        public PlannedAction Directional(ActionType type, Dir dir)
-        {
-            if (type == ActionType.Signature && Ability == Ability.Switcheroo)
-                return new PlannedAction(type, dir, default, NearestUnitToward(dir));
-            return new PlannedAction(type, dir);
-        }
+        // The action for a direction pick (hover preview and commit share it).
+        public PlannedAction Directional(ActionType type, Dir dir) => new PlannedAction(type, dir);
 
-        bool SwitcherooTargetValid(int slot) => slot != Slot && slot >= 0 && slot < _s.Units.Length && _s.Units[slot].Alive;
+        // Slots that can be a Switcheroo target: every living musketeer except you.
+        public bool IsSwitcherooTarget(int slot) => slot != Slot && slot >= 0 && slot < _s.Units.Length && _s.Units[slot].Alive;
 
-        int NearestUnitToward(Dir dir)
+        public bool CommitUnit(int slot)
         {
-            Int2 from = CursorState.Pos;
-            Int2 d = dir.ToInt2();
-            int best = Slot, bestScore = int.MaxValue;
-            for (int i = 0; i < _s.Units.Length; i++)
-            {
-                if (i == Slot || !_s.Units[i].Alive)
-                    continue;
-                Int2 delta = _s.Units[i].Pos - from;
-                int along = delta.X * d.X + delta.Y * d.Y;
-                int score = (along > 0 ? 0 : 1000) + delta.X * delta.X + delta.Y * delta.Y;
-                if (score < bestScore)
-                {
-                    bestScore = score;
-                    best = i;
-                }
-            }
-            return best;
+            if (!PendingNeedsUnit || !IsSwitcherooTarget(slot))
+                return false;
+            Place(PlannedAction.Switcheroo(slot));
+            return true;
         }
 
         public PlanIssue TargetIssue(Int2 target) =>

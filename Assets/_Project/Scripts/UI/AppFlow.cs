@@ -152,6 +152,16 @@ namespace Musketeers.UI
                 DevFlags.AutoPlay = true;
                 DevFlags.AutoStartPlayers = 4;
             }
+            // Dev hook: a human-planned match (control-all) on a chosen map, for planning-preview checks.
+            string humanMap = UnityEditor.EditorPrefs.GetString("Musketeers.DevHumanMap", "");
+            if (!string.IsNullOrEmpty(humanMap) && _art.Maps != null && _art.Maps.IndexOf(humanMap) >= 0)
+            {
+                _model.Map = _art.Maps.IndexOf(humanMap);
+                DevFlags.AutoPlay = false;
+                DevFlags.ControlAll = true;
+                DevFlags.PlanningSeconds = 600f;
+                DevFlags.AutoStartPlayers = 4;
+            }
 #endif
             if (DevFlags.AutoStartPlayers >= 2)
             {
@@ -292,6 +302,7 @@ namespace Musketeers.UI
                 setup.Names[i] = i == 0 && !string.IsNullOrEmpty(name) ? name : _art.CharacterName(chars[i]);
                 setup.Loadouts[i] = setup.IsBot[i] ? "" : _model.LoadoutFor(i).Serialize();
             }
+            _model.ApplyTo(setup);
             return setup;
         }
 

@@ -4,13 +4,25 @@
             <ui:Button name="lobby-back" text="Menu" class="btn btn--small" />
             <ui:Label text="The Tavern" class="title lobby-title" />
             <ui:VisualElement class="panel panel--slim map-choice">
-                <ui:Label text="Map" class="section-label section-label--inline" />
-                <ui:Button name="map-prev" text="&lt;" class="btn btn--icon" />
-                <ui:VisualElement class="map-text">
-                    <ui:Label name="map-name" text="The Courtyard" class="map-name" />
-                    <ui:Label name="map-desc" text="" class="map-desc" />
+                <ui:VisualElement class="map-row" picking-mode="Ignore">
+                    <ui:Label text="Map" class="section-label section-label--inline" />
+                    <ui:Button name="map-prev" text="&lt;" class="btn btn--icon" />
+                    <ui:VisualElement class="map-text">
+                        <ui:Label name="map-name" text="The Courtyard" class="map-name" />
+                        <ui:Label name="map-desc" text="" class="map-desc" />
+                    </ui:VisualElement>
+                    <ui:Button name="map-next" text="&gt;" class="btn btn--icon" />
                 </ui:VisualElement>
-                <ui:Button name="map-next" text="&gt;" class="btn btn--icon" />
+                <ui:VisualElement class="rules-row" picking-mode="Ignore">
+                    <ui:Label text="Points to win" class="section-label section-label--inline" />
+                    <ui:Button name="points-minus" text="-" class="btn btn--icon" />
+                    <ui:Label name="points-value" text="12" class="stepper-value" />
+                    <ui:Button name="points-plus" text="+" class="btn btn--icon" />
+                    <ui:Label text="Hearts" class="section-label section-label--inline rules-gap" />
+                    <ui:Button name="hearts-minus" text="-" class="btn btn--icon" />
+                    <ui:Label name="hearts-value" text="3" class="stepper-value" />
+                    <ui:Button name="hearts-plus" text="+" class="btn btn--icon" />
+                </ui:VisualElement>
             </ui:VisualElement>
         </ui:VisualElement>
 

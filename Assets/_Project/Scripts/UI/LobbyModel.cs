@@ -1,4 +1,5 @@
 using Musketeers.Data;
+using Musketeers.Game;
 using UnityEngine;
 
 namespace Musketeers.UI
@@ -11,6 +12,12 @@ namespace Musketeers.UI
         const string PlayersKey = "Musketeers.Players";
         const string MapKey = "Musketeers.Map";
         const string LoadoutKey = "Musketeers.Loadout.";
+        public const string PointsKey = "Musketeers.PointsToWin";
+        public const string HeartsKey = "Musketeers.Hearts";
+
+        // FIXES_v0.2 §3.2 rule 8: the match rules a lobby can set.
+        public const int MinPointsToWin = 10, MaxPointsToWin = 30, DefaultPointsToWin = 12;
+        public const int MinHearts = 1, MaxHearts = 5, DefaultHearts = 3;
 
         readonly CharacterRoster _roster;
         readonly CosmeticCatalog _catalog;
@@ -22,6 +29,11 @@ namespace Musketeers.UI
         public int Map;
         public int MapCount;
 
+        int _pointsToWin = DefaultPointsToWin;
+        int _hearts = DefaultHearts;
+        public int PointsToWin { get => _pointsToWin; set => _pointsToWin = Mathf.Clamp(value, MinPointsToWin, MaxPointsToWin); }
+        public int Hearts { get => _hearts; set => _hearts = Mathf.Clamp(value, MinHearts, MaxHearts); }
+
         public int RosterCount => _roster != null ? _roster.Count : 4;
 
         public LobbyModel(CharacterRoster roster, CosmeticCatalog catalog, int mapCount)
@@ -32,8 +44,17 @@ namespace Musketeers.UI
             Character = Mathf.Clamp(PlayerPrefs.GetInt(CharacterKey, 0), 0, RosterCount - 1);
             Players = Mathf.Clamp(PlayerPrefs.GetInt(PlayersKey, 4), 2, Mathf.Min(4, RosterCount));
             Map = Mathf.Clamp(PlayerPrefs.GetInt(MapKey, 0), 0, MapCount - 1);
+            PointsToWin = PlayerPrefs.GetInt(PointsKey, DefaultPointsToWin);
+            Hearts = PlayerPrefs.GetInt(HeartsKey, DefaultHearts);
             for (int i = 1; i < 4; i++)
                 RerollBot(i);
+        }
+
+        // Copies the lobby's rules into a match setup (hearts per round, points to win).
+        public void ApplyTo(MatchSetup setup)
+        {
+            setup.Config.PointsToWin = PointsToWin;
+            setup.Config.MaxHp = Hearts;
         }
 
         // Slot 0 is you; bots take the other characters in roster order (§4: characters are unique).
@@ -102,6 +123,8 @@ namespace Musketeers.UI
             PlayerPrefs.SetInt(CharacterKey, Character);
             PlayerPrefs.SetInt(PlayersKey, Players);
             PlayerPrefs.SetInt(MapKey, Map);
+            PlayerPrefs.SetInt(PointsKey, PointsToWin);
+            PlayerPrefs.SetInt(HeartsKey, Hearts);
             PlayerPrefs.Save();
         }
     }

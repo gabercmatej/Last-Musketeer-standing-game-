@@ -177,7 +177,9 @@ namespace Musketeers.UI
                 return "Locked in. Waiting for the others...";
             var st = b.CursorState;
             string status = $"Tick {b.EditTick + 1}: {st.Grit} grit, {(st.Loaded ? "loaded" : "unloaded")}";
-            if (b.HasPending && PlanBuilder.NeedsDirection(b.Pending))
+            if (b.PendingNeedsUnit)
+                return $"{status}.  Click the musketeer to swap places with.  Esc cancels.";
+            if (b.PendingTakesDirection)
                 return $"{status}.  Pick a direction: WASD / arrows, or click a tile in line.  Esc cancels.";
             if (b.HasPending && PlanBuilder.NeedsTarget(b.Pending))
                 return $"{status}.  Click a tile within {b.Config.KegThrowRange} to throw the keg.  Esc cancels.";

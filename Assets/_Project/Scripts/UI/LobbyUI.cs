@@ -18,7 +18,7 @@ namespace Musketeers.UI
 
         readonly VisualElement _root;
         readonly VisualElement _bottom;
-        readonly Label _mapName, _mapDesc, _ability, _count;
+        readonly Label _mapName, _mapDesc, _ability, _count, _points, _hearts;
         readonly Button _add, _remove;
         readonly List<VisualElement> _picks = new List<VisualElement>();
         readonly LobbyModel _model;
@@ -36,6 +36,8 @@ namespace Musketeers.UI
             _mapDesc = root.Q<Label>("map-desc");
             _ability = root.Q<Label>("char-ability");
             _count = root.Q<Label>("player-count");
+            _points = root.Q<Label>("points-value");
+            _hearts = root.Q<Label>("hearts-value");
             _add = root.Q<Button>("add-bot");
             _remove = root.Q<Button>("remove-bot");
 
@@ -44,6 +46,10 @@ namespace Musketeers.UI
             back.clicked += () => BackClicked?.Invoke();
             root.Q<Button>("map-prev").clicked += () => StepMap(-1);
             root.Q<Button>("map-next").clicked += () => StepMap(1);
+            root.Q<Button>("points-minus").clicked += () => StepRules(-1, 0);
+            root.Q<Button>("points-plus").clicked += () => StepRules(1, 0);
+            root.Q<Button>("hearts-minus").clicked += () => StepRules(0, -1);
+            root.Q<Button>("hearts-plus").clicked += () => StepRules(0, 1);
             _add.clicked += () => SetPlayers(_model.Players + 1);
             _remove.clicked += () => SetPlayers(_model.Players - 1);
             root.Q<Button>("start").clicked += () => { UiArt.Sfx("SFX/ui/ready"); StartClicked?.Invoke(); };
@@ -124,8 +130,19 @@ namespace Musketeers.UI
             Changed?.Invoke();
         }
 
+        void StepRules(int points, int hearts)
+        {
+            _model.PointsToWin += points;
+            _model.Hearts += hearts;
+            _model.Save();
+            UiArt.Sfx("SFX/ui/wardrobe_equip", 0.5f);
+            Refresh();
+        }
+
         public void Refresh()
         {
+            _points.text = _model.PointsToWin.ToString();
+            _hearts.text = _model.Hearts.ToString();
             for (int i = 0; i < _picks.Count; i++)
                 _picks[i].EnableInClassList("char-pick--on", i == _model.Character);
             var def = _art.Character(_model.Character);

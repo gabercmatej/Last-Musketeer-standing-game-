@@ -175,6 +175,22 @@ namespace Musketeers.Sim.Tests
         }
 
         [Test]
+        public void LobbyRules_ClampToTheirRanges_AndApplyToTheSetup()
+        {
+            var model = new LobbyModel(null, null, 1);
+            model.PointsToWin = 3; Assert.That(model.PointsToWin, Is.EqualTo(10));
+            model.PointsToWin = 99; Assert.That(model.PointsToWin, Is.EqualTo(30));
+            model.Hearts = 0; Assert.That(model.Hearts, Is.EqualTo(1));
+            model.Hearts = 9; Assert.That(model.Hearts, Is.EqualTo(5));
+            model.PointsToWin = 15; model.Hearts = 4;
+            var setup = new Musketeers.Game.MatchSetup();
+            model.ApplyTo(setup);
+            Assert.That(setup.Config.PointsToWin, Is.EqualTo(15));
+            Assert.That(setup.Config.MaxHp, Is.EqualTo(4));
+            Assert.That(setup.Config.PlanningSeconds, Is.EqualTo(30), "planning time stays the GameConfig value");
+        }
+
+        [Test]
         public void FloorVariant_IsStableAndInRange()
         {
             for (int y = 0; y < 13; y++)

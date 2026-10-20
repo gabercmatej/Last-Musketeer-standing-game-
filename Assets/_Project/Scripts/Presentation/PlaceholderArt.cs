@@ -16,6 +16,24 @@ namespace Musketeers.Presentation
         public static Sprite Circle => Get("circle", Size, (x, y) => Sdf(Len(x, y) - 0.46f));
         public static Sprite Ring => Get("ring", Size, (x, y) => Sdf(Math.Abs(Len(x, y) - 0.42f) - 0.045f));
         public static Sprite SoftCircle => Get("soft", Size, (x, y) => Mathf.Clamp01(1f - Len(x, y) / 0.5f));
+        // A diagonal cross (the "contested" marker's crossed blades).
+        public static Sprite Cross => Get("cross", Size, (x, y) =>
+        {
+            float d = Math.Min(Math.Abs(x - y), Math.Abs(x + y)) * 0.7071f;
+            return Sdf(Math.Max(d - 0.05f, Math.Max(Math.Abs(x), Math.Abs(y)) - 0.34f));
+        });
+
+        // A crescent arc bulging toward +x, thick in the middle and tapering to points (the parry shield).
+        public static Sprite Crescent => Get("crescent", 96, (x, y) =>
+        {
+            float ang = Mathf.Atan2(y, x);
+            const float Half = 1.15f;
+            if (Math.Abs(ang) > Half)
+                return 0f;
+            float w = 0.015f + 0.11f * (1f - Math.Abs(ang) / Half);
+            return Sdf(Math.Abs(Len(x, y) - 0.4f) - w);
+        });
+
         public static Sprite RoundedSquare => Get("rsquare", Size, (x, y) => Sdf(Box(x, y, 0.40f, 0.40f) - 0.07f));
 
         // Floor with a darker 1-pixel rim, which reads as subtle grid lines once tiles sit side by side.
