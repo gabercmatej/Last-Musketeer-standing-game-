@@ -173,6 +173,14 @@ Flow: Menu (name) → **Pick your Musketeer** overlay → Lobby.
   - Offline: local only. *(Day 5: synced.)*
   - Typing in chat must not trigger action hotkeys.
 
+
+### 2.8 Per-map theming [4C] (added by Matej)
+Each map has its own **lobby background**, **lobby music** and **results lobby**. They're defined on the map's data asset, so future maps just add their own.
+- **Lobby:** when the game master picks a map, the lobby **background** and **lobby music** switch to that map's versions, with a short crossfade for the music and a fade for the background. *(Day 5: everyone in the lobby sees and hears the switch.)*
+- **Results:** after a match, the results lobby shows the **podium art of the map that was played**. Matej generated one for each map. This applies to §2.5: fit the podium positions per map.
+- **In-match music stays the same on every map** (battle and battle_final). Only the lobby music changes per map.
+- New files are in the root `Art/` (backgrounds, e.g. `lobby-bridge`, results lobbies per map) and `Audio/Music/`. Find them by modification date, report which file maps to which map, and ask if anything is ambiguous.
+
 ---
 
 ## 3. Arena and gameplay [4D]

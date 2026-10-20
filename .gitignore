@@ -50,3 +50,7 @@ node_modules/
 
 # Playwright MCP screenshots/logs
 .playwright-mcp/
+
+# Unity scene recovery backups
+/Assets/_Recovery/
+/Assets/_Recovery.meta
