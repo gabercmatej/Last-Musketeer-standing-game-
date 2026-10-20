@@ -121,7 +121,7 @@ namespace Musketeers.Presentation
             {
                 var from = Builder.CursorState.Pos;
                 if (PlanBuilder.NeedsDirection(Builder.Pending) && TryDirection(from, tile.Value, out Dir d))
-                    hover = new PlannedAction(Builder.Pending, d);
+                    hover = Builder.Directional(Builder.Pending, d);
                 else if (PlanBuilder.NeedsTarget(Builder.Pending) && Builder.TargetIssue(tile.Value) == PlanIssue.None)
                     hover = new PlannedAction(Builder.Pending, Dir.N, tile.Value);
             }
@@ -182,7 +182,7 @@ namespace Musketeers.Presentation
                 return false;
             if (!a.HasValue)
                 return true;
-            return a.Value.Type == b.Value.Type && a.Value.Dir == b.Value.Dir && a.Value.Target == b.Value.Target;
+            return a.Value.Type == b.Value.Type && a.Value.Dir == b.Value.Dir && a.Value.Target == b.Value.Target && a.Value.Unit == b.Value.Unit;
         }
     }
 }

@@ -53,7 +53,7 @@ namespace Musketeers.UI
                 case ActionType.Keg: return $"{cfg.KegCost} grit";
                 case ActionType.CatchBreath: return "+1 grit";
                 case ActionType.Signature:
-                    return ability == Ability.DoubleCharge ? $"{cfg.SignatureCost} grit + loaded" : $"{cfg.SignatureCost} grit";
+                    return ability == Ability.TripleCharge ? $"{cfg.SignatureCost} grit + loaded" : $"{cfg.SignatureCost} grit";
                 default: return "free";
             }
         }
@@ -63,7 +63,7 @@ namespace Musketeers.UI
             switch (t)
             {
                 case ActionType.Move: return "Move 1 tile.";
-                case ActionType.Dash: return "Move 2 tiles in a line. Leaps over a 1-tile pit.";
+                case ActionType.Dash: return "Move 2 tiles in a line. Flies over crates, kegs, musketeers and 1-tile pits. Only a pillar blocks it; the landing tile must be free.";
                 case ActionType.Fire: return $"Instant shot, range {cfg.FireRange}. 1 damage to the first thing hit. Unloads your musket.";
                 case ActionType.Reload: return "Load your musket.";
                 case ActionType.Parry: return "Block shots and blasts this tick. Shots bounce back at the shooter.";
@@ -116,7 +116,7 @@ namespace Musketeers.UI
                     {
                         case Ability.Grappin: return "grappin";
                         case Ability.Switcheroo: return "switcheroo";
-                        case Ability.DoubleCharge: return "double_charge";
+                        case Ability.TripleCharge: return "double_charge";   // asset name predates the rename
                         default: return "bull_rush";
                     }
                 default: return "";

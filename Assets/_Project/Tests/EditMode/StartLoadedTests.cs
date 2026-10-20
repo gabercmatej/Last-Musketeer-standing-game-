@@ -18,7 +18,7 @@ namespace Musketeers.Sim.Tests
         {
             var cfg = new GameConfig { StartLoaded = startLoaded };
             var m = MatchRunner.NewMatch(MapParser.Parse(BuiltInMaps.Courtyard),
-                new[] { Ability.Grappin, Ability.Switcheroo, Ability.DoubleCharge, Ability.BullRush }, cfg, 7);
+                new[] { Ability.Grappin, Ability.Switcheroo, Ability.TripleCharge, Ability.BullRush }, cfg, 7);
             foreach (var u in m.Round.Units)
                 Assert.That(u.Loaded, Is.EqualTo(startLoaded), $"round 1 unit {u.Slot}");
 

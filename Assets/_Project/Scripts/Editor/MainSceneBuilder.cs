@@ -195,11 +195,11 @@ namespace Musketeers.EditorTools
                 Character("Matej", "Matej", new Color(0.62f, 0.38f, 0.98f), Ability.Grappin, "Grappin",
                     "Hook the first thing in a line (5). Units get yanked to you; walls pull you in."),
                 Character("Matic", "Matic", new Color(0.93f, 0.27f, 0.30f), Ability.Switcheroo, "Switcheroo",
-                    "Swap places with the first unit or keg in a line (5). Passes over pits."),
-                Character("Aljaz", "Aljaž", new Color(0.27f, 0.55f, 1.00f), Ability.DoubleCharge, "Double Charge",
-                    "Range 7 shot that pierces 2 units and ignores Parry. Needs a loaded musket."),
+                    "Swap places with any musketeer you pick, wherever they are. Fails if you stand on a cracked tile."),
+                Character("Aljaz", "Aljaž", new Color(0.27f, 0.55f, 1.00f), Ability.TripleCharge, "Triple Charge",
+                    "Fire 3 shots down a line (range 5). Each hit deals 1 damage and knocks the target back 1 tile. A parry reflects each shot. Needs a loaded musket."),
                 Character("Nik", "Nik", new Color(0.27f, 0.80f, 0.40f), Ability.BullRush, "Bull Rush",
-                    "Charge up to 3 tiles. A unit you crash into is pushed 2."),
+                    "Charge up to 3 tiles. A unit you crash into is pushed 4."),
             };
             var roster = EnsureAsset<CharacterRoster>($"{DataDir}/CharacterRoster.asset");
             if (roster.Characters == null || roster.Characters.Length == 0)

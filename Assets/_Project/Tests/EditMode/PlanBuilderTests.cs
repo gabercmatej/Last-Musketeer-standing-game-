@@ -29,7 +29,7 @@ namespace Musketeers.Sim.Tests
         [Test]
         public void CatchBreath_MakesTheSignatureAffordable_NextTick()
         {
-            var b = Builder(Scenario.From("A...B"));
+            var b = Builder(Scenario.From("A...B").WithGrit('A', 4));   // signature costs 5
             Assert.That(b.IssueFor(ActionType.Signature), Is.EqualTo(PlanIssue.NoGrit));
             Assert.That(b.Choose(ActionType.CatchBreath));
             Assert.That(b.IssueFor(ActionType.Signature), Is.EqualTo(PlanIssue.None));
@@ -142,20 +142,29 @@ namespace Musketeers.Sim.Tests
         }
 
         [TestCase(Ability.Grappin, 4)]       // pulls itself to the tile before the pillar
-        [TestCase(Ability.Switcheroo, 0)]    // nothing to swap with on this row: stays
         [TestCase(Ability.BullRush, 3)]      // 3 tiles, stops before nothing
         public void Signature_MovesTheProjection(Ability ability, int x)
         {
-            var s = Scenario.From("A....#\n......\n.....B").WithAbility('A', ability).WithGrit('A', 3);
+            var s = Scenario.From("A....#\n......\n.....B").WithAbility('A', ability).WithGrit('A', 5);
             var b = Builder(s);
             Assert.That(b.Choose(ActionType.Signature) && b.CommitDirection(Dir.E));
             Assert.That(b.Projection.States[1].Pos, Is.EqualTo(new Int2(x, 2)));
         }
 
         [Test]
-        public void DoubleCharge_UnloadsTheProjection()
+        public void Switcheroo_ProjectsOntoTheTargetsTile()
         {
-            var b = Builder(Scenario.From("A...B").WithAbility('A', Ability.DoubleCharge).WithGrit('A', 3));
+            var s = Scenario.From("A....#\n......\n.....B").WithAbility('A', Ability.Switcheroo).WithGrit('A', 5);
+            var b = Builder(s);
+            Assert.That(b.Choose(ActionType.Signature) && b.CommitDirection(Dir.E));
+            Assert.That(b.Plan[0].Unit, Is.EqualTo(1));
+            Assert.That(b.Projection.States[1].Pos, Is.EqualTo(new Int2(5, 0)));
+        }
+
+        [Test]
+        public void TripleCharge_UnloadsTheProjection()
+        {
+            var b = Builder(Scenario.From("A...B").WithAbility('A', Ability.TripleCharge).WithGrit('A', 5));
             Assert.That(b.Choose(ActionType.Signature) && b.CommitDirection(Dir.E));
             Assert.That(b.CursorState.Loaded, Is.False);
             Assert.That(b.IssueFor(ActionType.Fire), Is.EqualTo(PlanIssue.Unloaded));
@@ -195,7 +204,7 @@ namespace Musketeers.Sim.Tests
             var rng = new DeterministicRng(99);
             var types = new[] { ActionType.Move, ActionType.Dash, ActionType.Fire, ActionType.Reload, ActionType.Parry, ActionType.CatchBreath,
                 ActionType.Idle, ActionType.Signature, ActionType.Keg };
-            var abilities = new[] { Ability.DoubleCharge, Ability.BullRush, Ability.Switcheroo };
+            var abilities = new[] { Ability.TripleCharge, Ability.BullRush, Ability.Switcheroo };
             const string map = @"
                 B........
                 .........

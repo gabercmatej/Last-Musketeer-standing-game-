@@ -33,6 +33,15 @@ namespace Musketeers.Sim.Tests
         }
 
         [Test]
+        public void BridgeMap_SameSeed_IdenticalHashEveryTurn()
+        {
+            var a = Run(BotMatch.Create(4242, 4, map: BuiltInMaps.Bridge));
+            var b = Run(BotMatch.Create(4242, 4, map: BuiltInMaps.Bridge));
+            Assert.That(a.Count, Is.GreaterThan(5));
+            Assert.That(b, Is.EqualTo(a));
+        }
+
+        [Test]
         public void DifferentSeeds_DifferentMatches()
         {
             Assert.That(Run(BotMatch.Create(1, 4)), Is.Not.EqualTo(Run(BotMatch.Create(2, 4))));

@@ -35,8 +35,7 @@ namespace Musketeers.Sim
         static void Phase4Shots(TickContext c)
         {
             c.Log.Phase = SimPhase.Shots;
-            var s = c.S;
-            var units = s.Units;
+            var units = c.S.Units;
             var buf = new ShotBuffer();
 
             foreach (int i in c.Order)
@@ -46,9 +45,26 @@ namespace Musketeers.Sim
                     continue;
                 if (c.Act[i].Type == ActionType.Fire)
                     TraceShot(c, i, u.Pos, c.Act[i].Dir, c.Cfg.FireRange, true, buf);
-                else if (c.Act[i].Type == ActionType.Signature && u.Ability == Ability.DoubleCharge)
-                    TraceDoubleCharge(c, i, u.Pos, c.Act[i].Dir, buf);
             }
+            ApplyShotBuffer(c, buf);
+
+            // §4 Triple Charge: after the musket shots have landed, each charge fires its shots one at a
+            // time on the live state, in initiative order. A unit that fell to an earlier charge doesn't fire.
+            foreach (int i in c.Order)
+            {
+                var u = units[i];
+                if (!c.Active[i] || !u.Alive || c.Act[i].Type != ActionType.Signature || u.Ability != Ability.TripleCharge)
+                    continue;
+                for (int shot = 0; shot < c.Cfg.TripleChargeShots && u.Alive; shot++)
+                    FireTripleChargeShot(c, i, c.Act[i].Dir);
+            }
+        }
+
+        // Applies everything a set of traced shots touched, all at once.
+        static void ApplyShotBuffer(TickContext c, ShotBuffer buf)
+        {
+            var s = c.S;
+            var units = s.Units;
 
             for (int k = 0; k < buf.Crates.Count; k++)
             {
@@ -62,6 +78,8 @@ namespace Musketeers.Sim
             // §6 Phase 4.1: a keg hit by a shot explodes this tick, in Phase 5.
             for (int k = 0; k < buf.Kegs.Count; k++)
             {
+                if (buf.Kegs[k].Detonating)
+                    continue;   // an earlier shot this tick already lit it and keeps the credit
                 buf.Kegs[k].Detonating = true;
                 buf.Kegs[k].DetonatedBy = buf.KegShooters[k];
             }
@@ -139,17 +157,18 @@ namespace Musketeers.Sim
             c.Log.Add(kind, unit: owner, from: origin, to: p, dir: dir);
         }
 
-        // §4 Double Charge: range 7, hits up to DoubleChargePierce units (stopping at the last one),
-        // ignores Parry (no block, no reflection). Pillars stop it; a crate is destroyed and stops it;
-        // a keg is detonated and stops it, like a musket shot.
-        static void TraceDoubleCharge(TickContext c, int owner, Int2 origin, Dir dir, ShotBuffer buf)
+        // §4 Triple Charge, one shot (FIXES §3.2 rule 7): traced from the shooter with range FireRange on
+        // the live state. A unit hit takes ShotDamage and slides TripleChargePush tiles away (normal push
+        // rules: wall slam, bonk, fall) with credit to the shooter, so the next shot meets it further
+        // along. A crate is destroyed at once (the next shot can pass), a keg is set to detonate in
+        // Phase 5. A parrier takes nothing, isn't pushed, and reflects the shot like a musket shot.
+        static void FireTripleChargeShot(TickContext c, int owner, Dir dir)
         {
             var s = c.S;
+            Int2 origin = s.Units[owner].Pos;
             Int2 d = dir.ToInt2();
             Int2 p = origin;
-            Keg hitKeg = null;
-            var victims = new List<Unit>(c.Cfg.DoubleChargePierce);
-            for (int step = 1; step <= c.Cfg.DoubleChargeRange; step++)
+            for (int step = 1; step <= c.Cfg.FireRange; step++)
             {
                 Int2 next = p + d;
                 if (!s.Board.InBounds(next))
@@ -158,37 +177,48 @@ namespace Musketeers.Sim
 
                 var tile = s.Board.Get(p);
                 if (tile == TileType.Pillar)
-                    break;
+                {
+                    c.Log.Add(SimEventKind.ShotFired, unit: owner, from: origin, to: p, dir: dir, reason: (byte)ShotKind.TripleCharge);
+                    return;
+                }
                 if (tile == TileType.Crate)
                 {
-                    buf.Crates.Add(p);
-                    buf.CrateShooters.Add(owner);
-                    break;
+                    c.Log.Add(SimEventKind.ShotFired, unit: owner, from: origin, to: p, dir: dir, reason: (byte)ShotKind.TripleCharge);
+                    var crate = new ShotBuffer();
+                    crate.Crates.Add(p);
+                    crate.CrateShooters.Add(owner);
+                    ApplyShotBuffer(c, crate);
+                    return;
                 }
-                hitKeg = s.KegAt(p);
-                if (hitKeg != null)
-                    break;
-                var target = s.UnitAt(p);
-                if (target != null)
+                var keg = s.KegAt(p);
+                if (keg != null)
                 {
-                    victims.Add(target);
-                    if (victims.Count >= c.Cfg.DoubleChargePierce)
-                        break;
+                    c.Log.Add(SimEventKind.ShotFired, unit: owner, from: origin, to: p, dir: dir, reason: (byte)ShotKind.TripleCharge);
+                    c.Log.Add(SimEventKind.ShotHit, other: owner, keg: keg.Id, to: p, dir: dir);
+                    var kegs = new ShotBuffer();
+                    kegs.AddKeg(keg, owner);
+                    ApplyShotBuffer(c, kegs);
+                    return;
                 }
+                var target = s.UnitAt(p);
+                if (target == null)
+                    continue;
+                c.Log.Add(SimEventKind.ShotFired, unit: owner, from: origin, to: p, dir: dir, reason: (byte)ShotKind.TripleCharge);
+                if (target.Parrying)
+                {
+                    c.Log.Add(SimEventKind.Parried, unit: target.Slot, other: owner, to: p, dir: dir);
+                    var back = new ShotBuffer();
+                    TraceShot(c, target.Slot, p, dir.Opposite(), c.Cfg.FireRange, false, back);
+                    ApplyShotBuffer(c, back);
+                    return;
+                }
+                c.Log.Add(SimEventKind.ShotHit, unit: target.Slot, other: owner, to: p, dir: dir);
+                Damage(c, target.Slot, c.Cfg.ShotDamage, owner, DamageKind.TripleCharge);
+                SlideUnit(c, target.Slot, dir, c.Cfg.TripleChargePush, owner);
+                return;
             }
-
-            // Same event order as a musket shot: the tracer first, then what it hit.
-            c.Log.Add(SimEventKind.ShotFired, unit: owner, from: origin, to: p, dir: dir, reason: (byte)ShotKind.DoubleCharge);
-            foreach (var v in victims)
-            {
-                buf.Hits.Add(new ShotHitRecord { Target = v.Slot, Attacker = owner, Kind = DamageKind.DoubleCharge });
-                c.Log.Add(SimEventKind.ShotHit, unit: v.Slot, other: owner, to: v.Pos, dir: dir);
-            }
-            if (hitKeg != null)
-            {
-                c.Log.Add(SimEventKind.ShotHit, other: owner, keg: hitKeg.Id, to: p, dir: dir);
-                buf.AddKeg(hitKeg, owner);
-            }
+            // Out of range or off the board: the shot ends on the last tile it reached.
+            c.Log.Add(SimEventKind.ShotFired, unit: owner, from: origin, to: p, dir: dir, reason: (byte)ShotKind.TripleCharge);
         }
     }
 }

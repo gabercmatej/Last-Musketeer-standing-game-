@@ -2,19 +2,31 @@ using NUnit.Framework;
 
 namespace Musketeers.Sim.Tests
 {
-    // Rule change 2026-10-18 (§6 Phase 2.2): movers whose paths cross or pass through each other in
-    // the same tick bonk like a swap: neither moves, both take 1 damage, no kill credit.
+    // §6 Phase 2.2 (rule change 2026-10-18, narrowed 2026-10-20 by FIXES §3.2 rule 1): movers bonk when they
+    // enter the same tile or swap tiles. A dash only enters its landing tile, so flying over someone or
+    // crossing a path is not a collision.
     public class CrossingTests
     {
         [Test]
-        public void DashesTowardEachOther_PassingThrough_Bonk()
+        public void DashesTowardEachOther_PassOverEachOther_NoBonk()
         {
-            // A would end on 2 passing 1, B on 1 passing 2.
-            var s = Scenario.From("A..B")
+            // A lands on 2, B lands on 1: different tiles, no swap.
+            Scenario.From("A..B")
                 .Plan('A', Act.Dash(Dir.E))
                 .Plan('B', Act.Dash(Dir.W))
                 .ResolveTick()
-                .AssertBoard("A..B")
+                .AssertBoard(".BA.")
+                .AssertNoEvent(SimEventKind.Bonk);
+        }
+
+        [Test]
+        public void DashesOntoEachOthersStartTiles_ExactSwap_Bonk()
+        {
+            var s = Scenario.From("A.B")
+                .Plan('A', Act.Dash(Dir.E))
+                .Plan('B', Act.Dash(Dir.W))
+                .ResolveTick()
+                .AssertBoard("A.B")
                 .AssertHp('A', 2)
                 .AssertHp('B', 2)
                 .AssertEventCount(SimEventKind.Bonk, 2);
@@ -23,36 +35,19 @@ namespace Musketeers.Sim.Tests
         }
 
         [Test]
-        public void DashThroughUnitMovingTheOtherWay_Bonks()
+        public void DashOverUnitWalkingTheOtherWay_NoBonk()
         {
-            // B steps into A's middle tile while A dashes onto B's start tile.
+            // B steps into A's flown-over tile while A lands on the tile B just left.
             Scenario.From("A.B")
                 .Plan('A', Act.Dash(Dir.E))
                 .Plan('B', Act.Move(Dir.W))
                 .ResolveTick()
-                .AssertBoard("A.B")
-                .AssertHp('A', 2)
-                .AssertHp('B', 2);
+                .AssertBoard(".BA")
+                .AssertNoEvent(SimEventKind.Bonk);
         }
 
         [Test]
-        public void PerpendicularWalkerIntoDashMiddle_Bonks()
-        {
-            Scenario.From(@"
-                .B.
-                A..")
-                .Plan('A', Act.Dash(Dir.E))
-                .Plan('B', Act.Move(Dir.S))
-                .ResolveTick()
-                .AssertBoard(@"
-                .B.
-                A..")
-                .AssertHp('A', 2)
-                .AssertHp('B', 2);
-        }
-
-        [Test]
-        public void PerpendicularDashes_CrossingMiddles_Bonk()
+        public void PerpendicularDashes_CrossingMiddles_NoBonk()
         {
             Scenario.From(@"
                 .B.
@@ -61,16 +56,14 @@ namespace Musketeers.Sim.Tests
                 .Plan('A', Act.Dash(Dir.E))
                 .Plan('B', Act.Dash(Dir.S))
                 .ResolveTick()
-                .AssertPos('A', 0, 1)
-                .AssertPos('B', 1, 2)
-                .AssertHp('A', 2)
-                .AssertHp('B', 2);
+                .AssertPos('A', 2, 1)
+                .AssertPos('B', 1, 0)
+                .AssertNoEvent(SimEventKind.Bonk);
         }
 
         [Test]
         public void DashFollowingAWalker_DoesNotBonk()
         {
-            // A dashes onto the tile B is leaving; their paths never share a tile or an edge.
             Scenario.From("A.B.")
                 .Plan('A', Act.Dash(Dir.E))
                 .Plan('B', Act.Move(Dir.E))
@@ -82,7 +75,6 @@ namespace Musketeers.Sim.Tests
         [Test]
         public void WalkingAwayFromADashersPath_DoesNotBonk()
         {
-            // B leaves the row A dashes along; B never enters A's tiles.
             Scenario.From(@"
                 ...
                 .B.
@@ -96,9 +88,9 @@ namespace Musketeers.Sim.Tests
         }
 
         [Test]
-        public void CrossingOverAPit_BonksAndNobodyFalls()
+        public void CrossingOverAPit_NobodyBonksOrFalls()
         {
-            // Both want to pass through the pit tile: they collide above it and stay put.
+            // Both fly over the pit tile and land on different tiles.
             Scenario.From(@"
                 .B.
                 A~.
@@ -108,8 +100,21 @@ namespace Musketeers.Sim.Tests
                 .ResolveTick()
                 .AssertAlive('A')
                 .AssertAlive('B')
-                .AssertPos('A', 0, 1)
+                .AssertPos('A', 2, 1)
+                .AssertPos('B', 1, 0)
                 .AssertNoEvent(SimEventKind.Fell);
+        }
+
+        [Test]
+        public void WalkersSwappingPlaces_StillBonk()
+        {
+            Scenario.From("AB")
+                .Plan('A', Act.Move(Dir.E))
+                .Plan('B', Act.Move(Dir.W))
+                .ResolveTick()
+                .AssertBoard("AB")
+                .AssertHp('A', 2)
+                .AssertHp('B', 2);
         }
     }
 }

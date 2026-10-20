@@ -2,7 +2,7 @@ namespace Musketeers.Sim
 {
     // TECH_DESIGN §4 event kinds, plus Pushed (the unit a shove moved) and ParryRaised. Field use per kind:
     //   Moved / Dashed      Unit, From, To, Dir
-    //   Leaped              Unit, From, To (the dash crossed a pit)
+    //   Leaped              Unit, From, To (the dash flew over a middle tile that wasn't empty floor: pit, crate, keg or unit)
     //   MoveBlocked         Unit, From, To (the tile it wanted), Reason = BlockReason
     //   Bonk                one per participant: Unit, Other (partner, -1 if none), From, To (tile it ran into).
     //                       Phase 2 also bonks movers whose paths cross (shared tile or opposite traversal).
@@ -27,7 +27,8 @@ namespace Musketeers.Sim
     //   KegExploded         Keg, Unit = credited player or -1, Other = owner, To = center, Amount = 1 if chained
     //   Grappled            Unit = grappler, Other = yanked unit, Keg = pulled keg, From/To = start/end of
     //                       whatever moved (the hook's last tile on a miss), Dir, Reason = GrappleResult
-    //   Swapped             Unit = user, Other = unit or -1, Keg = keg or -1, From = user start, To = user end, Dir
+    //   Swapped             Unit = user, Other = the target musketeer (or -1 if the slot was invalid), From = user start,
+    //                       To = user end, Amount = 1 on success / 0 on failure, Reason = SwitcherooFail (0 on success)
     //   BullRushed          Unit = rusher, Other = unit it hit or -1, Keg = keg it hit or -1, From, To, Dir
     //   TileWarned          To = tile, Amount = ring (TurnStart)
     //   TileCrumbled        To = tile, Amount = ring (TurnStart)

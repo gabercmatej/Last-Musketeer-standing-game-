@@ -14,7 +14,7 @@ namespace Musketeers.Sim.Tests
             cfg ??= new GameConfig();
             // Abilities: a seeded shuffle of the four, first `players` of them.
             var pick = new DeterministicRng(seed ^ 0xA5A5A5A5u);
-            var all = new[] { Ability.Grappin, Ability.Switcheroo, Ability.DoubleCharge, Ability.BullRush };
+            var all = new[] { Ability.Grappin, Ability.Switcheroo, Ability.TripleCharge, Ability.BullRush };
             for (int i = all.Length - 1; i > 0; i--)
             {
                 int j = pick.Range(0, i + 1);

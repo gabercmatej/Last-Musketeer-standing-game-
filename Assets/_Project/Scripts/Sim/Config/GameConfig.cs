@@ -8,17 +8,17 @@ namespace Musketeers.Sim
         public static readonly GameConfig Default = new GameConfig();
 
         // --- §11 table ---
-        public int BoardSize = 9;
+        public int BoardWidth = 15;           // maps are 15x9 (the map text is the source of truth; these document it)
+        public int BoardHeight = 9;
         public int MaxHp = 3;
         public int StartGrit = 2;
         public int MaxGrit = 5;
         public int GritPerTurn = 1;
         public bool StartLoaded = true;       // §4 musket starts loaded; false = everyone starts unloaded (Matej's test knob)
         public int TicksPerTurn = 3;
-        public int PlanningSeconds = 25;
+        public int PlanningSeconds = 30;
         public int RevealMs = 1500;           // §11 says 1.5 s; the sim is integer-only, so milliseconds
         public int FireRange = 5;
-        public int DoubleChargeRange = 7;
         public int KegThrowRange = 3;
         public int KegFuseTicks = 3;
         public int MaxKegsPerPlayer = 1;
@@ -26,11 +26,10 @@ namespace Musketeers.Sim
         public int DashCost = 1;
         public int ParryCost = 1;
         public int KegCost = 2;
-        public int SignatureCost = 3;
+        public int SignatureCost = 5;
         public int GrappleRange = 5;
-        public int SwitcherooRange = 5;
         public int BullRushDistance = 3;
-        public int BullRushPush = 2;
+        public int BullRushPush = 4;
         public int CrumbleStartTurn = 5;
         public int CrumbleEvery = 2;
         public int PointsToWin = 12;
@@ -49,7 +48,8 @@ namespace Musketeers.Sim
         public int SqueezeDamage = 1;         // §6 Phase 3.3
         public int KegDamage = 1;             // §6 Phase 5.3
         public int KegPush = 1;               // §6 Phase 5.3: orthogonal neighbours pushed 1 outward
-        public int DoubleChargePierce = 2;    // §4 Double Charge
+        public int TripleChargeShots = 3;     // §4 Triple Charge: shots per charge (range is FireRange)
+        public int TripleChargePush = 1;      // §4 Triple Charge: tiles each hit slides the target
         public int KillCreditTurns = 1;       // §6 Kill credit: last attacker counts this turn or last turn
     }
 }

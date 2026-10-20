@@ -41,55 +41,60 @@ At the start of each round, the player with strictly the most match points wears
 
 ## 3. The board
 
-- A square grid, **9×9** by default. Coordinates: `x` 0–8 from left to right, `y` 0–8 from bottom to top.
+- A rectangular grid, **15×9** on both built-in maps (tiles are square and fill the arena floor of the background art). Coordinates: `x` 0–14 from left to right, `y` 0–8 from bottom to top.
 - **4 directions only** (N, E, S, W). No diagonal moves or shots.
 
 | Tile | Symbol | Move through | Shots | Notes |
 |---|---|---|---|---|
 | Floor | `.` | yes | pass | |
+| Bridge | `b` | yes | pass | Plain Floor for the rules. It only looks like a bridge; pushes off its sides drop you into the water. |
 | Pillar | `#` | no | block | Indestructible |
 | Crate | `o` | no | block | Destroyed by 1 shot or explosion → becomes Floor |
-| Pit / moat | `~` | deadly | pass | Entering = **ring-out** (instant death). Off-board counts as pit. |
+| Pit / moat / water | `~` | deadly | pass | Entering = **ring-out** (instant death). Off-board counts as pit, unless the map has walled edges. |
 | Spawn | `1`–`4` | Floor | | Player slot spawn |
 
 Kegs (section 5) are objects that sit on a floor tile and behave like crates for movement.
 
-### Map 1: "The Courtyard" (ships first)
-Top row is y = 8.
+**Walled edges.** A map whose first line is `@walls` has solid walls around it: the outside counts as a **pillar**. You can't walk, dash or Bull Rush off it, a push into the edge is a **Wall Slam**, and kicked kegs stop there. Shots, Grappin hooks and keg throws still end at the edge. Crumbling still makes pits inside. Without `@walls` the outside is a pit. Lines starting with `@` are directives and aren't part of the grid.
+
+### Map 1: "The Courtyard" (ships first, walled)
+Top row is y = 8. The first line `@walls` is a directive.
 ```
-.........
-.1..o..2.
-..#...#..
-...~.~...
-.o.....o.
-...~.~...
-..#...#..
-.3..o..4.
-.........
+@walls
+...............
+.1....o.o....2.
+...#.......#...
+.....~...~.....
+.o.....#.....o.
+.....~...~.....
+...#.......#...
+.3....o.o....4.
+...............
 ```
 With 2 or 3 players, use the spawns in slot order.
 
 ### Map 2: "The Bridge"
+Islands, bridges and water. Falling off the edge or into the water is death. The 1-tile water gaps between the bridges can be leaped with a Dash.
 ```
-~~~...~~~
-~1.....2~
-~..#.#..~
-...o.o...
-.........
-...o.o...
-~..#.#..~
-~3.....4~
-~~~...~~~
+~~~~~~~~~~~~~~~
+~1..~~~~~~~..2~
+~...bbb~bbb...~
+~.o.~~.#.~~.o.~
+~...~~...~~...~
+~.o.~~.#.~~.o.~
+~...bbb~bbb...~
+~3..~~~~~~~..4~
+~~~~~~~~~~~~~~~
 ```
 
-Maps are plain-text files, so new maps (your hangout spots) are easy to add. The board size comes from the map file (any rectangle; the camera fits up to 13×13), and each map picks a tileset and background.
+Maps are plain-text files, so new maps (your hangout spots) are easy to add. The board size comes from the map file (any rectangle), and each map picks a tileset and background.
 
 ### The Cardinal's Guard closes in (shrinking arena)
-Each tile has a **ring index**: `min(x, y, W-1-x, H-1-y)`. The outer ring is 0, and the center is 4.
+Each tile has a **ring index**: `min(x, y, W-1-x, H-1-y)`. The outer ring is 0. On the 15×9 maps the center ring is 4, which is the middle row of 7 tiles.
 - At the start of **turn 5**, ring 0 is **warned** (it glows red for one turn).
 - At the start of **turn 6**, ring 0 **crumbles** into pit. Anyone standing on it falls.
 - The next ring is then warned, and it crumbles the following turn: ring 1 is warned on turn 7 and falls on turn 8, and so on.
-- On turn 14 the center falls, and anyone still alive dies. That round is a draw.
+- On the 15×9 maps ring 3 falls on turn 12, which leaves only the 7-tile center row, and on turn 14 that row falls too: anyone still alive dies and the round is a draw.
 
 Config: `CrumbleStartTurn = 5`, `CrumbleEvery = 2`.
 
@@ -108,11 +113,11 @@ All four musketeers have identical base stats. They differ only in their **signa
 Everyone can see everyone's HP, Grit and loaded/unloaded musket at all times. These are the tells you read.
 
 ### Roster (placeholder assignments: swap abilities to match personalities)
-| Character | Signature (costs 3 Grit) | Flavor |
+| Character | Signature (costs 5 Grit) | Flavor |
 |---|---|---|
 | **Matej** | **Grappin** (grappling hook) | The playmaker who drags you where he wants you |
 | **Matic** | **Switcheroo** | Now you're here, and I'm not |
-| **Aljaž** | **Double Charge** | The one who trusts powder over steel |
+| **Aljaž** | **Triple Charge** | The one who trusts powder over steel |
 | **Nik** | **Bull Rush** | Doesn't go around things |
 
 Characters are unique in a lobby. Each player picks a different one, and bots take any that are left.
@@ -126,7 +131,7 @@ Each turn you plan **3 actions**, one per tick. Unplanned ticks become **Idle**:
 | # | Action | Target | Cost | Effect |
 |---|---|---|---|---|
 | 1 | **Move** | direction | 0 | Move 1 tile. |
-| 2 | **Dash** | direction | 1 Grit | Move 2 tiles in a straight line. **Can leap over a 1-tile pit.** |
+| 2 | **Dash** | direction | 1 Grit | Move 2 tiles in a straight line, **flying over** crates, kegs, musketeers and 1-tile pits. Only a **pillar** (or a wall) on the middle tile blocks it. The landing tile must be free, or the dash fails and the Grit is still spent. |
 | 3 | **Fire** | direction | needs loaded | Instant line shot, range **5**. Hits the first unit, crate, keg or pillar for **1 damage**. Unloads your musket. |
 | 4 | **Reload** | none | 0 | Musket becomes loaded. You can do it while loaded, but it's wasted. |
 | 5 | **Parry** | none | 1 Grit | This tick: block all shot and explosion damage, and **reflect** shots back the way they came (riposte). Pushes still move you. |
@@ -134,7 +139,7 @@ Each turn you plan **3 actions**, one per tick. Unplanned ticks become **Idle**:
 | 7 | **Powder Keg** | tile within 3 (Manhattan) | 2 Grit | Lob a keg. It lands this tick and **explodes 3 ticks later** (the same tick slot next turn). Max 1 active keg per player. |
 | 8 | **Catch Breath** | none | 0 | +1 Grit (it can be spent from the next tick on). |
 | – | **Idle** | none | 0 | Does nothing. Every tick you didn't plan is Idle. |
-| Q | **Signature** | depends | 3 Grit | See below. |
+| Q | **Signature** | depends | 5 Grit | See below. |
 
 ### The core triangle
 - **Fire** beats standing still, shoving and reloading.
@@ -148,9 +153,9 @@ Each turn you plan **3 actions**, one per tick. Unplanned ticks become **Idle**:
   - A **unit**: yank it to the tile right next to you (it passes over pits safely).
   - A **pillar, crate or keg**: pull yourself to the tile right before it. Exception: a keg is pulled to you instead, so it lands on the tile next to you.
   - **Nothing:** the hook misses, and the Grit is still spent.
-- **Switcheroo** (Matic). Swap positions with the first unit or keg in a direction (range 5, blocked by pillars and crates; passes over pits). If there's nothing to swap with, it misses.
-- **Double Charge** (Aljaž). Needs a loaded musket. A shot with range **7** that **pierces** up to 2 units and **ignores Parry**, dealing 1 damage to each unit hit. It stops at pillars and crates, and destroys the crate it hits. Unloads your musket.
-- **Bull Rush** (Nik). Charge up to 3 tiles in a direction, stopping before any pillar, crate, keg, unit or pit. If the charge stopped because of a **unit**, that unit is **pushed 2 tiles**. If it stopped because of a **keg**, the keg is kicked.
+- **Switcheroo** (Matic). Pick **any living musketeer** and swap positions with them, wherever they are when it resolves (no range, no line of sight). It **fails** (the Grit is still spent) if Matic stands on a warned tile when it resolves, or if the target is dead. The target is credited to Matic for kill credit. Kegs can't be swapped.
+- **Triple Charge** (Aljaž). Needs a loaded musket, and unloads it. Fires **3 shots in a row down one line**, each with range 5 (`FireRange`) from the shooter. Each shot that hits a unit deals **1 damage and pushes it 1 tile** away (normal push rules: Wall Slam, Bonk, fall), so the next shot meets it one tile further along: up to 3 damage and 3 tiles of knockback. No pierce. A **crate** is destroyed (the next shot can pass), a **keg** is detonated and stops the shot, a pillar stops it. It **can be parried**: each shot that meets a parrying unit does nothing to it and is reflected like a normal shot.
+- **Bull Rush** (Nik). Charge up to 3 tiles in a direction, stopping before any pillar, crate, keg, unit or pit. If the charge stopped because of a **unit**, that unit is **pushed 4 tiles**. If it stopped because of a **keg**, the keg is kicked.
 
 ### Invalid actions (fizzles)
 When it's time for an action to happen, the simulation checks it. If you don't have enough Grit, your musket isn't loaded, or you already have an active keg, the action **fizzles**: nothing happens, it costs nothing, and a sad "click" plays. The planning UI tries to prevent this by projecting your Grit and musket state across your 3 ticks.
@@ -171,17 +176,17 @@ For every living unit, look at its action for this tick. Check the cost and requ
 ### Phase 2: Movement (Move, Dash)
 1. Compute each mover's desired destination:
    - **Move** goes to `pos + d`.
-   - **Dash** goes to `pos + 2d`. If the first tile is a pillar, crate or keg, the dash is cancelled. If only the second tile is blocked, the dash stops on the first tile. The middle tile may be a pit (that's a leap). If the middle tile holds a unit at the start of the tick, the dash is cancelled.
+   - **Dash** goes to `pos + 2d` and flies over the middle tile. Only a **pillar** (or a wall) on the middle tile blocks it; a crate, keg, unit or pit there is flown over. The **landing** tile must not be a pillar, crate or keg, or the dash fails: you stay put, and the Grit stays spent. Landing on a pit (or off an unwalled board) is a fall.
    - A destination that is a pillar, crate or keg cancels the move.
 2. **Head-on collisions (Bonk):**
-   - If two or more units want the **same tile**, none of them move, and each takes **1 damage**.
-   - If two units try to **swap tiles**, neither moves, and both take **1 damage**.
-   - **Crossing paths** count as a swap: if two units' paths cross or pass through each other in the same tick (they would both enter the same tile at any point of their move, or cross the same edge in opposite directions), neither moves, and both take **1 damage**. Examples: two dashes toward each other, a dash through a unit that is moving the opposite way, or a walker stepping into the tile a dash passes through.
-3. **Blocked:** if a mover's destination is occupied by a unit that ends up not moving, the mover stays put and takes no damage. Repeat this check until nothing changes, so chains of blocked units resolve. Rotations of 3 or more units all succeed.
+   - If two or more movers want the **same tile**, none of them move, and each takes **1 damage**.
+   - If two movers try to **swap tiles** (each enters the other's start tile), neither moves, and both take **1 damage**.
+   - A dash only ever *enters its landing tile*. Flying over a unit, or walking into the tile a dash flies over, never causes a Bonk. Dashes bonk only on a shared landing tile or an exact swap.
+3. **Blocked:** if a mover's destination (a dash's landing tile) is occupied by a unit that ends up not moving, the mover stays put and takes no damage. Repeat this check until nothing changes, so chains of blocked units resolve. Rotations of 3 or more units all succeed.
 4. Apply the moves. If a unit ends on a pit, it **falls** and dies instantly.
 
 ### Phase 2b: Movement abilities (Grappin, Switcheroo, Bull Rush)
-These resolve one at a time in **initiative order**, each using the positions left by the previous one. Pushes caused by Bull Rush follow the push rules in Phase 3.
+These resolve one at a time in **initiative order**, each using the positions left by the previous one (Switcheroo swaps with its target's position at that moment). Pushes caused by Bull Rush follow the push rules in Phase 3.
 
 ### Phase 3: Shoves
 1. Using the post-movement snapshot, every shover targets `pos + d`.
@@ -193,17 +198,18 @@ These resolve one at a time in **initiative order**, each using the positions le
 4. Apply pushes in initiative order of the **targets**. A pushed unit slides one tile at a time, up to the push strength:
    - If the next tile is a pillar, crate or keg, it stops and takes 1 damage (**Wall Slam**).
    - If the next tile holds a unit, both stop and both take 1 damage (**Bonk**). There's no chain pushing.
-   - If the next tile is a pit or off the board, it **falls** and dies instantly.
+   - If the next tile is a pit or off an unwalled board, it **falls** and dies instantly. (On a walled board the edge is a pillar, so it's a Wall Slam.)
 5. **Kegs** that get shoved (kicked) slide up to 3 tiles until blocked. A keg that slides into a pit is gone.
 
-### Phase 4: Shots (Fire, Double Charge)
+### Phase 4: Shots (Fire, Triple Charge)
 1. Trace every shot on the same snapshot, starting from the shooter's tile and going in the chosen direction:
    - A **pillar** stops the shot.
    - A **crate** is destroyed and stops the shot.
    - A **keg** is detonated this tick and stops the shot.
-   - A **unit** is hit for 1 damage and stops the shot. The exception is Double Charge, which pierces up to 2 units.
+   - A **unit** is hit for 1 damage and stops the shot.
 2. **Parry:** a normal shot that hits a parrying unit does no damage and is **reflected**. A new shot traces from the parrying unit in the opposite direction, with full range, and hits the first thing it meets. A reflected shot can't be reflected again.
 3. Apply all shot damage at once. Two players who shoot each other both get hit.
+4. **Triple Charge**, after the shots above have landed: each Triple Charge, in initiative order, fires its 3 shots one after another on the live board. Each traces from the shooter with range 5 and ends on the first thing it meets. A unit hit takes 1 damage and slides 1 tile away (credit to the shooter); the next shot traces again from the shooter, so it follows the target. A crate is destroyed at once, a keg is detonated (it explodes in Phase 5), a parrying unit takes no damage, isn't pushed, and reflects the shot (1 damage to the first thing it meets on the way back, no push, not reflectable again).
 
 ### Phase 5: Kegs
 1. **Landing:** a newly thrown keg lands on its target tile. If that tile isn't empty floor (it has a unit, keg, crate, pillar or pit), the keg **explodes on impact** (a direct hit).
@@ -230,7 +236,7 @@ Each unit remembers its **last attacker**, meaning whoever last damaged, pushed,
 
 ## 7. A turn, minute by minute
 
-1. **Planning (default 25 s).**
+1. **Planning (default 30 s).**
    - You see a clean board with everyone's HP, Grit, musket state and kegs with fuse numbers.
    - You build your 3-action plan. A ghost preview shows where you'll end up each tick, your shot lines and your keg landing spots.
    - **Lock In** sends a ✔ "confident" icon to everyone.
@@ -313,18 +319,19 @@ Offline (vs bots) the lobby is local; online (Day 5) the same lobby is shared an
 
 | Knob | Default |
 |---|---|
-| BoardSize | 9 |
+| BoardWidth / BoardHeight (both maps) | 15 / 9 |
 | MaxHp | 3 |
 | StartGrit / MaxGrit / GritPerTurn | 2 / 5 / 1 |
 | StartLoaded (muskets start loaded, §4) | true |
 | TicksPerTurn | 3 |
-| PlanningSeconds | 25 |
+| PlanningSeconds | 30 |
 | RevealSeconds | 1.5 |
-| FireRange / DoubleChargeRange | 5 / 7 |
+| FireRange | 5 |
+| TripleChargeShots / TripleChargePush | 3 / 1 |
 | KegThrowRange / KegFuseTicks / MaxKegsPerPlayer | 3 / 3 / 1 |
 | KegKickDistance | 3 |
-| Costs: Dash / Parry / Keg / Signature | 1 / 1 / 2 / 3 |
-| GrappleRange / SwitcherooRange / BullRushDistance / BullRushPush | 5 / 5 / 3 / 2 |
+| Costs: Dash / Parry / Keg / Signature | 1 / 1 / 2 / 5 |
+| GrappleRange / BullRushDistance / BullRushPush | 5 / 3 / 4 |
 | CrumbleStartTurn / CrumbleEvery | 5 / 2 |
 | PointsToWin / WinPoints / KillPoints / CrownKillPoints | 12 / 3 / 1 / 2 |
 

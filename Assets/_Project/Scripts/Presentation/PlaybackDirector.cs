@@ -113,11 +113,15 @@ namespace Musketeers.Presentation
                 {
                     _group.Add(log[i]);
                     i++;
-                } while (i < log.Count && log[i].Phase == phase && !(phase == SimPhase.MovementAbilities && StartsAbility(log[i].Kind)));
+                } while (i < log.Count && log[i].Phase == phase && !(phase == SimPhase.MovementAbilities && StartsAbility(log[i].Kind))
+                         && !(phase == SimPhase.Shots && StartsTripleChargeShot(log[i])));
                 float d = PlayGroup(_group);
                 yield return Wait(d);
             }
         }
+
+        // Triple Charge shots fire one after another on the live state, so each plays as its own group.
+        static bool StartsTripleChargeShot(SimEvent e) => e.Kind == SimEventKind.ShotFired && (ShotKind)e.Reason == ShotKind.TripleCharge;
 
         static bool StartsAbility(SimEventKind k) => k == SimEventKind.Grappled || k == SimEventKind.Swapped || k == SimEventKind.BullRushed;
 
@@ -286,7 +290,7 @@ namespace Musketeers.Presentation
                 case SimEventKind.ShotFired:
                 {
                     if (u == null) return 0f;
-                    bool dc = (ShotKind)e.Reason == ShotKind.DoubleCharge;
+                    bool dc = (ShotKind)e.Reason == ShotKind.TripleCharge;
                     u.Aim(e.Dir);
                     Vector3 tip = u.BarrelTip(e.Dir);
                     Vector3 dv = BoardMath.DirVector(e.Dir);
@@ -496,11 +500,10 @@ namespace Musketeers.Presentation
                 case SimEventKind.Swapped:
                 {
                     if (u == null) return 0f;
-                    u.SetFacing(e.Dir);
                     Sfx(delay, "SFX/abilities/switcheroo");
-                    if (e.Other < 0 && e.Keg < 0)
+                    if (e.Amount == 0)   // failed: warned tile, dead or invalid target
                     {
-                        At(delay, () => _fx.Popup("miss", from + BoardMath.DirVector(e.Dir) + Vector3.up * 0.3f, new Color(0.8f, 0.8f, 0.8f), S(0.6f)));
+                        At(delay, () => _fx.Popup("fails", from + Vector3.up * 0.9f, new Color(0.8f, 0.8f, 0.8f), S(0.6f)));
                         return 0.3f;
                     }
                     At(delay, () =>
@@ -511,15 +514,6 @@ namespace Musketeers.Presentation
                     Slide(u, e.To, 0.3f, delay, Ease.InOutQuad);
                     if (o != null)
                         Slide(o, e.From, 0.3f, delay, Ease.InOutQuad);
-                    else if (e.Keg >= 0)
-                    {
-                        var kv = _board.Keg(e.Keg);
-                        if (kv != null)
-                        {
-                            kv.SetGridPosLogical(e.From);
-                            At(delay, () => Tween.LocalPosition(kv.transform, from, S(0.3f), Ease.InOutQuad));
-                        }
-                    }
                     return 0.35f;
                 }
                 case SimEventKind.BullRushed:

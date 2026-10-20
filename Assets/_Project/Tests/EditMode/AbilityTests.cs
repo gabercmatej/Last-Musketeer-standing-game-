@@ -2,30 +2,30 @@ using NUnit.Framework;
 
 namespace Musketeers.Sim.Tests
 {
-    // GAME_DESIGN §4 signature abilities, §6 Phase 2b and Phase 4 (Double Charge).
-    // Each test gives A the ability under test and the 3 Grit it costs.
+    // GAME_DESIGN §4 signature abilities, §6 Phase 2b and Phase 4 (Triple Charge).
+    // Each test gives A the ability under test and the 5 Grit it costs.
     public class AbilityTests
     {
         static Scenario With(string map, Ability a) =>
-            Scenario.From(map).WithAbility('A', a).WithGrit('A', 3);
+            Scenario.From(map).WithAbility('A', a).WithGrit('A', 5);
 
         [Test]
         public void Signature_WithoutGrit_FizzlesFree()
         {
             Scenario.From("A...B")
                 .WithAbility('A', Ability.Grappin)
-                .WithGrit('A', 2)
+                .WithGrit('A', 4)   // signatures cost 5
                 .Plan('A', Act.Sig(Dir.E))
                 .ResolveTick()
                 .AssertFizzle('A', FizzleReason.NotEnoughGrit)
-                .AssertGrit('A', 2)
+                .AssertGrit('A', 4)
                 .AssertPos('B', 4, 0);
         }
 
         // --- Grappin ---
 
         [Test]
-        public void Grappin_YanksUnitNextToYou_CostsThree_SetsAttacker()
+        public void Grappin_YanksUnitNextToYou_CostsFive_SetsAttacker()
         {
             var s = With("A....B", Ability.Grappin)
                 .Plan('A', Act.Sig(Dir.E))
@@ -99,56 +99,115 @@ namespace Musketeers.Sim.Tests
                 .AssertGrit('A', 0);
         }
 
-        // --- Switcheroo ---
+        // --- Switcheroo (FIXES §3.2 rule 5) ---
 
         [Test]
-        public void Switcheroo_SwapsWithUnit_SetsAttacker()
+        public void Switcheroo_SwapsWithTheChosenMusketeer_AnywhereOnTheBoard_SetsAttacker()
         {
-            var s = With("A..B", Ability.Switcheroo)
-                .Plan('A', Act.Sig(Dir.E))
+            var s = With(@"
+                A..
+                ...
+                ..B", Ability.Switcheroo)
+                .Plan('A', Act.Switcheroo('B'))
                 .ResolveTick()
-                .AssertBoard("B..A")
+                .AssertBoard(@"
+                B..
+                ...
+                ..A")
+                .AssertGrit('A', 0)
                 .AssertEvent(SimEventKind.Swapped, 'A');
             Assert.That(s.Unit('B').LastAttacker, Is.EqualTo(0));
+            Assert.That(s.Find(SimEventKind.Swapped).Value.Amount, Is.EqualTo(1));
         }
 
         [Test]
-        public void Switcheroo_PassesOverPits()
+        public void Switcheroo_IgnoresPillarsCratesAndPits_InTheWay()
         {
-            With("A~~B", Ability.Switcheroo)
-                .Plan('A', Act.Sig(Dir.E))
+            With("A#o~B", Ability.Switcheroo)
+                .Plan('A', Act.Switcheroo('B'))
                 .ResolveTick()
-                .AssertBoard("B~~A");
+                .AssertPos('A', 4, 0)
+                .AssertPos('B', 0, 0);
         }
 
-        [TestCase("A#.B")]
-        [TestCase("Ao.B")]
-        public void Switcheroo_BlockedByPillarOrCrate_Misses(string row)
+        [Test]
+        public void Switcheroo_UsesTheTargetsPositionAtThatMoment()
         {
-            With(row, Ability.Switcheroo)
-                .Plan('A', Act.Sig(Dir.E))
+            // B walks east in Phase 2; Phase 2b then swaps A with wherever B is now.
+            With("A..B.", Ability.Switcheroo)
+                .Plan('A', Act.Switcheroo('B'))
+                .Plan('B', Act.Move(Dir.E))
                 .ResolveTick()
-                .AssertPos('A', 0, 0)
-                .AssertPos('B', 3, 0)
+                .AssertPos('A', 4, 0)
+                .AssertPos('B', 0, 0);
+        }
+
+        [Test]
+        public void Switcheroo_FromAWarnedTile_Fails_GritSpent()
+        {
+            // Turn 5 warns ring 0, the outer ring; A stands on it.
+            var s = With(@"
+                A....
+                .....
+                .....
+                .....
+                ....B", Ability.Switcheroo)
+                .WithTurn(5)
+                .Plan('A', Act.Switcheroo('B'))
+                .ResolveTick()
+                .AssertPos('A', 0, 4)
+                .AssertPos('B', 4, 0)
                 .AssertGrit('A', 0);
+            var e = s.Find(SimEventKind.Swapped, 'A').Value;
+            Assert.That(e.Amount, Is.EqualTo(0));
+            Assert.That(e.Reason, Is.EqualTo((byte)SwitcherooFail.Warned));
         }
 
         [Test]
-        public void Switcheroo_WithKeg_SwapsAndTheBlastHitsYourOldNeighbour()
+        public void Switcheroo_TargetOnAWarnedTile_StillWorks_WhenMaticIsSafe()
         {
-            // A swaps with a keg about to blow: the keg lands next to B, A is out of range.
-            var s = Scenario.From(".BA..K.")
-                .WithAbility('B', Ability.Grappin)
-                .WithAbility('A', Ability.Switcheroo).WithGrit('A', 3)
-                .WithKegFuse(0, 1).WithKegOwner(0, 'A')
-                .Plan('A', Act.Sig(Dir.E))
+            With(@"
+                B....
+                .....
+                ..A..
+                .....
+                .....", Ability.Switcheroo)
+                .WithTurn(5)
+                .Plan('A', Act.Switcheroo('B'))
                 .ResolveTick()
-                .AssertPos('A', 5, 0)
-                .AssertHp('A', 3)
-                .AssertHp('B', 2)
-                .AssertPos('B', 0, 0)
-                .AssertNoKegs();
-            Assert.That(s.Unit('B').LastAttacker, Is.EqualTo(0));
+                .AssertPos('A', 0, 4)
+                .AssertPos('B', 2, 2);
+        }
+
+        [Test]
+        public void Switcheroo_DeadTarget_Fails_GritSpent()
+        {
+            var s = With("A..B..C", Ability.Switcheroo);
+            s.Unit('B').Alive = false;
+            s.Plan('A', Act.Switcheroo('B')).ResolveTick().AssertPos('A', 0, 0).AssertGrit('A', 0);
+            Assert.That(s.Find(SimEventKind.Swapped, 'A').Value.Reason, Is.EqualTo((byte)SwitcherooFail.TargetDead));
+        }
+
+        [Test]
+        public void Switcheroo_TargetingYourself_Fails()
+        {
+            var s = With("A..B", Ability.Switcheroo)
+                .Plan('A', Act.Switcheroo('A'))
+                .ResolveTick()
+                .AssertBoard("A..B")
+                .AssertGrit('A', 0);
+            Assert.That(s.Find(SimEventKind.Swapped, 'A').Value.Reason, Is.EqualTo((byte)SwitcherooFail.BadTarget));
+        }
+
+        [Test]
+        public void Switcheroo_CantSwapWithAKeg_Anymore()
+        {
+            // The kegs sit where a directional Switcheroo used to grab them; now only musketeers can be picked.
+            With("AK.B", Ability.Switcheroo)
+                .Plan('A', Act.Switcheroo('B'))
+                .ResolveTick()
+                .AssertKegAt(1, 0)
+                .AssertPos('A', 3, 0);
         }
 
         // --- Bull Rush ---
@@ -174,13 +233,13 @@ namespace Musketeers.Sim.Tests
         }
 
         [Test]
-        public void BullRush_StoppedByUnit_PushesItTwo()
+        public void BullRush_StoppedByUnit_PushesItFour()
         {
-            var s = With("A..B...", Ability.BullRush)
+            var s = With("A..B.......", Ability.BullRush)
                 .Plan('A', Act.Sig(Dir.E))
                 .ResolveTick()
                 .AssertPos('A', 2, 0)
-                .AssertPos('B', 5, 0)
+                .AssertPos('B', 7, 0)
                 .AssertHp('B', 3);
             Assert.That(s.Unit('B').LastAttacker, Is.EqualTo(0));
         }
@@ -188,7 +247,7 @@ namespace Musketeers.Sim.Tests
         [Test]
         public void BullRush_PushIntoPit_KillCredit()
         {
-            With("A.B.~", Ability.BullRush)
+            With("A.B..~", Ability.BullRush)
                 .Plan('A', Act.Sig(Dir.E))
                 .ResolveTick()
                 .AssertPos('A', 1, 0)
@@ -229,90 +288,173 @@ namespace Musketeers.Sim.Tests
         }
 
         [Test]
-        public void BullRush_OnParrier_PushesTwo_ParryStillBlocksShots()
+        public void BullRush_OnParrier_PushesFour_ParryStillBlocksShots()
         {
-            Scenario.From("A.B...C")
-                .WithAbility('A', Ability.BullRush).WithGrit('A', 3)
+            Scenario.From("A.B.......C")
+                .WithAbility('A', Ability.BullRush).WithGrit('A', 5)
                 .Plan('A', Act.Sig(Dir.E))
                 .Plan('B', Act.Parry())
                 .Plan('C', Act.Fire(Dir.W))
                 .ResolveTick()
-                .AssertPos('B', 4, 0)
+                .AssertPos('B', 6, 0)
                 .AssertHp('B', 3)
                 .AssertHp('C', 2)            // riposte: Bull Rush isn't a shove, so no Guard Break
                 .AssertNoEvent(SimEventKind.GuardBreak);
         }
 
-        // --- Double Charge ---
-
         [Test]
-        public void DoubleCharge_PiercesTwoUnits_StopsAtTheSecond()
+        public void BullRush_PushIsFourTiles_NotMore()
         {
-            var s = Scenario.From("A.B.C.D")
-                .WithAbility('A', Ability.DoubleCharge).WithGrit('A', 3)
+            With("A.B........", Ability.BullRush)
                 .Plan('A', Act.Sig(Dir.E))
                 .ResolveTick()
+                .AssertPos('B', 6, 0)   // A stopped on 1, B was on 2 and slid 4
+                .AssertHp('B', 3);
+        }
+
+        // --- Triple Charge (FIXES §3.2 rule 7) ---
+
+        [Test]
+        public void TripleCharge_ThreeHits_ThreePushes_AndTheShotsFollowTheTarget()
+        {
+            var s = With("A.B......", Ability.TripleCharge)
+                .WithHp('B', 5)
+                .Plan('A', Act.Sig(Dir.E))
+                .ResolveTick()
+                .AssertPos('B', 5, 0)
                 .AssertHp('B', 2)
-                .AssertHp('C', 2)
-                .AssertHp('D', 3)
                 .AssertLoaded('A', false)
-                .AssertGrit('A', 0);
-            Assert.That(s.Find(SimEventKind.ShotFired, 'A').Value.Reason, Is.EqualTo((byte)ShotKind.DoubleCharge));
+                .AssertGrit('A', 0)
+                .AssertEventCount(SimEventKind.ShotFired, 3)
+                .AssertEventCount(SimEventKind.ShotHit, 3)
+                .AssertEventCount(SimEventKind.Pushed, 3);
+            Assert.That(s.Find(SimEventKind.ShotFired, 'A').Value.Reason, Is.EqualTo((byte)ShotKind.TripleCharge));
+            Assert.That(s.Unit('B').LastAttacker, Is.EqualTo(0));
         }
 
         [Test]
-        public void DoubleCharge_IgnoresParry_NoRiposte()
+        public void TripleCharge_RangeFive_TargetPushedOutOfRange_LaterShotsMiss()
         {
-            With("A..B", Ability.DoubleCharge)
+            // B at distance 5 is hit once and slides to distance 6, beyond FireRange.
+            With("A.....B...", Ability.TripleCharge)
+                .Plan('A', Act.Sig(Dir.E))
+                .ResolveTick()
+                .AssertPos('B', 6, 0)
+                .AssertHp('B', 3);
+            With("A....B....", Ability.TripleCharge)
+                .WithHp('B', 5)
+                .Plan('A', Act.Sig(Dir.E))
+                .ResolveTick()
+                .AssertPos('B', 6, 0)
+                .AssertHp('B', 4);
+        }
+
+        [Test]
+        public void TripleCharge_WallSlamBetweenShots_EachShotSlamsAgain()
+        {
+            With("A.B#....", Ability.TripleCharge)
+                .WithHp('B', 7)
+                .Plan('A', Act.Sig(Dir.E))
+                .ResolveTick()
+                .AssertPos('B', 2, 0)
+                .AssertHp('B', 1)   // 3 shots + 3 wall slams
+                .AssertEventCount(SimEventKind.WallSlam, 3);
+        }
+
+        [Test]
+        public void TripleCharge_PushIntoPit_KillsAndCredits_RemainingShotsFlyOn()
+        {
+            With("A.B.~...", Ability.TripleCharge)
+                .Plan('A', Act.Sig(Dir.E))
+                .ResolveTick()
+                .AssertDead('B')
+                .AssertKilledBy('B', 'A')
+                .AssertEventCount(SimEventKind.ShotFired, 3);
+        }
+
+        [Test]
+        public void TripleCharge_Parried_EachShotIsReflected_NoDamageNoPushOnParrier()
+        {
+            With("A..B", Ability.TripleCharge)
+                .WithHp('A', 5)
                 .Plan('B', Act.Parry())
                 .Plan('A', Act.Sig(Dir.E))
                 .ResolveTick()
-                .AssertHp('B', 2)
-                .AssertHp('A', 3)
-                .AssertNoEvent(SimEventKind.Reflected)
-                .AssertNoEvent(SimEventKind.Parried);
-        }
-
-        [TestCase("A......B", 2)]    // 7 away: hit
-        [TestCase("A.......B", 3)]   // 8 away: out of range
-        public void DoubleCharge_RangeSeven(string row, int bHp)
-        {
-            With(row, Ability.DoubleCharge)
-                .Plan('A', Act.Sig(Dir.E))
-                .ResolveTick()
-                .AssertHp('B', bHp);
+                .AssertPos('B', 3, 0)
+                .AssertHp('B', 3)
+                .AssertHp('A', 2)   // three ripostes
+                .AssertEventCount(SimEventKind.Parried, 3)
+                .AssertEventCount(SimEventKind.Reflected, 3)
+                .AssertEventCount(SimEventKind.Pushed, 0);
         }
 
         [Test]
-        public void DoubleCharge_Unloaded_FizzlesFree()
+        public void TripleCharge_DestroysCrate_NextShotPasses()
         {
-            With("A..B", Ability.DoubleCharge)
-                .WithLoaded('A', false)
-                .Plan('A', Act.Sig(Dir.E))
-                .ResolveTick()
-                .AssertFizzle('A', FizzleReason.NotLoaded)
-                .AssertGrit('A', 3)
-                .AssertHp('B', 3);
-        }
-
-        [Test]
-        public void DoubleCharge_DestroysCrate_AndStops()
-        {
-            With("A.o.B", Ability.DoubleCharge)
+            With("A.o.B...", Ability.TripleCharge)
                 .Plan('A', Act.Sig(Dir.E))
                 .ResolveTick()
                 .AssertTile(2, 0, TileType.Floor)
-                .AssertHp('B', 3);
+                .AssertEventCount(SimEventKind.CrateDestroyed, 1)
+                .AssertPos('B', 6, 0)   // hit by shots 2 and 3
+                .AssertHp('B', 1);
         }
 
         [Test]
-        public void DoubleCharge_StopsAtPillar()
+        public void TripleCharge_Keg_IsDetonatedAndStopsTheShots()
         {
-            With("A.#.B", Ability.DoubleCharge)
+            With("A.K.B", Ability.TripleCharge)
+                .Plan('A', Act.Sig(Dir.E))
+                .ResolveTick()
+                .AssertEvent(SimEventKind.KegExploded)
+                .AssertNoKegs()
+                .AssertPos('B', 4, 0);
+        }
+
+        [Test]
+        public void TripleCharge_StopsAtPillar()
+        {
+            With("A.#.B", Ability.TripleCharge)
                 .Plan('A', Act.Sig(Dir.E))
                 .ResolveTick()
                 .AssertHp('B', 3)
                 .AssertTile(2, 0, TileType.Pillar);
+        }
+
+        [Test]
+        public void TripleCharge_MusketShotsLandFirst_OnTheSnapshot()
+        {
+            // B's musket was aimed before the charge pushes B away; it still hits A.
+            With("A.B....", Ability.TripleCharge)
+                .WithHp('B', 5)
+                .Plan('A', Act.Sig(Dir.E))
+                .Plan('B', Act.Fire(Dir.W))
+                .ResolveTick()
+                .AssertHp('A', 2)
+                .AssertPos('B', 5, 0)
+                .AssertHp('B', 2);
+        }
+
+        [Test]
+        public void TripleCharge_Unloaded_FizzlesFree()
+        {
+            With("A..B", Ability.TripleCharge)
+                .WithLoaded('A', false)
+                .Plan('A', Act.Sig(Dir.E))
+                .ResolveTick()
+                .AssertFizzle('A', FizzleReason.NotLoaded)
+                .AssertGrit('A', 5)
+                .AssertHp('B', 3);
+        }
+
+        [Test]
+        public void Signature_CostsFive()
+        {
+            Scenario.From("A..B").WithAbility('A', Ability.TripleCharge).WithGrit('A', 4)
+                .Plan('A', Act.Sig(Dir.E))
+                .ResolveTick()
+                .AssertFizzle('A', FizzleReason.NotEnoughGrit)
+                .AssertHp('B', 3);
         }
 
         // --- Phase 2b ordering ---
@@ -323,10 +465,10 @@ namespace Musketeers.Sim.Tests
         {
             Scenario.From("A...B")
                 .WithTurn(turn)
-                .WithAbility('A', Ability.Grappin).WithGrit('A', 3)
-                .WithAbility('B', Ability.Switcheroo).WithGrit('B', 3)
+                .WithAbility('A', Ability.Grappin).WithGrit('A', 5)
+                .WithAbility('B', Ability.Switcheroo).WithGrit('B', 5)
                 .Plan('A', Act.Sig(Dir.E))
-                .Plan('B', Act.Sig(Dir.W))
+                .Plan('B', Act.Switcheroo('A'))
                 .ResolveTick()
                 .AssertPos('A', ax, 0)
                 .AssertPos('B', bx, 0);

@@ -16,8 +16,8 @@ MonoBehaviour:
   DisplayName: "Alja\u017E"
   Color: {r: 0.27, g: 0.55, b: 1, a: 1}
   Ability: 2
-  AbilityName: Double Charge
-  AbilityDescription: Range 7 shot that pierces 2 units and ignores Parry. Needs a loaded musket.
+  AbilityName: Triple Charge
+  AbilityDescription: Fire 3 shots down a line (range 5). Each hit deals 1 damage and knocks the target back 1 tile. A parry reflects each shot. Needs a loaded musket.
   Portrait: {fileID: 21300000, guid: 58f165eb181354f75b00c3bb0e7354d3, type: 3}
   Idle:
     Sprite: {fileID: 21300000, guid: 7239633505f734974973af212efc9a76, type: 3}

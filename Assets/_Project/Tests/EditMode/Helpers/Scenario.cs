@@ -19,6 +19,7 @@ namespace Musketeers.Sim.Tests
         public static PlannedAction Keg(int x, int y) => PlannedAction.ThrowKeg(new Int2(x, y));
         public static PlannedAction Signature(Dir d) => PlannedAction.Signature(d);
         public static PlannedAction Sig(Dir d) => PlannedAction.Signature(d);
+        public static PlannedAction Switcheroo(char target) => PlannedAction.Switcheroo(target - 'A');
     }
 
     // TECH_DESIGN §6 ASCII scenario helper. A–D are units in slots 0–3 standing on floor, K is a keg
@@ -49,7 +50,7 @@ namespace Musketeers.Sim.Tests
             cfg ??= new GameConfig();
             string[] rows = MapParser.SplitRows(ascii);
             int h = rows.Length, w = rows[0].Length;
-            var board = new Board(w, h);
+            var board = new Board(w, h) { EdgeWalls = MapParser.Directives(ascii).Contains("walls") };
             var unitPos = new Int2?[4];
             var kegs = new List<Int2>();
 

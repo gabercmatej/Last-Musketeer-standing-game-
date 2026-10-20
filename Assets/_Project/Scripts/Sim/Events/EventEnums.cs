@@ -8,16 +8,20 @@ namespace Musketeers.Sim
 
     public enum DeathCause : byte { Damage, Fell }
 
-    public enum DamageKind : byte { Shot, ReflectedShot, Bonk, WallSlam, Squeeze, Explosion, DoubleCharge }
+    public enum DamageKind : byte { Shot, ReflectedShot, Bonk, WallSlam, Squeeze, Explosion, TripleCharge }
 
     // What a Grappin hook touched (§4).
     public enum GrappleResult : byte { Miss, YankUnit, PullSelf, PullKeg }
 
-    // ShotFired.Reason: a plain musket shot or a Double Charge.
-    public enum ShotKind : byte { Musket, DoubleCharge }
+    // ShotFired.Reason: a plain musket shot or one of a Triple Charge's shots.
+    public enum ShotKind : byte { Musket, TripleCharge }
 
     // KegLanded.Reason.
     public enum KegLanding : byte { Floor, Impact }
 
     public enum BlockReason : byte { Obstacle, Unit }
+
+    // Swapped.Reason when Switcheroo fails (Amount 0): Matic stands on a warned tile, the target is dead, or the
+    // target slot is invalid (Matic himself or out of range).
+    public enum SwitcherooFail : byte { None, Warned, TargetDead, BadTarget }
 }

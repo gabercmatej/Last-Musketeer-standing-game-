@@ -5,7 +5,7 @@ namespace Musketeers.Sim
     public static partial class TurnResolver
     {
         // §6 Phase 2b: Grappin, Switcheroo and Bull Rush, one at a time in initiative order, each
-        // using the positions the previous one left. Double Charge is a shot and resolves in Phase 4.
+        // using the positions the previous one left. Triple Charge is a shot and resolves in Phase 4.
         static void Phase2bAbilities(TickContext c)
         {
             c.Log.Phase = SimPhase.MovementAbilities;
@@ -19,7 +19,7 @@ namespace Musketeers.Sim
                 switch (u.Ability)
                 {
                     case Ability.Grappin: Grapple(c, i, dir); break;
-                    case Ability.Switcheroo: Switcheroo(c, i, dir); break;
+                    case Ability.Switcheroo: Switcheroo(c, i, c.Act[i].Unit); break;
                     case Ability.BullRush: BullRush(c, i, dir); break;
                 }
             }
@@ -99,35 +99,39 @@ namespace Musketeers.Sim
             }
         }
 
-        // §4 Switcheroo: swap with the first unit or keg in a direction (range 5). Pillars and crates
-        // block it; pits don't. Nothing to swap with is a miss (the Grit is still spent).
-        static void Switcheroo(TickContext c, int i, Dir dir)
+        // §4 Switcheroo (FIXES §3.2 rule 5): swap places with the chosen musketeer, wherever they are
+        // when this resolves (abilities go one at a time in initiative order, so the target's position
+        // already includes earlier abilities this phase). No range, no line of sight. It fails (Grit
+        // stays spent) if Matic stands on a warned tile, the target is dead, or the target is Matic.
+        static void Switcheroo(TickContext c, int i, int targetSlot)
         {
             var s = c.S;
             var u = s.Units[i];
             Int2 from = u.Pos;
-            var hit = TraceLine(s, u.Pos, dir, c.Cfg.SwitcherooRange, out Int2 touched, out Unit target, out Keg keg);
-            if (hit == LineHit.Unit)
+            if (targetSlot < 0 || targetSlot >= s.Units.Length || targetSlot == i)
             {
-                u.Pos = target.Pos;
-                target.Pos = from;
-                Credit(c, target.Slot, i);
-                c.Log.Add(SimEventKind.Swapped, unit: i, other: target.Slot, from: from, to: u.Pos, dir: dir);
+                c.Log.Add(SimEventKind.Swapped, unit: i, from: from, to: from, amount: 0, reason: (byte)SwitcherooFail.BadTarget);
+                return;
             }
-            else if (hit == LineHit.Keg)
+            var target = s.Units[targetSlot];
+            if (!target.Alive)
             {
-                u.Pos = keg.Pos;
-                keg.Pos = from;
-                c.Log.Add(SimEventKind.Swapped, unit: i, keg: keg.Id, from: from, to: u.Pos, dir: dir);
+                c.Log.Add(SimEventKind.Swapped, unit: i, other: targetSlot, from: from, to: from, amount: 0, reason: (byte)SwitcherooFail.TargetDead);
+                return;
             }
-            else
+            if (Crumble.IsWarned(s, from, c.Cfg))
             {
-                c.Log.Add(SimEventKind.Swapped, unit: i, from: from, to: from, dir: dir, amount: 0);
+                c.Log.Add(SimEventKind.Swapped, unit: i, other: targetSlot, from: from, to: from, amount: 0, reason: (byte)SwitcherooFail.Warned);
+                return;
             }
+            u.Pos = target.Pos;
+            target.Pos = from;
+            Credit(c, targetSlot, i);
+            c.Log.Add(SimEventKind.Swapped, unit: i, other: targetSlot, from: from, to: u.Pos, amount: 1);
         }
 
         // §4 Bull Rush: charge up to 3 tiles, stopping before any pillar, crate, keg, unit or pit. A unit
-        // that stopped the charge is pushed 2 (Phase 3 push rules); a keg that stopped it is kicked.
+        // that stopped the charge is pushed BullRushPush (4) tiles (Phase 3 push rules); a keg that stopped it is kicked.
         // Running out of distance next to something doesn't count as being stopped by it.
         static void BullRush(TickContext c, int i, Dir dir)
         {

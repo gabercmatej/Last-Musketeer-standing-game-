@@ -197,9 +197,11 @@ namespace Musketeers.Presentation
                 }
                 case Ability.Switcheroo:
                 {
-                    var hit = PlanProjection.TraceLine(s, b.Slot, from, a.Dir, cfg.SwitcherooRange, true, out Int2 end);
+                    // Chunk 3 replaces this with click-to-target; for now the target is the unit picked by direction.
+                    bool valid = a.Unit != b.Slot && a.Unit < s.Units.Length && s.Units[a.Unit].Alive;
+                    Int2 end = valid ? s.Units[a.Unit].Pos : from;
                     Line(wf, BoardMath.ToWorld(end), lineColor, 0.04f, Layers.PreviewOver);
-                    if (hit == LineHit.Unit || hit == LineHit.Keg)
+                    if (valid)
                     {
                         var g = Get(PlaceholderArt.Circle, new Color(1f, 1f, 1f, 0.3f), Layers.PreviewUnder + 2);
                         g.transform.localPosition = wf;
@@ -225,9 +227,9 @@ namespace Musketeers.Presentation
                     }
                     break;
                 }
-                case Ability.DoubleCharge:
+                case Ability.TripleCharge:
                 {
-                    PlanProjection.TraceLine(s, b.Slot, from, a.Dir, cfg.DoubleChargeRange, false, out Int2 end);
+                    PlanProjection.TraceLine(s, b.Slot, from, a.Dir, cfg.FireRange, false, out Int2 end);
                     var sc = invalid ? Invalid : new Color(1f, 0.55f, 0.15f, 0.95f);
                     Line(wf + dv * 0.3f, BoardMath.ToWorld(end), sc, 0.1f, Layers.PreviewOver);
                     Marker(BoardMath.ToWorld(end), sc);

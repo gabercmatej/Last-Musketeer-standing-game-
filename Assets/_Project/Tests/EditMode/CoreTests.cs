@@ -55,6 +55,7 @@ namespace Musketeers.Sim.Tests
                 ("RoundWinner", s => s.RoundWinner = 1),
                 ("Rng", s => s.Rng.NextUInt()),
                 ("Tile", s => s.Board.Set(new Int2(0, 0), TileType.Pit)),
+                ("Board.EdgeWalls", s => s.Board.EdgeWalls = true),
                 ("Unit.Slot count", s => s.Units = new[] { s.Units[0] }),
                 ("Unit.Character", s => s.Units[0].Character = 3),
                 ("Unit.Ability", s => s.Units[0].Ability = Ability.BullRush),

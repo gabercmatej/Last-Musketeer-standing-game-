@@ -10,26 +10,27 @@ namespace Musketeers.Sim.Tests
     {
         const int Matches = 1000;
         const int MaxTurnsPerMatch = 2000;
-        const int MaxTurnsPerRound = 40;   // the crumble ends every Courtyard round by turn 12
+        const int MaxTurnsPerRound = 40;   // the crumble ends every 15x9 round by turn 14 at the latest
 
-        [Test]
-        public void ThousandBotMatches_NoExceptions_AllEnd_InvariantsHold()
+        [TestCase("Courtyard", BuiltInMaps.Courtyard)]
+        [TestCase("Bridge", BuiltInMaps.Bridge)]
+        public void ThousandBotMatches_NoExceptions_AllEnd_InvariantsHold(string mapName, string map)
         {
             var cfg = new GameConfig();
-            var r = new Report();
+            var r = new Report(mapName);
             for (int i = 0; i < Matches; i++)
             {
                 uint seed = (uint)(i * 7919 + 13);
                 int players = 2 + i % 3;
-                var bm = BotMatch.Create(seed, players, cfg);
+                var bm = BotMatch.Create(seed, players, cfg, map);
                 CheckInvariants(bm.M.Round, cfg, seed, 0);
                 int turns = 0;
                 while (!bm.M.MatchOver)
                 {
                     var o = bm.Step();
                     turns++;
-                    Assert.That(turns, Is.LessThan(MaxTurnsPerMatch), $"seed {seed}: match never ended");
-                    Assert.That(bm.TurnsThisRound, Is.LessThan(MaxTurnsPerRound), $"seed {seed}: round never ended");
+                    Assert.That(turns, Is.LessThan(MaxTurnsPerMatch), $"{mapName} seed {seed}: match never ended");
+                    Assert.That(bm.TurnsThisRound, Is.LessThan(MaxTurnsPerRound), $"{mapName} seed {seed}: round never ended");
                     r.Record(o, bm.M);
                     if (o.EndedRound != null)
                         CheckInvariants(o.EndedRound, cfg, seed, turns);
@@ -40,9 +41,11 @@ namespace Musketeers.Sim.Tests
             string summary = r.Summary();
             TestContext.Progress.WriteLine(summary);
             UnityEngine.Debug.Log(summary);
+            // The console only shows the first lines; keep the full report where it can be read (Library is git-ignored).
+            System.IO.File.WriteAllText($"Library/fuzz-summary-{mapName}.txt", summary);
             // Bots must never walk or dash into a pit on their own, not even after a blocked move.
             // (A bot blasted off course by its own keg can't foresee that; it shows as "no credit".)
-            Assert.That(r.OwnStepFalls, Is.EqualTo(0), "bots walked into pits on their own");
+            Assert.That(r.OwnStepFalls, Is.EqualTo(0), $"{mapName}: bots walked into pits on their own");
         }
 
         static void CheckInvariants(GameState s, GameConfig cfg, uint seed, int turn)
@@ -92,6 +95,10 @@ namespace Musketeers.Sim.Tests
             readonly int[] _actions = new int[10];
             int _turnsThisRound;
             public int OwnStepFalls;
+            readonly string _map;
+            int _maxTurnsInRound;
+
+            public Report(string map) { _map = map; }
 
             public void Record(TurnOutcome o, MatchState m)
             {
@@ -105,6 +112,7 @@ namespace Musketeers.Sim.Tests
                     if (o.RoundResult.Winner < 0) _draws++;
                     else _roundWinsByAbility[(int)m.Abilities[o.RoundResult.Winner]]++;
                     if (o.RoundResult.SuddenDeath) _suddenDeaths++;
+                    if (_turnsThisRound > _maxTurnsInRound) _maxTurnsInRound = _turnsThisRound;
                     _turnsThisRound = 0;
                 }
                 foreach (var e in o.Turn.Events)
@@ -120,7 +128,7 @@ namespace Musketeers.Sim.Tests
                 {
                     switch (e.Kind)
                     {
-                        case SimEventKind.ShotFired: _actions[e.Reason == (byte)ShotKind.DoubleCharge ? 1 : 0]++; break;
+                        case SimEventKind.ShotFired: _actions[e.Reason == (byte)ShotKind.TripleCharge ? 1 : 0]++; break;
                         case SimEventKind.KegThrown: _actions[2]++; break;
                         case SimEventKind.ParryRaised: _actions[3]++; break;
                         case SimEventKind.Grappled: _actions[4]++; break;
@@ -169,8 +177,8 @@ namespace Musketeers.Sim.Tests
             public string Summary()
             {
                 var sb = new StringBuilder();
-                sb.AppendLine($"=== Fuzz summary: {_matches} bot matches on the Courtyard (2p {_byPlayers[2]}, 3p {_byPlayers[3]}, 4p {_byPlayers[4]}) ===");
-                sb.AppendLine($"avg turns per round  {(double)_turns / _rounds:0.00}");
+                sb.AppendLine($"=== Fuzz summary: {_matches} bot matches on the {_map} (2p {_byPlayers[2]}, 3p {_byPlayers[3]}, 4p {_byPlayers[4]}) ===");
+                sb.AppendLine($"turns per round      avg {(double)_turns / _rounds:0.00}, max {_maxTurnsInRound}");
                 sb.AppendLine($"avg rounds per match {(double)_rounds / _matches:0.00}");
                 sb.AppendLine($"drawn rounds         {_draws} of {_rounds} ({100.0 * _draws / _rounds:0.0}%), sudden-death rounds {_suddenDeaths}");
                 sb.AppendLine("match wins by ability (share of all wins | win rate when present):");
@@ -183,7 +191,7 @@ namespace Musketeers.Sim.Tests
                 sb.AppendLine($"causes of death ({deaths}):");
                 foreach (var kv in _deaths)
                     sb.AppendLine($"  {kv.Key,-24} {kv.Value,6} ({100.0 * kv.Value / deaths:0.0}%)");
-                sb.AppendLine($"per round: shots {Per(0)}, double charges {Per(1)}, kegs thrown {Per(2)}, kegs exploded {Per(7)}, parries {Per(3)}, shoves {Per(8)}, grapples {Per(4)}, swaps {Per(5)}, bull rushes {Per(6)}, fizzles {Per(9)}");
+                sb.AppendLine($"per round: shots {Per(0)}, triple charges {Per(1)}, kegs thrown {Per(2)}, kegs exploded {Per(7)}, parries {Per(3)}, shoves {Per(8)}, grapples {Per(4)}, swaps {Per(5)}, bull rushes {Per(6)}, fizzles {Per(9)}");
                 return sb.ToString();
             }
 

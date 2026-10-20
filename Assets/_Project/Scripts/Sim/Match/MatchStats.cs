@@ -8,7 +8,7 @@ namespace Musketeers.Sim
     public sealed class MatchStats
     {
         public readonly int[] ShotsFired;
-        public readonly int[] ShotHits;       // musket + Double Charge hits on units (not ripostes)
+        public readonly int[] ShotHits;       // musket + Triple Charge hits on units (not ripostes)
         public readonly int[] Ripostes;       // reflected shots that hit
         public readonly int[] ShotsParried;   // shots blocked by parry (blocked explosions don't count)
         public readonly int[] Bonks;          // one per collision a player was part of
@@ -66,7 +66,7 @@ namespace Musketeers.Sim
                         switch ((DamageKind)e.Reason)
                         {
                             case DamageKind.Shot:
-                            case DamageKind.DoubleCharge: ShotHits[e.Other]++; break;
+                            case DamageKind.TripleCharge: ShotHits[e.Other]++; break;
                             case DamageKind.ReflectedShot: Ripostes[e.Other]++; break;
                             case DamageKind.Explosion: KegDamage[e.Other] += e.Amount; break;
                         }

@@ -28,7 +28,7 @@ namespace Musketeers.Game
                         best = Max(best, Callout.Signature);
                         break;
                     case SimEventKind.ShotFired:
-                        if ((ShotKind)e.Reason == ShotKind.DoubleCharge)
+                        if ((ShotKind)e.Reason == ShotKind.TripleCharge)
                             best = Max(best, Callout.Signature);
                         break;
                     case SimEventKind.Died:

@@ -28,7 +28,7 @@ namespace Musketeers.Game
                 case SimEventKind.WallSlam: return $"{u} slams into a wall";
                 case SimEventKind.Fell: return e.Unit >= 0 ? $"{u} falls into the pit" : $"{keg} falls into the pit";
                 case SimEventKind.ShotFired:
-                    return (ShotKind)e.Reason == ShotKind.DoubleCharge ? $"{u} fires a Double Charge {e.Dir}" : $"{u} fires {e.Dir}";
+                    return (ShotKind)e.Reason == ShotKind.TripleCharge ? $"{u} fires a Triple Charge shot {e.Dir}" : $"{u} fires {e.Dir}";
                 case SimEventKind.ShotHit: return e.Unit >= 0 ? $"the shot hits {u}" : $"the shot hits {keg}";
                 case SimEventKind.Parried: return e.Keg >= 0 ? $"{u} parries the blast" : $"{u} parries {o}'s shot";
                 case SimEventKind.Reflected: return $"RIPOSTE! {u} reflects the shot {e.Dir}";
@@ -52,9 +52,8 @@ namespace Musketeers.Game
                         default: return $"{u}'s hook misses";
                     }
                 case SimEventKind.Swapped:
-                    if (e.Other >= 0) return $"{u} swaps places with {o}";
-                    if (e.Keg >= 0) return $"{u} swaps places with {keg}";
-                    return $"{u}'s switcheroo misses";
+                    if (e.Amount > 0 && e.Other >= 0) return $"{u} swaps places with {o}";
+                    return $"{u}'s switcheroo fails ({(SwitcherooFail)e.Reason})";
                 case SimEventKind.BullRushed: return e.Other >= 0 ? $"{u} bull-rushes into {o}" : $"{u} bull-rushes to {e.To}";
                 case SimEventKind.TileWarned: return $"ring {e.Amount} is about to crumble";
                 case SimEventKind.TileCrumbled: return $"ring {e.Amount} crumbles";

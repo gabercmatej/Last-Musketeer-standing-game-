@@ -50,13 +50,13 @@ namespace Musketeers.Sim
                         else u.Grit -= cfg.KegCost;
                         break;
                     case ActionType.Signature:
-                        // §4: every signature costs 3 Grit; Double Charge also needs (and spends) the load.
+                        // §4: every signature costs SignatureCost Grit; Triple Charge also needs (and spends) the load.
                         if (u.Grit < cfg.SignatureCost) reason = FizzleReason.NotEnoughGrit;
-                        else if (u.Ability == Ability.DoubleCharge && !u.Loaded) reason = FizzleReason.NotLoaded;
+                        else if (u.Ability == Ability.TripleCharge && !u.Loaded) reason = FizzleReason.NotLoaded;
                         else
                         {
                             u.Grit -= cfg.SignatureCost;
-                            if (u.Ability == Ability.DoubleCharge)
+                            if (u.Ability == Ability.TripleCharge)
                                 u.Loaded = false;
                         }
                         break;

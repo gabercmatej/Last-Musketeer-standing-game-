@@ -81,8 +81,44 @@ namespace Musketeers.Game
         {
             if (!HasPending || !NeedsDirection(Pending))
                 return false;
-            Place(new PlannedAction(Pending, dir));
+            var a = Directional(Pending, dir);
+            if (a.Type == ActionType.Signature && Ability == Ability.Switcheroo && !SwitcherooTargetValid(a.Unit))
+                return false;
+            Place(a);
             return true;
+        }
+
+        // The action for a direction pick. Switcheroo targets a musketeer, not a direction (FIXES §3.2 rule 5);
+        // until the click-to-target UI exists (Plan 007 task 3) the direction picks the nearest other
+        // living musketeer on that side.
+        public PlannedAction Directional(ActionType type, Dir dir)
+        {
+            if (type == ActionType.Signature && Ability == Ability.Switcheroo)
+                return new PlannedAction(type, dir, default, NearestUnitToward(dir));
+            return new PlannedAction(type, dir);
+        }
+
+        bool SwitcherooTargetValid(int slot) => slot != Slot && slot >= 0 && slot < _s.Units.Length && _s.Units[slot].Alive;
+
+        int NearestUnitToward(Dir dir)
+        {
+            Int2 from = CursorState.Pos;
+            Int2 d = dir.ToInt2();
+            int best = Slot, bestScore = int.MaxValue;
+            for (int i = 0; i < _s.Units.Length; i++)
+            {
+                if (i == Slot || !_s.Units[i].Alive)
+                    continue;
+                Int2 delta = _s.Units[i].Pos - from;
+                int along = delta.X * d.X + delta.Y * d.Y;
+                int score = (along > 0 ? 0 : 1000) + delta.X * delta.X + delta.Y * delta.Y;
+                if (score < bestScore)
+                {
+                    bestScore = score;
+                    best = i;
+                }
+            }
+            return best;
         }
 
         public PlanIssue TargetIssue(Int2 target) =>

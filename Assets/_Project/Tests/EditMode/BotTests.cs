@@ -139,7 +139,7 @@ namespace Musketeers.Sim.Tests
             var s = Scenario.From(@"
                 .......
                 A~...B.
-                .......").WithAbility('A', Ability.Grappin).WithGrit('A', 3).WithLoaded('A', false);
+                .......").WithAbility('A', Ability.Grappin).WithGrit('A', 5).WithLoaded('A', false);
             int yanked = 0;
             for (uint seed = 1; seed <= 30; seed++)
             {

@@ -57,8 +57,8 @@ namespace Musketeers.Sim.Tests
         [Test]
         public void Signature_WhenAnAbilityIsUsed()
         {
-            var s = Scenario.From("A...B").WithAbility('A', Ability.Switcheroo).WithGrit('A', 3)
-                .Plan('A', Act.Sig(Dir.E)).ResolveTick();
+            var s = Scenario.From("A...B").WithAbility('A', Ability.Switcheroo).WithGrit('A', 5)
+                .Plan('A', Act.Switcheroo('B')).ResolveTick();
             Assert.That(Top(s), Is.EqualTo(Callout.Signature));
         }
 

@@ -9,7 +9,7 @@ namespace Musketeers.Sim.Tests
     {
         static MatchSetup Setup(int players, uint seed)
         {
-            var abilities = new[] { Ability.Grappin, Ability.Switcheroo, Ability.DoubleCharge, Ability.BullRush };
+            var abilities = new[] { Ability.Grappin, Ability.Switcheroo, Ability.TripleCharge, Ability.BullRush };
             var s = new MatchSetup
             {
                 Seed = seed,
@@ -84,7 +84,7 @@ namespace Musketeers.Sim.Tests
             mc.TurnReady += p => got = p;
             mc.Start();
             Assert.That(mc.Phase, Is.EqualTo(MatchPhase.Planning));
-            Assert.That(mc.PlanningSecondsLeft, Is.EqualTo(25f));
+            Assert.That(mc.PlanningSecondsLeft, Is.EqualTo(30f));
 
             var plan = new TurnPlan(0) { A0 = PlannedAction.Reload(), A1 = PlannedAction.CatchBreath(), A2 = PlannedAction.Reload() };
             mc.SubmitPlan(plan, false);
@@ -106,7 +106,7 @@ namespace Musketeers.Sim.Tests
             mc.TurnReady += p => got = p;
             mc.Start();
             mc.SubmitPlan(new TurnPlan(0) { A0 = PlannedAction.Parry() }, false);
-            mc.Update(24.9f);
+            mc.Update(29.9f);
             Assert.That(got, Is.Null);
             mc.Update(0.2f);
             Assert.That(got, Is.Not.Null);

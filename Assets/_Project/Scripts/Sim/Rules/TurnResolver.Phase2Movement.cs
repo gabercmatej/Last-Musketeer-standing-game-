@@ -2,7 +2,7 @@ namespace Musketeers.Sim
 {
     public static partial class TurnResolver
     {
-        // §6 Phase 2: Move and Dash, all simultaneous.
+        // §6 Phase 2: Move and Dash, all simultaneous. Falls (pit, or off an unwalled board) are instant deaths.
         static void Phase2Movement(TickContext c)
         {
             c.Log.Phase = SimPhase.Movement;
@@ -10,8 +10,7 @@ namespace Musketeers.Sim
             var units = s.Units;
             int n = units.Length;
             var dest = new Int2[n];
-            var first = new Int2[n];       // tile entered first
-            var hasSecond = new bool[n];   // a dash that enters a second tile (then dest is that tile)
+            var first = new Int2[n];       // the tile a mover enters (a dash only ever enters its landing tile)
             var moving = new bool[n];
             var dashing = new bool[n];
             var leaping = new bool[n];
@@ -25,44 +24,38 @@ namespace Musketeers.Sim
                     continue;
                 Int2 d = a.Dir.ToInt2();
                 Int2 step1 = u.Pos + d;
-                if (IsSolid(s, step1))
-                {
-                    c.Log.Add(SimEventKind.MoveBlocked, unit: i, from: u.Pos, to: step1, dir: a.Dir, reason: (byte)BlockReason.Obstacle);
-                    continue;
-                }
-                first[i] = step1;
                 if (a.Type == ActionType.Move)
                 {
-                    dest[i] = step1;
+                    if (IsSolid(s, step1))
+                    {
+                        c.Log.Add(SimEventKind.MoveBlocked, unit: i, from: u.Pos, to: step1, dir: a.Dir, reason: (byte)BlockReason.Obstacle);
+                        continue;
+                    }
+                    first[i] = dest[i] = step1;
                     moving[i] = true;
                     continue;
                 }
 
-                // Dash: 2 tiles. A unit in the middle tile at the start of the tick cancels it, even
-                // if that unit moves away this tick (the check uses positions before anyone moves).
-                dashing[i] = true;
-                if (s.UnitAt(step1) != null)
+                // Dash (FIXES §3.2 rule 1): 2 tiles, flown over whatever is on the middle tile (crate, keg,
+                // unit, pit). Only a pillar there (or the wall of a walled board) blocks it. The landing
+                // tile must not be solid; otherwise the dash fails and the Grit stays spent (Phase 0).
+                Int2 step2 = step1 + d;
+                if (s.Board.Get(step1) == TileType.Pillar || IsSolid(s, step2))
                 {
-                    c.Log.Add(SimEventKind.MoveBlocked, unit: i, from: u.Pos, to: step1, dir: a.Dir, reason: (byte)BlockReason.Unit);
+                    Int2 hit = s.Board.Get(step1) == TileType.Pillar ? step1 : step2;
+                    c.Log.Add(SimEventKind.MoveBlocked, unit: i, from: u.Pos, to: hit, dir: a.Dir, reason: (byte)BlockReason.Obstacle);
                     continue;
                 }
-                Int2 step2 = step1 + d;
-                if (IsSolid(s, step2))
-                {
-                    dest[i] = step1;   // only the second tile is blocked: stop on the first
-                }
-                else
-                {
-                    dest[i] = step2;
-                    hasSecond[i] = true;
-                    leaping[i] = IsPit(s, step1) && !IsPit(s, step2);
-                }
+                dashing[i] = true;
+                first[i] = dest[i] = step2;
                 moving[i] = true;
+                // Positions are still the start-of-tick ones here, so a unit under the arc counts.
+                leaping[i] = s.Board.Get(step1) != TileType.Floor || s.KegAt(step1) != null || s.UnitAt(step1) != null;
             }
 
-            // 2.2 Head-on collisions, computed on the desires above. Two movers bonk if they enter a
-            // common tile (same destination, or one passes through a tile the other enters) or cross
-            // one edge in opposite directions (a swap, or a dash through someone coming the other way).
+            // 2.2 Head-on collisions, computed on the desires above. Two movers bonk if they enter the
+            // same tile or swap tiles (each enters the other's start tile). A dash only enters its landing
+            // tile, so passing over a unit or crossing another mover's path causes no bonk.
             // A unit bonks at most once per tick even if it collides with several movers.
             var bonk = new bool[n];
             var partner = new int[n];
@@ -73,7 +66,7 @@ namespace Musketeers.Sim
                     continue;
                 for (int j = 0; j < n; j++)
                 {
-                    if (j == i || !moving[j] || !PathsCollide(units, first, dest, hasSecond, i, j))
+                    if (j == i || !moving[j] || !PathsCollide(units, first, i, j))
                         continue;
                     bonk[i] = true;
                     if (partner[i] == SimEvent.None)
@@ -131,21 +124,10 @@ namespace Musketeers.Sim
             }
         }
 
-        // A mover enters first[i], and dest[i] too for a full dash. Its edges are start→first and,
-        // for a full dash, first→dest.
-        static bool PathsCollide(Unit[] units, Int2[] first, Int2[] dest, bool[] hasSecond, int i, int j)
-        {
-            if (Enters(first, dest, hasSecond, i, first[j]) || (hasSecond[j] && Enters(first, dest, hasSecond, i, dest[j])))
-                return true;
-            if (Traverses(units, first, dest, hasSecond, j, first[i], units[i].Pos))
-                return true;
-            return hasSecond[i] && Traverses(units, first, dest, hasSecond, j, dest[i], first[i]);
-        }
-
-        static bool Enters(Int2[] first, Int2[] dest, bool[] hasSecond, int i, Int2 p) =>
-            first[i] == p || (hasSecond[i] && dest[i] == p);
-
-        static bool Traverses(Unit[] units, Int2[] first, Int2[] dest, bool[] hasSecond, int i, Int2 from, Int2 to) =>
-            (units[i].Pos == from && first[i] == to) || (hasSecond[i] && first[i] == from && dest[i] == to);
+        // §6 Phase 2.2: a mover (walker or dasher) only ever enters first[i]; a dash flies over its middle
+        // tile, so walkers stepping into it and units under the arc never collide with it. Two movers
+        // collide if they enter the same tile, or swap: each lands on the other's start tile.
+        static bool PathsCollide(Unit[] units, Int2[] first, int i, int j) =>
+            first[i] == first[j] || (first[i] == units[j].Pos && first[j] == units[i].Pos);
     }
 }

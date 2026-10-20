@@ -23,6 +23,7 @@ namespace Musketeers.Sim
         int _grit;
         bool _loaded;
         bool _hasKeg;
+        bool _swapped;           // planned a Switcheroo this turn: our position afterwards is unknown, so we stand still
         Int2? _plannedKeg;
         Int2[] _ep;              // projected enemy positions (index = slot)
         bool[] _ea;              // projected enemy alive
@@ -71,6 +72,7 @@ namespace Musketeers.Sim
             _loaded = me.Loaded;
             _hasKeg = TurnResolver.ActiveKegs(s, Slot) >= cfg.MaxKegsPerPlayer;
             _plannedKeg = null;
+            _swapped = false;
             _possible.Clear();
             _possible.Add(_pos);
             int n = s.Units.Length;
@@ -105,7 +107,7 @@ namespace Musketeers.Sim
 
         PlannedAction Decide()
         {
-            if (!AnyEnemy())
+            if (!AnyEnemy() || _swapped)
                 return _grit < _cfg.MaxGrit ? PlannedAction.CatchBreath() : PlannedAction.Idle();
 
             bool inDanger = Dangerous(_pos) || Warned(_pos);
@@ -151,9 +153,10 @@ namespace Musketeers.Sim
             Dir d = step.Value;
             Int2 mid = _pos + d.ToInt2();
             Int2 two = mid + d.ToInt2();
-            // Far from safety with Grit to spare: dash if both tiles are walkable and the landing is safe.
-            if (dist >= 2 && _grit >= _cfg.DashCost && Walkable(mid) && Standable(two) && !Dangerous(two) && EnemyAt(two) < 0
-                && PitFreeFromAll(d, 2))
+            // Far from safety with Grit to spare: dash (it flies over the middle tile, only a pillar stops
+            // it) if the landing is safe.
+            if (dist >= 2 && _grit >= _cfg.DashCost && DashClear(mid) && Standable(two) && !Dangerous(two) && EnemyAt(two) < 0
+                && DashLandingPitFree(d))
                 a = PlannedAction.Dash(d);
             else if (PitFreeFromAll(d, 1))
                 a = PlannedAction.Move(d);
@@ -258,13 +261,13 @@ namespace Musketeers.Sim
             a = default;
             var first = FirstStepTowardEnemy(out int dist);
             if (first == null)
-                return false;   // no safe route, or already next to an enemy
+                return TryHop(out a);   // no safe route (or already next to an enemy)
             Dir d = first.Value;
-            // Sometimes dash when far away and both tiles are safe.
+            // Sometimes dash when far away and the landing is safe.
             Int2 mid = _pos + d.ToInt2();
             Int2 two = mid + d.ToInt2();
             if (dist >= 3 && _grit >= _cfg.DashCost + 1 && Standable(mid) && Standable(two) && !Dangerous(two)
-                && EnemyAt(two) < 0 && PitFreeFromAll(d, 2) && Chance(25))
+                && EnemyAt(two) < 0 && DashLandingPitFree(d) && Chance(25))
             {
                 a = PlannedAction.Dash(d);
                 return true;
@@ -275,6 +278,28 @@ namespace Musketeers.Sim
             return true;
         }
 
+        // Dash over a pit, crate or keg (or a unit) to a safe landing that is closer to an enemy.
+        bool TryHop(out PlannedAction a)
+        {
+            a = default;
+            if (_grit < _cfg.DashCost + 1 || !Chance(60))
+                return false;
+            int here = NearestEnemyDistance(_pos);
+            foreach (Dir d in DirExt.All)
+            {
+                Int2 mid = _pos + d.ToInt2();
+                Int2 two = mid + d.ToInt2();
+                if (!DashClear(mid) || !Standable(two) || Dangerous(two) || EnemyAt(two) >= 0 || !DashLandingPitFree(d))
+                    continue;
+                if (NearestEnemyDistance(two) < here - 1)
+                {
+                    a = PlannedAction.Dash(d);
+                    return true;
+                }
+            }
+            return false;
+        }
+
         // escaping: only Switcheroo out of danger counts (the enemy takes our tile).
         bool TrySignature(bool escaping, out PlannedAction a)
         {
@@ -283,7 +308,7 @@ namespace Musketeers.Sim
             {
                 case Ability.Grappin: return !escaping && TryGrappin(out a);
                 case Ability.Switcheroo: return TrySwitcheroo(escaping, out a);
-                case Ability.DoubleCharge: return !escaping && _loaded && TryDoubleCharge(out a);
+                case Ability.TripleCharge: return !escaping && _loaded && TryTripleCharge(out a);
                 case Ability.BullRush: return !escaping && TryBullRush(out a);
             }
             return false;
@@ -312,22 +337,49 @@ namespace Musketeers.Sim
             return false;
         }
 
+        // Switcheroo (FIXES §3.2 rule 5): pick a living enemy by slot. It fails on a warned tile, so never
+        // cast it from one. Escaping a keg blast: swap with an enemy who stands somewhere safe. Otherwise
+        // swap with the nearest enemy when we stand next to a pit (they get that spot and we shove them in
+        // next turn), now and then just to reshuffle.
         bool TrySwitcheroo(bool escaping, out PlannedAction a)
+        {
+            a = default;
+            if (Warned(_pos))
+                return false;
+            int best = -1;
+            int bestDist = int.MaxValue;
+            for (int e = 0; e < _ep.Length; e++)
+            {
+                if (!_ea[e] || Dangerous(_ep[e]) || Warned(_ep[e]) || !Standable(_ep[e]))
+                    continue;
+                int dist = _ep[e].Manhattan(_pos);
+                if (dist < 2 || dist >= bestDist)
+                    continue;
+                best = e;
+                bestDist = dist;
+            }
+            if (best < 0)
+                return false;
+            if (escaping ? Chance(90) : (NextToPit(_pos) ? Chance(60) : Chance(8)))
+            {
+                a = PlannedAction.Switcheroo(best);
+                return true;
+            }
+            return false;
+        }
+
+        // Triple Charge: 3 shots down a line, each hit pushing the target one tile further. Best when the
+        // pushes end in a pit or a warned tile, decent point blank, fine as a barrage otherwise.
+        bool TryTripleCharge(out PlannedAction a)
         {
             a = default;
             foreach (Dir d in DirExt.All)
             {
-                int e = FirstEnemyInLine(_pos, d, _cfg.SwitcherooRange, out int dist, passPits: true);
+                int e = FirstEnemyInLine(_pos, d, _cfg.FireRange, out _);
                 if (e < 0)
                     continue;
-                bool safeThere = !Dangerous(_ep[e]) && !Warned(_ep[e]);
-                if (escaping && safeThere && Chance(90))
-                {
-                    a = PlannedAction.Signature(d);   // they get our spot in the blast / on the warned ring
-                    return true;
-                }
-                // Put them next to a pit we can shove them into next tick, or just reshuffle for variety.
-                if (!escaping && safeThere && dist >= 2 && (NextToPit(_pos) ? Chance(60) : Chance(8)))
+                int hits = SimulateTripleCharge(d, false, out bool deadly);
+                if ((deadly && Chance(95)) || (hits >= 3 && Chance(80)) || (hits >= 2 && Chance(50)) || Chance(15))
                 {
                     a = PlannedAction.Signature(d);
                     return true;
@@ -336,34 +388,50 @@ namespace Musketeers.Sim
             return false;
         }
 
-        bool TryDoubleCharge(out PlannedAction a)
+        // Plays the charge out on the projected enemies: every shot hits the first enemy in line (within
+        // FireRange from us) and slides it one tile. Returns the hits; deadly = someone ended in a pit or
+        // on a warned tile. With apply, the projected enemies move.
+        int SimulateTripleCharge(Dir d, bool apply, out bool deadly)
         {
-            a = default;
-            foreach (Dir d in DirExt.All)
+            deadly = false;
+            Int2 dv = d.ToInt2();
+            int hits = 0;
+            var pos = (Int2[])_ep.Clone();
+            var alive = (bool[])_ea.Clone();
+            for (int shot = 0; shot < _cfg.TripleChargeShots; shot++)
             {
-                int count = 0;
-                int far = 0;
+                int e = -1;
                 Int2 p = _pos;
-                for (int step = 1; step <= _cfg.DoubleChargeRange; step++)
+                for (int step = 1; step <= _cfg.FireRange && e < 0; step++)
                 {
-                    p += d.ToInt2();
+                    p += dv;
                     if (!_s.Board.InBounds(p) || Solid(p))
                         break;
-                    if (EnemyAt(p) >= 0)
-                    {
-                        count++;
-                        if (step > _cfg.FireRange) far++;
-                        if (count >= _cfg.DoubleChargePierce)
-                            break;
-                    }
+                    for (int i = 0; i < pos.Length; i++)
+                        if (alive[i] && pos[i] == p) { e = i; break; }
                 }
-                if ((count >= 2 && Chance(90)) || (count == 1 && (far > 0 ? Chance(70) : Chance(30))))
+                if (e < 0)
+                    break;
+                hits++;
+                for (int step = 0; step < _cfg.TripleChargePush; step++)
                 {
-                    a = PlannedAction.Signature(d);
-                    return true;
+                    Int2 next = pos[e] + dv;
+                    if (Pit(next)) { alive[e] = false; deadly = true; break; }
+                    bool blocked = Solid(next) || next == _pos;
+                    for (int i = 0; i < pos.Length && !blocked; i++)
+                        if (alive[i] && i != e && pos[i] == next) blocked = true;
+                    if (blocked) break;
+                    pos[e] = next;
                 }
+                if (alive[e] && Warned(pos[e]))
+                    deadly = true;
             }
-            return false;
+            if (apply)
+            {
+                _ep = pos;
+                _ea = alive;
+            }
+            return hits;
         }
 
         bool TryBullRush(out PlannedAction a)
@@ -442,18 +510,20 @@ namespace Musketeers.Sim
                     break;
                 case ActionType.Signature:
                     _grit -= _cfg.SignatureCost;
-                    ProjectSignature(a.Dir);
+                    ProjectSignature(a);
                     break;
             }
         }
 
-        void ProjectSignature(Dir d)
+        void ProjectSignature(PlannedAction act)
         {
+            Dir d = act.Dir;
             Int2 dv = d.ToInt2();
             switch (_s.Units[Slot].Ability)
             {
-                case Ability.DoubleCharge:
+                case Ability.TripleCharge:
                     _loaded = false;
+                    SimulateTripleCharge(d, true, out _);
                     break;
                 case Ability.Grappin:
                 {
@@ -467,13 +537,14 @@ namespace Musketeers.Sim
                 }
                 case Ability.Switcheroo:
                 {
-                    int e = FirstEnemyInLine(_pos, d, _cfg.SwitcherooRange, out _, passPits: true);
-                    if (e >= 0)
+                    int e = act.Unit;
+                    if (e < _ep.Length && _ea[e])
                     {
                         Int2 mine = _pos;
                         _pos = _ep[e];
                         AddPossible(_possible, _pos);
                         _ep[e] = mine;
+                        _swapped = true;   // where we really end up depends on where they are by then: stand still
                     }
                     break;
                 }
@@ -539,9 +610,10 @@ namespace Musketeers.Sim
             foreach (var p in _possible)
             {
                 AddPossible(_scratch, p);
-                AddPossible(_scratch, p + d.ToInt2());
-                if (tiles == 2)
-                    AddPossible(_scratch, p + d.ToInt2() * 2);
+                if (tiles == 1)
+                    AddPossible(_scratch, p + d.ToInt2());
+                else
+                    AddPossible(_scratch, p + d.ToInt2() * 2);   // a dash only ever enters its landing tile
             }
             AddPossible(_scratch, _pos);
             _possible.Clear();
@@ -564,6 +636,20 @@ namespace Musketeers.Sim
                     if (Pit(p + d.ToInt2() * k))
                         return false;
                 }
+            }
+            return true;
+        }
+
+        // A dash flies over everything but a pillar (or a wall) on the middle tile.
+        bool DashClear(Int2 mid) => _s.Board.Get(mid) != TileType.Pillar;
+
+        // No possible tile would put the dash landing in a pit.
+        bool DashLandingPitFree(Dir d)
+        {
+            foreach (var p in _possible)
+            {
+                if (Pit(p + d.ToInt2() * 2))
+                    return false;
             }
             return true;
         }

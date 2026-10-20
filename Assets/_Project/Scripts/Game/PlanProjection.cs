@@ -89,7 +89,7 @@ namespace Musketeers.Game
                     return PlanIssue.None;
                 case ActionType.Signature:
                     if (p.Grit < cfg.SignatureCost) return PlanIssue.NoGrit;
-                    if (ability == Ability.DoubleCharge && !p.Loaded) return PlanIssue.Unloaded;
+                    if (ability == Ability.TripleCharge && !p.Loaded) return PlanIssue.Unloaded;
                     return PlanIssue.None;
                 default:
                     return PlanIssue.None;
@@ -136,10 +136,10 @@ namespace Musketeers.Game
                     break;
                 case ActionType.Signature:
                     p.Grit -= cfg.SignatureCost;
-                    if (ability == Ability.DoubleCharge)
-                        p.Loaded = false;   // §4: Double Charge spends the load (Phase 0)
+                    if (ability == Ability.TripleCharge)
+                        p.Loaded = false;   // §4: Triple Charge spends the load (Phase 0)
                     p.Facing = a.Dir;
-                    Signature(s, slot, cfg, ability, a.Dir, ref p);
+                    Signature(s, slot, cfg, ability, a, ref p);
                     break;
             }
         }
@@ -152,24 +152,20 @@ namespace Musketeers.Game
             Land(s, ref p, to);
         }
 
+        // FIXES §3.2 rule 1: a dash flies over everything on the middle tile except a pillar (or the wall
+        // of a walled board); the landing tile must be free or the dash fails and you stay put.
         static void Dash(GameState s, int slot, ref TickProjection p, Int2 d)
         {
             Int2 first = p.Pos + d;
             Int2 second = p.Pos + d * 2;
-            if (IsSolid(s, first) || OtherUnitAt(s, slot, first))
-                return;
-            if (IsSolid(s, second))
-            {
-                Land(s, ref p, first);
-                return;
-            }
-            if (OtherUnitAt(s, slot, second))
+            if (s.Board.Get(first) == TileType.Pillar || IsSolid(s, second) || OtherUnitAt(s, slot, second))
                 return;
             Land(s, ref p, second);
         }
 
-        static void Signature(GameState s, int slot, GameConfig cfg, Ability ability, Dir dir, ref TickProjection p)
+        static void Signature(GameState s, int slot, GameConfig cfg, Ability ability, PlannedAction a, ref TickProjection p)
         {
+            Dir dir = a.Dir;
             Int2 d = dir.ToInt2();
             switch (ability)
             {
@@ -182,9 +178,9 @@ namespace Musketeers.Game
                 }
                 case Ability.Switcheroo:
                 {
-                    var hit = TraceLine(s, slot, p.Pos, dir, cfg.SwitcherooRange, true, out Int2 last);
-                    if (hit == LineHit.Unit || hit == LineHit.Keg)
-                        p.Pos = last;
+                    // FIXES §3.2 rule 5: you end up where the chosen musketeer stands now.
+                    if (a.Unit != slot && a.Unit < s.Units.Length && s.Units[a.Unit].Alive)
+                        p.Pos = s.Units[a.Unit].Pos;
                     break;
                 }
                 case Ability.BullRush:

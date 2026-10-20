@@ -10,17 +10,18 @@ namespace Musketeers.Sim.Tests
         const string CourtyardPath = "Assets/_Project/Data/Maps/courtyard.txt";
 
         [Test]
-        public void Courtyard_Parses_WithSpawnsPitsPillarsAndCrates()
+        public void Courtyard_Parses_15x9_WithSpawnsPitsPillarsAndCrates()
         {
             var map = MapParser.Parse(BuiltInMaps.Courtyard);
             var b = map.Board;
-            Assert.That(b.Width, Is.EqualTo(9));
+            Assert.That(b.Width, Is.EqualTo(15));
             Assert.That(b.Height, Is.EqualTo(9));
-            Assert.That(map.Spawns, Is.EqualTo(new[] { new Int2(1, 7), new Int2(7, 7), new Int2(1, 1), new Int2(7, 1) }));
+            Assert.That(b.EdgeWalls, Is.True, "the Courtyard is walled");
+            Assert.That(map.Spawns, Is.EqualTo(new[] { new Int2(1, 7), new Int2(13, 7), new Int2(1, 1), new Int2(13, 1) }));
 
             int pits = 0, pillars = 0, crates = 0;
             for (int y = 0; y < 9; y++)
-            for (int x = 0; x < 9; x++)
+            for (int x = 0; x < 15; x++)
             {
                 switch (b.Get(new Int2(x, y)))
                 {
@@ -30,17 +31,47 @@ namespace Musketeers.Sim.Tests
                 }
             }
             Assert.That(pits, Is.EqualTo(4));
-            Assert.That(pillars, Is.EqualTo(4));
-            Assert.That(crates, Is.EqualTo(4));
+            Assert.That(pillars, Is.EqualTo(5));
+            Assert.That(crates, Is.EqualTo(6));
 
-            foreach (var p in new[] { new Int2(3, 5), new Int2(5, 5), new Int2(3, 3), new Int2(5, 3) })
+            foreach (var p in new[] { new Int2(5, 5), new Int2(9, 5), new Int2(5, 3), new Int2(9, 3) })
                 Assert.That(b.Get(p), Is.EqualTo(TileType.Pit), $"pit at {p}");
-            foreach (var p in new[] { new Int2(2, 6), new Int2(6, 6), new Int2(2, 2), new Int2(6, 2) })
+            foreach (var p in new[] { new Int2(3, 6), new Int2(11, 6), new Int2(3, 2), new Int2(11, 2), new Int2(7, 4) })
                 Assert.That(b.Get(p), Is.EqualTo(TileType.Pillar), $"pillar at {p}");
-            foreach (var p in new[] { new Int2(4, 7), new Int2(1, 4), new Int2(7, 4), new Int2(4, 1) })
+            foreach (var p in new[] { new Int2(6, 7), new Int2(8, 7), new Int2(1, 4), new Int2(13, 4), new Int2(6, 1), new Int2(8, 1) })
                 Assert.That(b.Get(p), Is.EqualTo(TileType.Crate), $"crate at {p}");
             foreach (var p in map.Spawns)
                 Assert.That(b.Get(p), Is.EqualTo(TileType.Floor), $"spawn {p} is floor");
+        }
+
+        [Test]
+        public void Directives_WallsSetTheFlag_UnknownThrows_BridgeTilesAreFloorAndRecorded()
+        {
+            Assert.That(MapParser.Parse("@walls\n1.2").Board.EdgeWalls, Is.True);
+            Assert.That(MapParser.Parse("1.2").Board.EdgeWalls, Is.False);
+            Assert.Throws<FormatException>(() => MapParser.Parse("@lava\n1.2"));
+            var m = MapParser.Parse("1b2");
+            Assert.That(m.Board.Get(new Int2(1, 0)), Is.EqualTo(TileType.Floor));
+            Assert.That(m.Bridges, Is.EqualTo(new[] { false, true, false }));
+        }
+
+        [Test]
+        public void WalledBoard_OutsideIsAPillar_UnwalledIsAPit_AndTheFlagSurvivesCloneAndRoundSetup()
+        {
+            var walled = MapParser.Parse(BuiltInMaps.Courtyard);
+            Assert.That(walled.Board.Get(new Int2(-1, 0)), Is.EqualTo(TileType.Pillar));
+            Assert.That(walled.Board.Get(new Int2(15, 3)), Is.EqualTo(TileType.Pillar));
+            Assert.That(walled.Board.Clone().EdgeWalls, Is.True);
+            var s = GameState.Create(walled.Board, walled.Spawns, new[] { Ability.Grappin, Ability.Switcheroo }, new GameConfig(), 1);
+            Assert.That(s.Board.EdgeWalls, Is.True);
+            Assert.That(s.Clone().Board.EdgeWalls, Is.True);
+            var m = MatchRunner.NewMatch(walled, new[] { Ability.Grappin, Ability.Switcheroo }, new GameConfig(), 1);
+            Assert.That(m.Round.Board.EdgeWalls, Is.True);
+            Assert.That(m.Clone().Round.Board.EdgeWalls, Is.True);
+
+            var open = MapParser.Parse(BuiltInMaps.Bridge);
+            Assert.That(open.Board.EdgeWalls, Is.False);
+            Assert.That(open.Board.Get(new Int2(-1, 0)), Is.EqualTo(TileType.Pit));
         }
 
         [Test]
@@ -50,6 +81,7 @@ namespace Musketeers.Sim.Tests
             string file = string.Join("\n", MapParser.SplitRows(File.ReadAllText(CourtyardPath)));
             string embedded = string.Join("\n", MapParser.SplitRows(BuiltInMaps.Courtyard));
             Assert.That(file, Is.EqualTo(embedded));
+            Assert.That(MapParser.Directives(File.ReadAllText(CourtyardPath)), Is.EqualTo(MapParser.Directives(BuiltInMaps.Courtyard)));
         }
 
         [Test]
