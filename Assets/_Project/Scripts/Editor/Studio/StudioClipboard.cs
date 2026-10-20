@@ -16,7 +16,11 @@ namespace Musketeers.EditorTools.Studio
             public UnityEngine.Object Owner;
         }
 
-        static string Who(StudioState s) => s.OverrideMusketeer ? s.CharId : null;
+        static string Who(StudioState s) => StudioEdit.EditCharacter(s);
+
+        // Does this target draw its FrontSprite on `pose` for the open musketeer? (Weapons never do.)
+        static bool DrawsFrontFor(StudioState s, IFitTarget t, PoseKind pose) =>
+            t is CosmeticDef cd && cd.FrontSprite != null && s.Character != null && s.Character.Pose(pose).Front;
 
         public static bool CanCopy(StudioState s) => StudioTargets.Resolve(s).Valid;
         public static bool CanPaste(StudioState s) => s.HasClipboard && StudioTargets.Resolve(s).Valid;
@@ -26,7 +30,7 @@ namespace Musketeers.EditorTools.Studio
             var t = StudioTargets.Resolve(s);
             if (!t.Valid)
                 return;
-            s.Clipboard = FitEdit.Copy(t.Fit, s.CharId, s.Pose, s.CopyIncludeMask, StudioMasks.DrawsFront(s));
+            s.Clipboard = FitEdit.Copy(t.Fit, Who(s) ?? "", s.Pose, s.CopyIncludeMask, StudioMasks.DrawsFront(s));
             s.HasClipboard = true;
             s.ClipboardName = t.Name;
             s.ClipboardPose = s.Pose;
@@ -74,11 +78,7 @@ namespace Musketeers.EditorTools.Studio
         static void Finish(StudioState s, int group, IEnumerable<UnityEngine.Object> owners)
         {
             foreach (var o in owners)
-            {
-                if (o is CosmeticDef cd)
-                    cd.Tuned = true;
-                s.MarkDirty(o);
-            }
+                StudioEdit.Touch(o, s);
             Undo.CollapseUndoOperations(group);
             s.Touch();
         }
@@ -100,18 +100,18 @@ namespace Musketeers.EditorTools.Studio
                 return;
             var owners = new[] { t.Owner };
             int g = Begin("Paste fit", owners);
-            StudioPaste.ThisPose(s.Clipboard, t.Fit, Who(s), s.Pose);
+            StudioPaste.ThisPose(s.Clipboard, t.Fit, Who(s), s.Pose, (f, p) => DrawsFrontFor(s, f, p));
             Finish(s, g, owners);
         }
 
         public static void PasteAllPoses(StudioState s)
         {
             var t = StudioTargets.Resolve(s);
-            if (!s.HasClipboard || !t.Valid)
+            if (!s.HasClipboard || !t.Valid || !StudioPaste.AllowsAllPoses(t.Fit))
                 return;
             var owners = new[] { t.Owner };
             int g = Begin("Paste fit to all poses", owners);
-            StudioPaste.AllPoses(s.Clipboard, t.Fit, Who(s));
+            StudioPaste.AllPoses(s.Clipboard, t.Fit, Who(s), (f, p) => DrawsFrontFor(s, f, p));
             Finish(s, g, owners);
         }
 
@@ -134,7 +134,7 @@ namespace Musketeers.EditorTools.Studio
             if (owners.Count == 0)
                 return 0;
             int g = Begin("Paste fit to other items", owners);
-            int n = StudioPaste.ToChecked(s.Clipboard, fits, ticks, Who(s), s.PasteOthersAllPoses, s.Pose);
+            int n = StudioPaste.ToChecked(s.Clipboard, fits, ticks, Who(s), s.PasteOthersAllPoses, s.Pose, (f, p) => DrawsFrontFor(s, f, p));
             Finish(s, g, owners);
             return n;
         }

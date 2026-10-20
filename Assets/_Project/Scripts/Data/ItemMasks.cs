@@ -30,13 +30,14 @@ namespace Musketeers.Data
             return null;
         }
 
-        // Per-pose path if the pose has one; otherwise Base, but only when the pose draws the side sprite
-        // (a front-facing pose drawing FrontSprite is a different picture, so Base doesn't apply).
+        // A pose with its own entry uses it, and an entry with no valid path means "no mask on this pose".
+        // Only poses without an entry fall back to Base, and only when they draw the side sprite (a
+        // front-facing pose drawing FrontSprite is a different picture, so Base doesn't apply).
         public BezierPath For(PoseKind pose, bool drawsFrontSprite)
         {
             var own = Find(pose);
-            if (own != null && own.Path != null && own.Path.Valid)
-                return own.Path;
+            if (own != null)
+                return own.Path != null && own.Path.Valid ? own.Path : null;
             if (!drawsFrontSprite && Base != null && Base.Valid)
                 return Base;
             return null;

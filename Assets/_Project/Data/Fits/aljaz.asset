@@ -42,27 +42,93 @@ MonoBehaviour:
       Position: {x: 0.184, y: 0.359}
       Rotation: -60
       Scale: 0.58
-    BootMaskBack:
-    - {x: -0.214, y: 0.198}
-    - {x: -0.091, y: 0.188}
-    - {x: -0.032, y: 0.03}
-    - {x: -0.034, y: -0.004}
-    - {x: -0.126, y: -0.016}
-    - {x: -0.225, y: 0.006}
-    BootMaskFront:
-    - {x: 0.003, y: 0.192}
-    - {x: 0.117, y: 0.192}
-    - {x: 0.222, y: 0.051}
-    - {x: 0.221, y: 0.013}
-    - {x: 0.01, y: 0.02}
-    HandMask:
-    - {x: 0.152, y: 0.285}
-    - {x: 0.199, y: 0.289}
-    - {x: 0.227, y: 0.332}
-    - {x: 0.227, y: 0.375}
-    - {x: 0.199, y: 0.438}
-    - {x: 0.176, y: 0.438}
-    - {x: 0.141, y: 0.422}
+    BootPathBack:
+      Points:
+      - P: {x: -0.214, y: 0.198}
+        In: {x: 0, y: 0}
+        Out: {x: 0, y: 0}
+        Broken: 0
+      - P: {x: -0.091, y: 0.188}
+        In: {x: 0, y: 0}
+        Out: {x: 0, y: 0}
+        Broken: 0
+      - P: {x: -0.032, y: 0.03}
+        In: {x: 0, y: 0}
+        Out: {x: 0, y: 0}
+        Broken: 0
+      - P: {x: -0.034, y: -0.004}
+        In: {x: 0, y: 0}
+        Out: {x: 0, y: 0}
+        Broken: 0
+      - P: {x: -0.126, y: -0.016}
+        In: {x: 0, y: 0}
+        Out: {x: 0, y: 0}
+        Broken: 0
+      - P: {x: -0.225, y: 0.006}
+        In: {x: 0, y: 0}
+        Out: {x: 0, y: 0}
+        Broken: 0
+      Closed: 1
+      Invert: 0
+    BootPathFront:
+      Points:
+      - P: {x: 0.003, y: 0.192}
+        In: {x: 0, y: 0}
+        Out: {x: 0, y: 0}
+        Broken: 0
+      - P: {x: 0.117, y: 0.192}
+        In: {x: 0, y: 0}
+        Out: {x: 0, y: 0}
+        Broken: 0
+      - P: {x: 0.222, y: 0.051}
+        In: {x: 0, y: 0}
+        Out: {x: 0, y: 0}
+        Broken: 0
+      - P: {x: 0.221, y: 0.013}
+        In: {x: 0, y: 0}
+        Out: {x: 0, y: 0}
+        Broken: 0
+      - P: {x: 0.01, y: 0.02}
+        In: {x: 0, y: 0}
+        Out: {x: 0, y: 0}
+        Broken: 0
+      Closed: 1
+      Invert: 0
+    HandPath:
+      Points:
+      - P: {x: 0.152, y: 0.285}
+        In: {x: 0, y: 0}
+        Out: {x: 0, y: 0}
+        Broken: 0
+      - P: {x: 0.199, y: 0.289}
+        In: {x: 0, y: 0}
+        Out: {x: 0, y: 0}
+        Broken: 0
+      - P: {x: 0.227, y: 0.332}
+        In: {x: 0, y: 0}
+        Out: {x: 0, y: 0}
+        Broken: 0
+      - P: {x: 0.227, y: 0.375}
+        In: {x: 0, y: 0}
+        Out: {x: 0, y: 0}
+        Broken: 0
+      - P: {x: 0.199, y: 0.438}
+        In: {x: 0, y: 0}
+        Out: {x: 0, y: 0}
+        Broken: 0
+      - P: {x: 0.176, y: 0.438}
+        In: {x: 0, y: 0}
+        Out: {x: 0, y: 0}
+        Broken: 0
+      - P: {x: 0.141, y: 0.422}
+        In: {x: 0, y: 0}
+        Out: {x: 0, y: 0}
+        Broken: 0
+      Closed: 1
+      Invert: 0
+    BootMaskBack: []
+    BootMaskFront: []
+    HandMask: []
     NoMusket: 0
     NoRapier: 0
   - Pose: 1
@@ -94,30 +160,105 @@ MonoBehaviour:
       Position: {x: 0.008, y: 0.512}
       Rotation: -70
       Scale: 0.58
-    BootMaskBack:
-    - {x: -0.228, y: 0.245}
-    - {x: -0.181, y: 0.246}
-    - {x: -0.099, y: 0.209}
-    - {x: -0.04, y: 0.033}
-    - {x: -0.042, y: -0.004}
-    - {x: -0.177, y: -0.012}
-    - {x: -0.276, y: 0.02}
-    - {x: -0.278, y: 0.075}
-    BootMaskFront:
-    - {x: 0.007, y: 0.238}
-    - {x: 0.136, y: 0.235}
-    - {x: 0.277, y: 0.066}
-    - {x: 0.276, y: 0.033}
-    - {x: 0.162, y: 0.023}
-    - {x: 0.032, y: 0.045}
-    HandMask:
-    - {x: -0.07, y: 0.469}
-    - {x: -0.016, y: 0.469}
-    - {x: 0.059, y: 0.5}
-    - {x: 0.062, y: 0.539}
-    - {x: 0.043, y: 0.566}
-    - {x: 0.008, y: 0.562}
-    - {x: -0.066, y: 0.504}
+    BootPathBack:
+      Points:
+      - P: {x: -0.228, y: 0.245}
+        In: {x: 0, y: 0}
+        Out: {x: 0, y: 0}
+        Broken: 0
+      - P: {x: -0.181, y: 0.246}
+        In: {x: 0, y: 0}
+        Out: {x: 0, y: 0}
+        Broken: 0
+      - P: {x: -0.099, y: 0.209}
+        In: {x: 0, y: 0}
+        Out: {x: 0, y: 0}
+        Broken: 0
+      - P: {x: -0.04, y: 0.033}
+        In: {x: 0, y: 0}
+        Out: {x: 0, y: 0}
+        Broken: 0
+      - P: {x: -0.042, y: -0.004}
+        In: {x: 0, y: 0}
+        Out: {x: 0, y: 0}
+        Broken: 0
+      - P: {x: -0.177, y: -0.012}
+        In: {x: 0, y: 0}
+        Out: {x: 0, y: 0}
+        Broken: 0
+      - P: {x: -0.276, y: 0.02}
+        In: {x: 0, y: 0}
+        Out: {x: 0, y: 0}
+        Broken: 0
+      - P: {x: -0.278, y: 0.075}
+        In: {x: 0, y: 0}
+        Out: {x: 0, y: 0}
+        Broken: 0
+      Closed: 1
+      Invert: 0
+    BootPathFront:
+      Points:
+      - P: {x: 0.007, y: 0.238}
+        In: {x: 0, y: 0}
+        Out: {x: 0, y: 0}
+        Broken: 0
+      - P: {x: 0.136, y: 0.235}
+        In: {x: 0, y: 0}
+        Out: {x: 0, y: 0}
+        Broken: 0
+      - P: {x: 0.277, y: 0.066}
+        In: {x: 0, y: 0}
+        Out: {x: 0, y: 0}
+        Broken: 0
+      - P: {x: 0.276, y: 0.033}
+        In: {x: 0, y: 0}
+        Out: {x: 0, y: 0}
+        Broken: 0
+      - P: {x: 0.162, y: 0.023}
+        In: {x: 0, y: 0}
+        Out: {x: 0, y: 0}
+        Broken: 0
+      - P: {x: 0.032, y: 0.045}
+        In: {x: 0, y: 0}
+        Out: {x: 0, y: 0}
+        Broken: 0
+      Closed: 1
+      Invert: 0
+    HandPath:
+      Points:
+      - P: {x: -0.07, y: 0.469}
+        In: {x: 0, y: 0}
+        Out: {x: 0, y: 0}
+        Broken: 0
+      - P: {x: -0.016, y: 0.469}
+        In: {x: 0, y: 0}
+        Out: {x: 0, y: 0}
+        Broken: 0
+      - P: {x: 0.059, y: 0.5}
+        In: {x: 0, y: 0}
+        Out: {x: 0, y: 0}
+        Broken: 0
+      - P: {x: 0.062, y: 0.539}
+        In: {x: 0, y: 0}
+        Out: {x: 0, y: 0}
+        Broken: 0
+      - P: {x: 0.043, y: 0.566}
+        In: {x: 0, y: 0}
+        Out: {x: 0, y: 0}
+        Broken: 0
+      - P: {x: 0.008, y: 0.562}
+        In: {x: 0, y: 0}
+        Out: {x: 0, y: 0}
+        Broken: 0
+      - P: {x: -0.066, y: 0.504}
+        In: {x: 0, y: 0}
+        Out: {x: 0, y: 0}
+        Broken: 0
+      Closed: 1
+      Invert: 0
+    BootMaskBack: []
+    BootMaskFront: []
+    HandMask: []
     NoMusket: 0
     NoRapier: 0
   - Pose: 2
@@ -149,32 +290,113 @@ MonoBehaviour:
       Position: {x: -0.305, y: 1.289}
       Rotation: 90
       Scale: 0.58
-    BootMaskBack:
-    - {x: -0.101, y: 0.212}
-    - {x: -0.132, y: 0.016}
-    - {x: -0.211, y: -0.016}
-    - {x: -0.306, y: -0.004}
-    - {x: -0.308, y: 0.034}
-    - {x: -0.231, y: 0.231}
-    BootMaskFront:
-    - {x: 0.054, y: 0.216}
-    - {x: 0.19, y: 0.227}
-    - {x: 0.308, y: 0.038}
-    - {x: 0.307, y: 0.001}
-    - {x: 0.198, y: -0.012}
-    - {x: 0.097, y: 0.011}
-    - {x: 0.052, y: 0.175}
-    HandMask:
-    - {x: -0.344, y: 1.102}
-    - {x: -0.273, y: 1.113}
-    - {x: -0.242, y: 1.148}
-    - {x: -0.227, y: 1.355}
-    - {x: -0.246, y: 1.391}
-    - {x: -0.266, y: 1.402}
-    - {x: -0.324, y: 1.398}
-    - {x: -0.352, y: 1.387}
-    - {x: -0.383, y: 1.352}
-    - {x: -0.383, y: 1.285}
+    BootPathBack:
+      Points:
+      - P: {x: -0.101, y: 0.212}
+        In: {x: 0, y: 0}
+        Out: {x: 0, y: 0}
+        Broken: 0
+      - P: {x: -0.132, y: 0.016}
+        In: {x: 0, y: 0}
+        Out: {x: 0, y: 0}
+        Broken: 0
+      - P: {x: -0.211, y: -0.016}
+        In: {x: 0, y: 0}
+        Out: {x: 0, y: 0}
+        Broken: 0
+      - P: {x: -0.306, y: -0.004}
+        In: {x: 0, y: 0}
+        Out: {x: 0, y: 0}
+        Broken: 0
+      - P: {x: -0.308, y: 0.034}
+        In: {x: 0, y: 0}
+        Out: {x: 0, y: 0}
+        Broken: 0
+      - P: {x: -0.231, y: 0.231}
+        In: {x: 0, y: 0}
+        Out: {x: 0, y: 0}
+        Broken: 0
+      Closed: 1
+      Invert: 0
+    BootPathFront:
+      Points:
+      - P: {x: 0.054, y: 0.216}
+        In: {x: 0, y: 0}
+        Out: {x: 0, y: 0}
+        Broken: 0
+      - P: {x: 0.19, y: 0.227}
+        In: {x: 0, y: 0}
+        Out: {x: 0, y: 0}
+        Broken: 0
+      - P: {x: 0.308, y: 0.038}
+        In: {x: 0, y: 0}
+        Out: {x: 0, y: 0}
+        Broken: 0
+      - P: {x: 0.307, y: 0.001}
+        In: {x: 0, y: 0}
+        Out: {x: 0, y: 0}
+        Broken: 0
+      - P: {x: 0.198, y: -0.012}
+        In: {x: 0, y: 0}
+        Out: {x: 0, y: 0}
+        Broken: 0
+      - P: {x: 0.097, y: 0.011}
+        In: {x: 0, y: 0}
+        Out: {x: 0, y: 0}
+        Broken: 0
+      - P: {x: 0.052, y: 0.175}
+        In: {x: 0, y: 0}
+        Out: {x: 0, y: 0}
+        Broken: 0
+      Closed: 1
+      Invert: 0
+    HandPath:
+      Points:
+      - P: {x: -0.344, y: 1.102}
+        In: {x: 0, y: 0}
+        Out: {x: 0, y: 0}
+        Broken: 0
+      - P: {x: -0.273, y: 1.113}
+        In: {x: 0, y: 0}
+        Out: {x: 0, y: 0}
+        Broken: 0
+      - P: {x: -0.242, y: 1.148}
+        In: {x: 0, y: 0}
+        Out: {x: 0, y: 0}
+        Broken: 0
+      - P: {x: -0.227, y: 1.355}
+        In: {x: 0, y: 0}
+        Out: {x: 0, y: 0}
+        Broken: 0
+      - P: {x: -0.246, y: 1.391}
+        In: {x: 0, y: 0}
+        Out: {x: 0, y: 0}
+        Broken: 0
+      - P: {x: -0.266, y: 1.402}
+        In: {x: 0, y: 0}
+        Out: {x: 0, y: 0}
+        Broken: 0
+      - P: {x: -0.324, y: 1.398}
+        In: {x: 0, y: 0}
+        Out: {x: 0, y: 0}
+        Broken: 0
+      - P: {x: -0.352, y: 1.387}
+        In: {x: 0, y: 0}
+        Out: {x: 0, y: 0}
+        Broken: 0
+      - P: {x: -0.383, y: 1.352}
+        In: {x: 0, y: 0}
+        Out: {x: 0, y: 0}
+        Broken: 0
+      - P: {x: -0.383, y: 1.285}
+        In: {x: 0, y: 0}
+        Out: {x: 0, y: 0}
+        Broken: 0
+      Closed: 1
+      Invert: 0
+    BootMaskBack: []
+    BootMaskFront: []
+    HandMask: []
     NoMusket: 0
     NoRapier: 0
   - Pose: 3
@@ -206,30 +428,108 @@ MonoBehaviour:
       Position: {x: 0.594, y: 0.676}
       Rotation: 0
       Scale: 0.58
-    BootMaskBack:
-    - {x: -0.27, y: 0.181}
-    - {x: -0.269, y: 0.143}
-    - {x: -0.406, y: -0.008}
-    - {x: -0.564, y: -0.007}
-    - {x: -0.565, y: 0.029}
-    - {x: -0.381, y: 0.258}
-    - {x: -0.348, y: 0.257}
-    BootMaskFront:
-    - {x: 0.256, y: 0.222}
-    - {x: 0.354, y: 0.257}
-    - {x: 0.393, y: 0.258}
-    - {x: 0.566, y: 0.034}
-    - {x: 0.565, y: 0.001}
-    - {x: 0.507, y: -0.014}
-    - {x: 0.292, y: 0}
-    HandMask:
-    - {x: 0.773, y: 0.723}
-    - {x: 0.738, y: 0.781}
-    - {x: 0.668, y: 0.773}
-    - {x: 0.496, y: 0.707}
-    - {x: 0.484, y: 0.684}
-    - {x: 0.484, y: 0.605}
-    - {x: 0.672, y: 0.602}
-    - {x: 0.762, y: 0.641}
+    BootPathBack:
+      Points:
+      - P: {x: -0.27, y: 0.181}
+        In: {x: 0, y: 0}
+        Out: {x: 0, y: 0}
+        Broken: 0
+      - P: {x: -0.269, y: 0.143}
+        In: {x: 0, y: 0}
+        Out: {x: 0, y: 0}
+        Broken: 0
+      - P: {x: -0.406, y: -0.008}
+        In: {x: 0, y: 0}
+        Out: {x: 0, y: 0}
+        Broken: 0
+      - P: {x: -0.564, y: -0.007}
+        In: {x: 0, y: 0}
+        Out: {x: 0, y: 0}
+        Broken: 0
+      - P: {x: -0.565, y: 0.029}
+        In: {x: 0, y: 0}
+        Out: {x: 0, y: 0}
+        Broken: 0
+      - P: {x: -0.381, y: 0.258}
+        In: {x: 0, y: 0}
+        Out: {x: 0, y: 0}
+        Broken: 0
+      - P: {x: -0.348, y: 0.257}
+        In: {x: 0, y: 0}
+        Out: {x: 0, y: 0}
+        Broken: 0
+      Closed: 1
+      Invert: 0
+    BootPathFront:
+      Points:
+      - P: {x: 0.256, y: 0.222}
+        In: {x: 0, y: 0}
+        Out: {x: 0, y: 0}
+        Broken: 0
+      - P: {x: 0.354, y: 0.257}
+        In: {x: 0, y: 0}
+        Out: {x: 0, y: 0}
+        Broken: 0
+      - P: {x: 0.393, y: 0.258}
+        In: {x: 0, y: 0}
+        Out: {x: 0, y: 0}
+        Broken: 0
+      - P: {x: 0.566, y: 0.034}
+        In: {x: 0, y: 0}
+        Out: {x: 0, y: 0}
+        Broken: 0
+      - P: {x: 0.565, y: 0.001}
+        In: {x: 0, y: 0}
+        Out: {x: 0, y: 0}
+        Broken: 0
+      - P: {x: 0.507, y: -0.014}
+        In: {x: 0, y: 0}
+        Out: {x: 0, y: 0}
+        Broken: 0
+      - P: {x: 0.292, y: 0}
+        In: {x: 0, y: 0}
+        Out: {x: 0, y: 0}
+        Broken: 0
+      Closed: 1
+      Invert: 0
+    HandPath:
+      Points:
+      - P: {x: 0.773, y: 0.723}
+        In: {x: 0, y: 0}
+        Out: {x: 0, y: 0}
+        Broken: 0
+      - P: {x: 0.738, y: 0.781}
+        In: {x: 0, y: 0}
+        Out: {x: 0, y: 0}
+        Broken: 0
+      - P: {x: 0.668, y: 0.773}
+        In: {x: 0, y: 0}
+        Out: {x: 0, y: 0}
+        Broken: 0
+      - P: {x: 0.496, y: 0.707}
+        In: {x: 0, y: 0}
+        Out: {x: 0, y: 0}
+        Broken: 0
+      - P: {x: 0.484, y: 0.684}
+        In: {x: 0, y: 0}
+        Out: {x: 0, y: 0}
+        Broken: 0
+      - P: {x: 0.484, y: 0.605}
+        In: {x: 0, y: 0}
+        Out: {x: 0, y: 0}
+        Broken: 0
+      - P: {x: 0.672, y: 0.602}
+        In: {x: 0, y: 0}
+        Out: {x: 0, y: 0}
+        Broken: 0
+      - P: {x: 0.762, y: 0.641}
+        In: {x: 0, y: 0}
+        Out: {x: 0, y: 0}
+        Broken: 0
+      Closed: 1
+      Invert: 0
+    BootMaskBack: []
+    BootMaskFront: []
+    HandMask: []
     NoMusket: 0
     NoRapier: 0

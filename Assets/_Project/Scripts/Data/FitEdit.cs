@@ -36,6 +36,7 @@ namespace Musketeers.Data
         public ItemFit Fit;
         public bool HasMask;
         public BezierPath Mask;
+        public bool MaskFromFront;   // the mask was drawn on a pose that shows the FrontSprite
     }
 
     // The one set of rules for editing item fits per pose (Plan 006 data model). Idle = the master (Global);
@@ -166,16 +167,19 @@ namespace Musketeers.Data
                 var m = t.Masks.For(pose, drawsFrontSprite);
                 clip.HasMask = m != null;
                 clip.Mask = m?.Clone();
+                clip.MaskFromFront = m != null && drawsFrontSprite;
             }
             return clip;
         }
 
-        public static void Paste(FitClip clip, IFitTarget t, string character, PoseKind pose)
+        // A front mask only goes into a per-pose mask of a pose where the target draws its FrontSprite, never into
+        // Base; a side mask goes into Base (Idle + everyone) or a per-pose mask of a side-drawing pose.
+        public static void Paste(FitClip clip, IFitTarget t, string character, PoseKind pose, bool targetDrawsFront = false)
         {
             Set(t, pose, character, clip.Fit);
-            if (!clip.HasMask || clip.Mask == null)
+            if (!clip.HasMask || clip.Mask == null || clip.MaskFromFront != targetDrawsFront)
                 return;
-            if (pose == PoseKind.Idle && string.IsNullOrEmpty(character))
+            if (!clip.MaskFromFront && pose == PoseKind.Idle && string.IsNullOrEmpty(character))
                 t.Masks.Base = clip.Mask.Clone();
             else
                 t.Masks.SetForPose(pose, clip.Mask.Clone());

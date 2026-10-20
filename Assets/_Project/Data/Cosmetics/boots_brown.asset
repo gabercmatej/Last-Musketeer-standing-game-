@@ -29,4 +29,27 @@ MonoBehaviour:
       Offset: {x: 0, y: 0.127}
       Rotation: 0
       Scale: 0.7
-  Tuned: 0
+  Tuned: 1
+  Masks:
+    Base:
+      Points:
+      - P: {x: -0.2, y: 0.21}
+        In: {x: 0, y: 0}
+        Out: {x: 0, y: 0}
+        Broken: 0
+      - P: {x: 0.2, y: 0.21}
+        In: {x: 0, y: 0}
+        Out: {x: 0, y: 0}
+        Broken: 0
+      - P: {x: 0.2, y: 0.175}
+        In: {x: 0, y: 0}
+        Out: {x: -0.1, y: -0.02}
+        Broken: 0
+      - P: {x: -0.2, y: 0.165}
+        In: {x: 0.1, y: -0.02}
+        Out: {x: 0, y: 0}
+        Broken: 0
+      Closed: 1
+      Invert: 0
+    PerPose: []
+  CheckedMask: 0

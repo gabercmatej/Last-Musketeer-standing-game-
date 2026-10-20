@@ -66,9 +66,9 @@ namespace Musketeers.EditorTools.Studio
             string id = _s.CharId;
             EditorGUILayout.LabelField(t.Name, EditorStyles.boldLabel);
             bool custom = FitEdit.IsCustom(t.Fit, _s.Pose);
-            string badge = _s.Pose == PoseKind.Idle ? "master" : custom ? "custom" : "inherits Idle";
+            string badge = _s.Pose == PoseKind.Idle ? "master" : t.IsWeapon ? "per pose" : custom ? "custom" : "inherits Idle";
             EditorGUILayout.LabelField($"{_s.Pose}: {badge}", EditorStyles.miniBoldLabel);
-            var f = FitEdit.Resolve(t.Fit, id, _s.Pose);
+            var f = StudioEdit.StartFit(t.Fit, _s);
             EditorGUI.BeginChangeCheck();
             var ox = EditorGUILayout.FloatField("Offset X", f.Offset.x);
             var oy = EditorGUILayout.FloatField("Offset Y", f.Offset.y);
@@ -76,15 +76,15 @@ namespace Musketeers.EditorTools.Studio
             var sc = EditorGUILayout.FloatField("Scale", f.S);
             if (EditorGUI.EndChangeCheck())
             {
-                StudioEdit.Write(t.Fit, t.Owner, _s.Pose, _s.OverrideMusketeer ? id : null, new ItemFit(ox, oy, Mathf.Clamp(sc, 0.05f, 10f), rot), _s.LinkAllPoses);
-                _s.MarkDirty(t.Owner);
+                StudioEdit.Write(t.Fit, t.Owner, _s.Pose, StudioEdit.EditCharacter(_s), new ItemFit(ox, oy, Mathf.Clamp(sc, 0.05f, 10f), rot), _s.LinkAllPoses);
+                StudioEdit.Touch(t.Owner, _s);
                 _s.Touch();
             }
-            if (custom && GUILayout.Button("Reset to Idle"))
+            if (custom && !t.IsWeapon && GUILayout.Button("Reset to Idle"))
             {
                 Undo.RecordObject(t.Owner, "Reset to Idle");
                 FitEdit.ResetToIdle(t.Fit, _s.Pose);
-                _s.MarkDirty(t.Owner);
+                StudioEdit.Touch(t.Owner, _s);
                 _s.Touch();
             }
             _s.LinkAllPoses = EditorGUILayout.ToggleLeft("Link all poses", _s.LinkAllPoses);
@@ -92,12 +92,12 @@ namespace Musketeers.EditorTools.Studio
             {
                 EditorGUILayout.LabelField("override: " + _s.Character.DisplayName, EditorStyles.miniBoldLabel);
                 if (!_s.OverrideMusketeer)
-                    EditorGUILayout.LabelField("Turn on \"Override for this musketeer\" to edit it.", EditorStyles.wordWrappedMiniLabel);
+                    EditorGUILayout.HelpBox($"{_s.Character.DisplayName} has an own override here, so this canvas won't move; edits go to everyone.", MessageType.Warning);
                 if (GUILayout.Button("Remove override"))
                 {
                     Undo.RecordObject(t.Owner, "Remove override");
                     FitEdit.RemoveMusketeerOverride(t.Fit, id, _s.Pose);
-                    _s.MarkDirty(t.Owner);
+                    StudioEdit.Touch(t.Owner, _s);
                     _s.Touch();
                 }
             }
@@ -110,9 +110,7 @@ namespace Musketeers.EditorTools.Studio
         {
             Undo.RecordObject(owner, undoName);
             change();
-            if (owner is CosmeticDef cd)
-                cd.Tuned = true;
-            _s.MarkDirty(owner);
+            StudioEdit.Touch(owner, _s);
             _s.Touch();
         }
 
@@ -172,7 +170,7 @@ namespace Musketeers.EditorTools.Studio
                         Edited(t.Owner, "Delete mask", () =>
                         {
                             if (per)
-                                t.Fit.Masks.ResetToBase(_s.Pose);
+                                t.Fit.Masks.SetForPose(_s.Pose, new BezierPath());   // no mask on this pose
                             else
                                 t.Fit.Masks.Base = new BezierPath();
                         });
@@ -187,7 +185,7 @@ namespace Musketeers.EditorTools.Studio
             }
             if (t.Fit.Masks.IsCustom(_s.Pose))
             {
-                EditorGUILayout.LabelField("custom mask (this pose)", EditorStyles.miniBoldLabel);
+                EditorGUILayout.LabelField(has ? "custom mask (this pose)" : "no mask (this pose)", EditorStyles.miniBoldLabel);
                 if (GUILayout.Button("Reset mask to base"))
                 {
                     m.Stop();
@@ -270,8 +268,13 @@ namespace Musketeers.EditorTools.Studio
             {
                 if (GUILayout.Button("This pose"))
                     StudioClipboard.PasteThisPose(_s);
-                if (GUILayout.Button("All poses of this item"))
-                    StudioClipboard.PasteAllPoses(_s);
+                var cur = StudioTargets.Resolve(_s);
+                bool allowAll = !cur.IsWeapon;
+                using (new EditorGUI.DisabledScope(!allowAll))
+                {
+                    if (GUILayout.Button(allowAll ? "All poses of this item" : "All poses (not for weapons)"))
+                        StudioClipboard.PasteAllPoses(_s);
+                }
                 EditorGUILayout.LabelField("Other items in this slot", EditorStyles.miniBoldLabel);
                 var others = StudioClipboard.Others(_s);
                 using (new EditorGUILayout.HorizontalScope())
@@ -291,7 +294,8 @@ namespace Musketeers.EditorTools.Studio
                     if (now && !on) _s.PasteChecked.Add(o.Key);
                     else if (!now && on) _s.PasteChecked.Remove(o.Key);
                 }
-                _s.PasteOthersAllPoses = EditorGUILayout.ToggleLeft("all poses", _s.PasteOthersAllPoses);
+                using (new EditorGUI.DisabledScope(cur.IsWeapon))
+                    _s.PasteOthersAllPoses = EditorGUILayout.ToggleLeft(cur.IsWeapon ? "all poses (not for weapons)" : "all poses", _s.PasteOthersAllPoses && !cur.IsWeapon);
                 if (GUILayout.Button("Paste to checked items"))
                     StudioClipboard.PasteOthers(_s);
             }

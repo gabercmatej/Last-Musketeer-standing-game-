@@ -30,3 +30,10 @@ MonoBehaviour:
       Rotation: 0
       Scale: 0.66
   Tuned: 0
+  Masks:
+    Base:
+      Points: []
+      Closed: 0
+      Invert: 0
+    PerPose: []
+  CheckedMask: 0

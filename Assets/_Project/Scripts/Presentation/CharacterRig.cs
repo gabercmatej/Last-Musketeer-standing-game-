@@ -53,6 +53,7 @@ namespace Musketeers.Presentation
         bool _breathB;          // showing the IdleB breathing frame
         PoseKind _pose = PoseKind.Idle;
         Tween _poseTimer;
+        Tween _holdTimer;
         Tween _breathTween;
 
         public PoseKind Pose => _pose;
@@ -155,6 +156,7 @@ namespace Musketeers.Presentation
         void OnDestroy()
         {
             _poseTimer.Stop();
+            _holdTimer.Stop();
             _breathTween.Stop();
             if (_breath != null) Tween.StopAll(_breath);
             if (_musketPivot != null) Tween.StopAll(_musketPivot);
@@ -328,7 +330,8 @@ namespace Musketeers.Presentation
             _musketAimed = true;
             _aimExtra = 0f;
             Layout();
-            Tween.Delay(this, Mathf.Max(0.05f, seconds), r => { if (r._holdId == mine) r.Rest(); });
+            _holdTimer.Stop();
+            _holdTimer = Tween.Delay(this, Mathf.Max(0.05f, seconds), r => { if (r._holdId == mine) r.Rest(); });
         }
 
         public void Recoil(float duration)

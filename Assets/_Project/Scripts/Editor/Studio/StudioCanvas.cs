@@ -216,7 +216,7 @@ namespace Musketeers.EditorTools.Studio
             _pivot = l.Placement.Position;
             _anchor = _s.Character.FitFor(_s.Pose).Get(target.Anchor);
             _mirrored = StudioTargets.Mirrored(_s.Character, _s.Pose, l.BackFoot);
-            _startFit = FitEdit.Resolve(target.Fit, _s.CharId, _s.Pose);
+            _startFit = StudioEdit.StartFit(target.Fit, _s);
             _startAngle = Mathf.Atan2(pp.y - _pivot.y, pp.x - _pivot.x) * Mathf.Rad2Deg;
             _startDist = Mathf.Max(0.001f, (pp - _pivot).magnitude);
         }
@@ -332,8 +332,8 @@ namespace Musketeers.EditorTools.Studio
                     fit = StudioEdit.ScaleBy(_startFit, Mathf.Max(0.001f, (pp - _pivot).magnitude) / _startDist);
                     break;
             }
-            StudioEdit.Write(target.Fit, target.Owner, _s.Pose, _s.OverrideMusketeer ? _s.CharId : null, fit, _s.LinkAllPoses);
-            _s.MarkDirty(target.Owner);
+            StudioEdit.Write(target.Fit, target.Owner, _s.Pose, StudioEdit.EditCharacter(_s), fit, _s.LinkAllPoses);
+            StudioEdit.Touch(target.Owner, _s);
             _s.Touch();
         }
 
@@ -364,9 +364,7 @@ namespace Musketeers.EditorTools.Studio
 
         void Edited(UnityEngine.Object owner)
         {
-            if (owner is CosmeticDef cd)
-                cd.Tuned = true;
-            _s.MarkDirty(owner);
+            StudioEdit.Touch(owner, _s);
             _s.Touch();
         }
 
@@ -438,9 +436,9 @@ namespace Musketeers.EditorTools.Studio
                 return false;
             var anchor = _s.Character.FitFor(_s.Pose).Get(target.Anchor);
             bool mirrored = StudioTargets.Mirrored(_s.Character, _s.Pose, l.BackFoot);
-            var fit = change(FitEdit.Resolve(target.Fit, _s.CharId, _s.Pose), anchor, mirrored);
-            StudioEdit.Write(target.Fit, target.Owner, _s.Pose, _s.OverrideMusketeer ? _s.CharId : null, fit, _s.LinkAllPoses);
-            _s.MarkDirty(target.Owner);
+            var fit = change(StudioEdit.StartFit(target.Fit, _s), anchor, mirrored);
+            StudioEdit.Write(target.Fit, target.Owner, _s.Pose, StudioEdit.EditCharacter(_s), fit, _s.LinkAllPoses);
+            StudioEdit.Touch(target.Owner, _s);
             _s.Touch();
             return true;
         }

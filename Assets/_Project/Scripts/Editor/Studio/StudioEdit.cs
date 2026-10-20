@@ -29,6 +29,27 @@ namespace Musketeers.EditorTools.Studio
             return f;
         }
 
+        // The musketeer an edit goes to: only when "Override for this musketeer" is on, otherwise everyone (null).
+        public static string EditCharacter(StudioState s) => s.OverrideMusketeer ? s.CharId : null;
+
+        // Where an edit starts from: the fit of whoever the edit is written for, so an own override
+        // never leaks into the everyone fit.
+        public static ItemFit StartFit(IFitTarget t, string characterOrNull, PoseKind pose) =>
+            FitEdit.Resolve(t, characterOrNull ?? "", pose);
+
+        public static ItemFit StartFit(IFitTarget t, StudioState s) => StartFit(t, EditCharacter(s), s.Pose);
+
+        // The one place a Studio change to an asset gets recorded (the caller has already recorded Undo).
+        // Any CosmeticDef write counts as tuned, so Import Art won't re-apply FitDefaults over it.
+        public static void Touch(UnityEngine.Object owner, StudioState s)
+        {
+            if (owner == null)
+                return;
+            if (owner is CosmeticDef cd)
+                cd.Tuned = true;
+            s.MarkDirty(owner);
+        }
+
         // `characterOrNull` = the musketeer id when "Override for this musketeer" is on. Does not save to disk.
         public static void Write(IFitTarget t, UnityEngine.Object owner, PoseKind pose, string characterOrNull, ItemFit fit, bool linkAll)
         {

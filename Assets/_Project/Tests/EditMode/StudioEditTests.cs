@@ -189,6 +189,91 @@ namespace Musketeers.Sim.Tests
         }
 
         [Test]
+        public void Edit_OverrideOff_StartsFromEveryoneFit_DoesNotLeakOverride()
+        {
+            var d = NewItem("hat");
+            try
+            {
+                d.Global = new ItemFit(0f, 0f, 1f);
+                FitEdit.Set(d, PoseKind.Idle, "aljaz", new ItemFit(0.5f, 0f, 1f));
+                var start = StudioEdit.StartFit(d, null, PoseKind.Idle);
+                Assert.AreEqual(0f, start.Offset.x, 1e-5f);
+                var moved = StudioEdit.Move(start, new Anchor(0, 0), new Vector2(0.1f, 0f), false);
+                StudioEdit.Write(d, d, PoseKind.Idle, null, moved, false);
+                Assert.AreEqual(0.1f, d.Global.Offset.x, 1e-5f);
+                Assert.AreEqual(0.5f, FitEdit.Resolve(d, "aljaz", PoseKind.Idle).Offset.x, 1e-5f, "override unchanged");
+            }
+            finally { Object.DestroyImmediate(d); }
+        }
+
+        [Test]
+        public void Paste_AllPoses_RefusedForWeapons()
+        {
+            var w = new FitSet { Name = "musket" };
+            var clip = new FitClip { Fit = new ItemFit(0.5f, 0f, 1f) };
+            Assert.IsFalse(StudioPaste.AllPoses(clip, w, null));
+            Assert.AreEqual(0f, w.Global.Offset.x, 1e-5f);
+            var d = NewItem("hat");
+            try
+            {
+                Assert.IsFalse(StudioPaste.AllPoses(clip, d, null, null, false), "guard flag");
+                Assert.AreEqual(0f, d.Global.Offset.x, 1e-5f);
+                var list = new System.Collections.Generic.List<IFitTarget> { w };
+                Assert.AreEqual(1, StudioPaste.ToChecked(clip, list, new[] { true }, null, true, PoseKind.Lunge));
+                Assert.IsTrue(FitEdit.IsCustom(w, PoseKind.Lunge), "this pose only");
+                Assert.IsFalse(FitEdit.IsCustom(w, PoseKind.Hurt));
+            }
+            finally { Object.DestroyImmediate(d); }
+        }
+
+        static bool FrontOnHurtVictory(IFitTarget t, PoseKind p) => p == PoseKind.Hurt || p == PoseKind.Victory;
+
+        [Test]
+        public void Paste_FrontMask_AllPoses_GoesOnlyToFrontPoses_KeepsSideBase()
+        {
+            var d = NewItem("hat");
+            try
+            {
+                d.Masks.Base = Square(7f);
+                d.Masks.SetForPose(PoseKind.Lunge, Square(8f));
+                var clip = new FitClip { Fit = new ItemFit(0.1f, 0f, 1f), HasMask = true, Mask = Square(), MaskFromFront = true };
+                Assert.IsTrue(StudioPaste.AllPoses(clip, d, null, FrontOnHurtVictory));
+                Assert.AreEqual(7f, d.Masks.Base.Points[0].P.x, 1e-5f, "Base untouched");
+                Assert.IsTrue(d.Masks.IsCustom(PoseKind.Hurt));
+                Assert.IsTrue(d.Masks.IsCustom(PoseKind.Victory));
+                Assert.IsFalse(d.Masks.IsCustom(PoseKind.Idle));
+                Assert.AreEqual(8f, d.Masks.For(PoseKind.Lunge, false).Points[0].P.x, 1e-5f, "side pose keeps its own mask");
+                // Pasting a front mask to a side pose does nothing to masks.
+                var e = NewItem("hat2");
+                StudioPaste.ThisPose(clip, e, null, PoseKind.Idle, FrontOnHurtVictory);
+                Assert.IsFalse(e.Masks.Base.Valid);
+                Object.DestroyImmediate(e);
+            }
+            finally { Object.DestroyImmediate(d); }
+        }
+
+        [Test]
+        public void Paste_SideMask_AllPoses_KeepsFrontPoseMask()
+        {
+            var d = NewItem("hat");
+            try
+            {
+                d.Masks.SetForPose(PoseKind.Victory, Square(9f));
+                d.Masks.SetForPose(PoseKind.Lunge, Square(8f));
+                var clip = new FitClip { Fit = new ItemFit(0.1f, 0f, 1f), HasMask = true, Mask = Square() };
+                Assert.IsTrue(StudioPaste.AllPoses(clip, d, null, FrontOnHurtVictory));
+                Assert.IsTrue(d.Masks.Base.Valid);
+                Assert.AreEqual(9f, d.Masks.For(PoseKind.Victory, true).Points[0].P.x, 1e-5f, "front pose keeps its mask");
+                Assert.IsFalse(d.Masks.IsCustom(PoseKind.Lunge), "side per-pose mask cleared");
+                var e = NewItem("hat2");
+                StudioPaste.ThisPose(clip, e, null, PoseKind.Hurt, FrontOnHurtVictory);
+                Assert.IsFalse(e.Masks.IsCustom(PoseKind.Hurt), "side mask never goes into a front pose");
+                Object.DestroyImmediate(e);
+            }
+            finally { Object.DestroyImmediate(d); }
+        }
+
+        [Test]
         public void CopyMaskFrom_TransfersToEveryTargetForAllPoses()
         {
             var src = ScriptableObject.CreateInstance<CharacterFit>();

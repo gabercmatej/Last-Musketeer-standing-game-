@@ -151,7 +151,7 @@ namespace Musketeers.EditorTools.Studio
                     {
                         Undo.RecordObject(item, "Enabled in v1");
                         item.EnabledInV1 = v1;
-                        _s.MarkDirty(item);
+                        StudioEdit.Touch(item, _s);
                     }
                     CheckToggle(item, item);
                 }
@@ -167,7 +167,7 @@ namespace Musketeers.EditorTools.Studio
             {
                 Undo.RecordObject(owner, "Checked " + t.Id);
                 FitEdit.SetChecked(t, _s.Pose, now);
-                _s.MarkDirty(owner);
+                StudioEdit.Touch(owner, _s);
             }
         }
 

@@ -74,6 +74,18 @@ namespace Musketeers.Sim.Tests
         }
 
         [Test]
+        public void ItemMasks_EmptyPerPoseEntry_OptsOutOfBase()
+        {
+            var m = new ItemMasks { Base = Square(1f) };
+            Assert.That(m.For(PoseKind.Lunge, false), Is.SameAs(m.Base));
+            m.SetForPose(PoseKind.Lunge, new BezierPath());
+            Assert.That(m.For(PoseKind.Lunge, false), Is.Null, "empty entry = no mask on this pose");
+            Assert.That(m.For(PoseKind.Hurt, false), Is.SameAs(m.Base), "other poses still use Base");
+            m.ResetToBase(PoseKind.Lunge);
+            Assert.That(m.For(PoseKind.Lunge, false), Is.SameAs(m.Base));
+        }
+
+        [Test]
         public void FitEdit_IdleIsMaster_PosesInheritUntilCustom_ResetRestores()
         {
             var it = NewItem();
