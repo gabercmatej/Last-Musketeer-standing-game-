@@ -31,12 +31,13 @@ namespace Musketeers.Presentation
 
         static readonly (Key key, ActionType type)[] ActionKeys =
         {
-            (Key.Digit1, ActionType.Move), (Key.Digit2, ActionType.Dash), (Key.Digit3, ActionType.Fire),
-            (Key.Digit4, ActionType.Reload), (Key.Digit5, ActionType.Parry), (Key.Digit6, ActionType.Shove),
-            (Key.Digit7, ActionType.Keg), (Key.Digit8, ActionType.CatchBreath), (Key.Q, ActionType.Signature),
-            (Key.Numpad1, ActionType.Move), (Key.Numpad2, ActionType.Dash), (Key.Numpad3, ActionType.Fire),
-            (Key.Numpad4, ActionType.Reload), (Key.Numpad5, ActionType.Parry), (Key.Numpad6, ActionType.Shove),
-            (Key.Numpad7, ActionType.Keg), (Key.Numpad8, ActionType.CatchBreath),
+            // Same order as the grouped action bar (ActionInfo.Bar): Movement 1-3, Combat 4-8, Special Q.
+            (Key.Digit1, ActionType.Move), (Key.Digit2, ActionType.Dash), (Key.Digit3, ActionType.CatchBreath),
+            (Key.Digit4, ActionType.Fire), (Key.Digit5, ActionType.Reload), (Key.Digit6, ActionType.Shove),
+            (Key.Digit7, ActionType.Parry), (Key.Digit8, ActionType.Keg), (Key.Q, ActionType.Signature),
+            (Key.Numpad1, ActionType.Move), (Key.Numpad2, ActionType.Dash), (Key.Numpad3, ActionType.CatchBreath),
+            (Key.Numpad4, ActionType.Fire), (Key.Numpad5, ActionType.Reload), (Key.Numpad6, ActionType.Shove),
+            (Key.Numpad7, ActionType.Parry), (Key.Numpad8, ActionType.Keg),
         };
 
         static readonly (Key key, Dir dir)[] DirKeys =

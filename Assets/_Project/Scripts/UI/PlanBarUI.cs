@@ -16,7 +16,11 @@ namespace Musketeers.UI
         public event Action<int> SlotClicked;
         public event Action LockClicked;
 
-        readonly VisualElement _bar;
+        readonly VisualElement _planPanel, _bottomBar;
+        readonly Label _gritNum;
+        readonly VisualElement _gritPips;
+        readonly List<VisualElement> _pips = new List<VisualElement>();
+        string[] _names;
         readonly Label _planningFor;
         readonly Label _hint;
         readonly Button _lock;
@@ -36,7 +40,10 @@ namespace Musketeers.UI
         public PlanBarUI(VisualElement hudRoot)
         {
             _root = hudRoot;
-            _bar = hudRoot.Q("plan-bar");
+            _planPanel = hudRoot.Q("plan-panel");
+            _bottomBar = hudRoot.Q("bottom-bar");
+            _gritNum = hudRoot.Q<Label>("grit-num");
+            _gritPips = hudRoot.Q("grit-pips");
             _planningFor = hudRoot.Q<Label>("planning-for");
             _hint = hudRoot.Q<Label>("hint");
             _lock = hudRoot.Q<Button>("lock");
@@ -55,6 +62,7 @@ namespace Musketeers.UI
                 var icon = new VisualElement();
                 icon.AddToClassList("slot-icon");
                 var col = new VisualElement();
+                col.AddToClassList("slot-col");
                 var text = new Label("");
                 text.AddToClassList("slot-text");
                 var sub = new Label("");
@@ -73,33 +81,55 @@ namespace Musketeers.UI
             }
 
             var actions = hudRoot.Q("actions");
+            var special = hudRoot.Q("special-slot");
+            VisualElement group = null;
+            VisualElement row = null;
+            int groupIndex = -1;
             for (int i = 0; i < ActionInfo.Bar.Length; i++)
             {
                 int index = i;
                 var type = ActionInfo.Bar[i];
+                int g = ActionInfo.Group(type);
+                if (g != groupIndex)
+                {
+                    groupIndex = g;
+                    group = new VisualElement();
+                    group.AddToClassList("action-group");
+                    group.AddToClassList("action-group--" + g);
+                    var gl = new Label(ActionInfo.GroupNames[g]);
+                    gl.AddToClassList("action-group-label");
+                    row = new VisualElement();
+                    row.AddToClassList("action-row");
+                    group.Add(gl);
+                    group.Add(row);
+                    (g == 2 ? special : actions).Add(group);
+                }
+                bool sig = type == ActionType.Signature;
                 var el = new VisualElement();
                 el.AddToClassList("action");
-                var top = new VisualElement();
-                top.AddToClassList("action-top");
+                if (sig)
+                    el.AddToClassList("action--sig");
                 var key = new Label(ActionInfo.Hotkey(type));
                 key.AddToClassList("action-key");
                 var icon = new VisualElement();
                 icon.AddToClassList("action-icon");
                 icon.style.backgroundImage = new StyleBackground(ActionInfo.Icon(type));
                 icon.style.unityBackgroundImageTintColor = ActionInfo.IconTint(type);
-                top.Add(key);
-                top.Add(icon);
                 var name = new Label(type.ToString());
                 name.AddToClassList("action-name");
                 var cost = new Label("");
                 cost.AddToClassList("action-cost");
-                el.Add(top);
-                el.Add(name);
-                el.Add(cost);
+                var text = new VisualElement { pickingMode = PickingMode.Ignore };
+                text.AddToClassList("action-text");
+                text.Add(name);
+                text.Add(cost);
+                el.Add(icon);
+                el.Add(text);
+                el.Add(key);
                 el.RegisterCallback<ClickEvent>(_ => ActionClicked?.Invoke(type));
                 el.RegisterCallback<PointerEnterEvent>(_ => ShowTooltip(el, _tooltips[index]));
                 el.RegisterCallback<PointerLeaveEvent>(_ => HideTooltip());
-                actions.Add(el);
+                row.Add(el);
                 _actions.Add(el);
                 _actionIcons.Add(icon);
                 _actionNames.Add(name);
@@ -107,7 +137,14 @@ namespace Musketeers.UI
             }
         }
 
-        public void SetVisible(bool visible) => _bar.style.display = visible ? DisplayStyle.Flex : DisplayStyle.None;
+        public void SetPlayerNames(string[] names) => _names = names;
+
+        public void SetVisible(bool visible)
+        {
+            var d = visible ? DisplayStyle.Flex : DisplayStyle.None;
+            _planPanel.style.display = d;
+            _bottomBar.style.display = d;
+        }
 
         public void SetCharacter(CharacterDef c, GameConfig cfg, Ability ability, string who, Color color)
         {
@@ -145,7 +182,7 @@ namespace Musketeers.UI
                 _slots[t].EnableInClassList("slot--cursor", !locked && t == b.Cursor);
                 _slots[t].EnableInClassList("slot--invalid", issue != PlanIssue.None);
                 _slots[t].EnableInClassList("slot--locked", locked);
-                _slotTexts[t].text = a.Type == ActionType.Idle ? (t == b.Cursor && !locked ? "next..." : "idle") : ActionInfo.Short(a, c);
+                _slotTexts[t].text = a.Type == ActionType.Idle ? (t == b.Cursor && !locked ? "next..." : "idle") : ActionInfo.Short(a, c, _names);
                 _slotSubs[t].text = issue != PlanIssue.None ? ShortIssue(issue) : "";
                 var icon = ActionInfo.Icon(a.Type, _ability);
                 _slotIcons[t].style.backgroundImage = icon != null ? new StyleBackground(icon) : new StyleBackground(StyleKeyword.None);
@@ -153,9 +190,25 @@ namespace Musketeers.UI
                 _slotIcons[t].style.rotate = new Rotate(ActionInfo.IconAngle(a, _ability));
             }
 
+            SetGrit(b.CursorState.Grit, cfg.MaxGrit);
             _lock.text = locked ? "Locked  (Space to edit)" : "Lock in  (Space)";
             _lock.EnableInClassList("btn--locked", locked);
             _hint.text = Hint(b);
+        }
+
+        // The big counter: the Grit projected for the tick being planned (the same number the hint shows).
+        void SetGrit(int grit, int max)
+        {
+            while (_pips.Count < max)
+            {
+                var pip = new VisualElement { pickingMode = PickingMode.Ignore };
+                pip.AddToClassList("grit-pip");
+                _gritPips.Add(pip);
+                _pips.Add(pip);
+            }
+            for (int i = 0; i < _pips.Count; i++)
+                _pips[i].EnableInClassList("grit-pip--on", i < grit);
+            _gritNum.text = grit.ToString();
         }
 
         static string ShortIssue(PlanIssue i)
@@ -164,6 +217,7 @@ namespace Musketeers.UI
             {
                 case PlanIssue.NoGrit: return "fizzles: no grit";
                 case PlanIssue.Unloaded: return "fizzles: unloaded";
+                case PlanIssue.AlreadyLoaded: return "already loaded";
                 case PlanIssue.KegActive: return "fizzles: keg out";
                 case PlanIssue.OutOfRange: return "fizzles: range";
                 case PlanIssue.Dead: return "you're gone";

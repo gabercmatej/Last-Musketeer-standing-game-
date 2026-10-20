@@ -18,7 +18,7 @@ namespace Musketeers.Presentation
         int _used, _labelsUsed;
 
         static readonly Color Invalid = new Color(0.55f, 0.55f, 0.58f, 0.6f);
-        static readonly Color ShotColor = new Color(1f, 0.9f, 0.35f, 0.9f);
+        static readonly Color ShotColor = new Color(1f, 0.78f, 0.12f, 1f);
         static readonly Color BlastColor = new Color(1f, 0.45f, 0.1f, 0.28f);
 
         public void Clear()
@@ -150,7 +150,7 @@ namespace Musketeers.Presentation
                 case ActionType.Fire:
                 {
                     var sc = invalid ? Invalid : ShotColor;
-                    ShotRange(s, b.Slot, from, a.Dir, cfg.FireRange, true, sc, 0.05f);
+                    ShotRange(s, b.Slot, from, a.Dir, cfg.FireRange, true, sc, 0.12f);
                     break;
                 }
                 case ActionType.Shove:
@@ -229,21 +229,21 @@ namespace Musketeers.Presentation
                 case Ability.BullRush:
                 {
                     var rush = PlanProjection.BullRush(s, b.Slot, from, a.Dir, cfg.BullRushDistance, cfg.BullRushPush);
-                    var rc = invalid ? Invalid : c;
+                    var rc = invalid ? Invalid : new Color(c.r, c.g, c.b, 1f);
                     if (rush.End != from)
-                        Line(wf, BoardMath.ToWorld(rush.End), rc, 0.16f, Layers.PreviewUnder + 1);
+                        Line(wf, BoardMath.ToWorld(rush.End), rc, 0.26f, Layers.PreviewUnder + 1);
                     if (rush.HasImpact)
                     {
                         var iw = BoardMath.ToWorld(rush.ImpactTile);
-                        var hot = invalid ? Invalid : new Color(1f, 0.4f, 0.3f, 0.95f);
+                        var hot = invalid ? Invalid : new Color(1f, 0.3f, 0.2f, 1f);
                         var x = Get(PlaceholderArt.Cross, hot, Layers.PreviewOver);
                         x.transform.localPosition = iw;
-                        x.transform.localScale = Vector3.one * 0.55f;
+                        x.transform.localScale = Vector3.one * 0.7f;
                         if (rush.HitUnit && rush.Landing != rush.ImpactTile)
                         {
                             var lw = BoardMath.ToWorld(rush.Landing);
-                            Line(iw, lw, hot, 0.07f, Layers.PreviewOver);
-                            Arrow(lw - dv * 0.3f, a.Dir, hot, 0.38f);
+                            Line(iw, lw, hot, 0.14f, Layers.PreviewOver);
+                            Arrow(lw - dv * 0.3f, a.Dir, hot, 0.5f);
                             Marker(lw, hot);
                             if (rush.Falls)
                                 Label("falls!", lw + new Vector3(0, 0.35f, 0), "ghost-dead");
@@ -255,8 +255,8 @@ namespace Musketeers.Presentation
                 }
                 case Ability.TripleCharge:
                 {
-                    var sc = invalid ? Invalid : new Color(1f, 0.55f, 0.15f, 0.95f);
-                    var tiles = ShotRange(s, b.Slot, from, a.Dir, cfg.FireRange, true, sc, 0.1f);
+                    var sc = invalid ? Invalid : new Color(1f, 0.5f, 0.1f, 1f);
+                    var tiles = ShotRange(s, b.Slot, from, a.Dir, cfg.FireRange, true, sc, 0.18f);
                     if (tiles.Count > 0)
                     {
                         var last = tiles[tiles.Count - 1];
@@ -266,12 +266,12 @@ namespace Musketeers.Presentation
                         {
                             var dot = Get(PlaceholderArt.Circle, sc, Layers.PreviewOver + 1);
                             dot.transform.localPosition = lw - dv * (0.12f + 0.2f * k);
-                            dot.transform.localScale = Vector3.one * 0.2f;
+                            dot.transform.localScale = Vector3.one * 0.28f;
                         }
                         if (s.UnitAt(last) != null && s.UnitAt(last).Slot != b.Slot)
                         {
                             var pw = lw + dv * cfg.TripleChargePush;
-                            Arrow(lw + dv * 0.5f, a.Dir, sc, 0.34f);
+                            Arrow(lw + dv * 0.5f, a.Dir, sc, 0.46f);
                             Label("push " + cfg.TripleChargePush, pw + new Vector3(0, 0.3f, 0), "ghost-tag");
                         }
                     }
@@ -285,7 +285,8 @@ namespace Musketeers.Presentation
         List<Int2> ShotRange(GameState s, int self, Int2 from, Dir dir, int range, bool stopAtUnits, Color c, float width)
         {
             var tiles = PlanProjection.ShotTiles(s, self, from, dir, range, stopAtUnits);
-            var fill = new Color(c.r, c.g, c.b, 0.3f);
+            // Bolder on the light stone floor: a deeper, more saturated tint at higher alpha.
+            var fill = new Color(c.r, c.g * 0.7f, c.b * 0.5f, 0.5f);
             foreach (var t in tiles)
             {
                 var sq = Get(PlaceholderArt.Square, fill, Layers.PreviewUnder);

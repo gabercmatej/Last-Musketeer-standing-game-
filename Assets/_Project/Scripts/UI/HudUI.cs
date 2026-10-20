@@ -21,6 +21,9 @@ namespace Musketeers.UI
         readonly VisualElement _banner;
         readonly VisualElement _scores;
         readonly Button _speed;
+        readonly VisualElement _gritBox, _specialSlot;
+        readonly VisualElement _topStrip, _topLeft, _leftCol, _rightCol, _bottomBar;
+        CameraRig _rig;
         VisualElement[] _scoreEls = new VisualElement[0];
         Label[] _points = new Label[0];
         VisualElement[] _crowns = new VisualElement[0];
@@ -39,6 +42,17 @@ namespace Musketeers.UI
             _bannerText = hudRoot.Q<Label>("banner-text");
             _devBadge = hudRoot.Q<Label>("dev-badge");
             _speed = hudRoot.Q<Button>("speed");
+            _topStrip = hudRoot.Q("top-strip");
+            _topLeft = hudRoot.Q("top-left");
+            _leftCol = hudRoot.Q("left-col");
+            _rightCol = hudRoot.Q("right-col");
+            _bottomBar = hudRoot.Q("bottom-bar");
+            _gritBox = hudRoot.Q("grit-box");
+            _specialSlot = hudRoot.Q("special-slot");
+            // Speed and Log are debugging aids: only in the Editor and development builds (L still opens the log).
+            bool dev = Debug.isDebugBuild || Application.isEditor;
+            hudRoot.Q("dev-buttons").style.display = dev ? DisplayStyle.Flex : DisplayStyle.None;
+            _root.RegisterCallback<GeometryChangedEvent>(_ => ApplyLayout());
             var log = hudRoot.Q<Button>("log-toggle");
             var quit = hudRoot.Q<Button>("quit");
             var settings = hudRoot.Q<Button>("hud-settings");
@@ -51,7 +65,50 @@ namespace Musketeers.UI
             settings.clicked += () => SettingsClicked?.Invoke();
         }
 
-        public void SetVisible(bool visible) => _root.style.display = visible ? DisplayStyle.Flex : DisplayStyle.None;
+        public void SetVisible(bool visible)
+        {
+            _root.style.display = visible ? DisplayStyle.Flex : DisplayStyle.None;
+            if (visible)
+                _root.schedule.Execute(ApplyLayout).ExecuteLater(0);
+        }
+
+        // The HUD lives around the arena, never on it: the camera reports where the board sits and the columns
+        // and strips are placed in the margins (HudLayout; narrow screens shrink and then overlap the board edge).
+        public void BindArena(CameraRig rig)
+        {
+            _rig = rig;
+            rig.ArenaChanged += ApplyLayout;
+        }
+
+        public void ApplyLayout()
+        {
+            if (_rig == null)
+                return;
+            float w = _root.resolvedStyle.width, h = _root.resolvedStyle.height;
+            if (float.IsNaN(w) || float.IsNaN(h) || w < 50f || h < 50f)
+                return;
+            var r = HudLayout.Compute(_rig.ArenaPanelRect(w, h), w, h);
+            Place(_topStrip, r.Top);
+            Place(_bottomBar, r.Bottom);
+            Place(_leftCol, r.Left);
+            Place(_rightCol, r.Right);
+            _topLeft.style.left = r.RoundX;
+            // Corner widgets under the columns: Grit bottom-left, the Signature button bottom-right.
+            _gritBox.style.marginLeft = r.Left.x;
+            _gritBox.style.width = r.Left.width;
+            _specialSlot.style.marginRight = HudLayout.Pad;
+            _specialSlot.style.width = r.Right.width;
+            _root.EnableInClassList("hud--compact", r.Compact);
+            _root.EnableInClassList("hud--overlap", r.Overlap);
+        }
+
+        static void Place(VisualElement e, Rect r)
+        {
+            e.style.left = r.x;
+            e.style.top = r.y;
+            e.style.width = r.width;
+            e.style.height = r.height;
+        }
 
         public void BuildScores(string[] names, Color[] colors, Sprite[] portraits = null)
         {
@@ -132,7 +189,7 @@ namespace Musketeers.UI
 
         public void SetSpeed(float speed) => _speed.text = $"Speed {speed:0.#}x";
 
-        public void SetDevBadge(bool on) => _devBadge.style.display = on ? DisplayStyle.Flex : DisplayStyle.None;
+        public void SetDevBadge(bool on) => _devBadge.style.display = on && (Debug.isDebugBuild || Application.isEditor) ? DisplayStyle.Flex : DisplayStyle.None;
 
         // The announcer ribbon: pops in, holds, fades.
         public void Banner(string text, Color color, float seconds)

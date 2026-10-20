@@ -1,7 +1,8 @@
 <ui:UXML xmlns:ui="UnityEngine.UIElements">
     <ui:VisualElement name="hud" class="screen" picking-mode="Ignore">
-        <ui:VisualElement name="top-bar" class="top-bar panel-bar">
-            <ui:VisualElement class="top-left" picking-mode="Ignore">
+        <!-- Top strip (above the arena): Round/Turn on the left, timer + phase in the centre. -->
+        <ui:VisualElement name="top-strip" class="top-strip" picking-mode="Ignore">
+            <ui:VisualElement name="top-left" class="top-left" picking-mode="Ignore">
                 <ui:Label name="round-label" text="Round 1" class="round-label" />
                 <ui:Label name="turn-label" text="Turn 1" class="turn-label" />
             </ui:VisualElement>
@@ -9,36 +10,55 @@
                 <ui:Label name="timer" text="25" class="timer" />
                 <ui:Label name="phase-label" text="Plan your moves" class="phase-label" />
             </ui:VisualElement>
-            <ui:VisualElement name="scores" class="scores" picking-mode="Ignore" />
         </ui:VisualElement>
 
-        <ui:VisualElement class="corner-buttons">
-            <ui:Button name="speed" text="Speed 1x" class="btn btn--small" />
-            <ui:Button name="log-toggle" text="Log (L)" class="btn btn--small" />
-            <ui:Button name="hud-settings" text="Settings" class="btn btn--small" />
-            <ui:Button name="quit" text="Leave" class="btn btn--small" />
+        <!-- Left column: Settings/Leave, dev buttons, then the plan panel. -->
+        <ui:VisualElement name="left-col" class="side-col left-col" picking-mode="Ignore">
+            <ui:VisualElement class="corner-buttons" picking-mode="Ignore">
+                <ui:Button name="hud-settings" text="Settings" class="btn btn--small btn--hud" />
+                <ui:Button name="quit" text="Leave" class="btn btn--small btn--hud" />
+            </ui:VisualElement>
+            <ui:VisualElement name="dev-buttons" class="corner-buttons" picking-mode="Ignore">
+                <ui:Button name="speed" text="Speed 1x" class="btn btn--small btn--hud" />
+                <ui:Button name="log-toggle" text="Log (L)" class="btn btn--small btn--hud" />
+            </ui:VisualElement>
+            <ui:Label name="dev-badge" text="DEV: CONTROL ALL (F2)  Tab or click a unit to switch" class="badge badge--dev dev-badge" />
+
+            <ui:VisualElement name="plan-panel" class="plan-panel">
+                <ui:Label name="planning-for" text="Matej" class="planning-for" />
+                <ui:VisualElement name="slots" class="slots" />
+                <ui:Label name="hint" text="" class="hint" />
+                <ui:Button name="lock" text="Lock in  (Space)" class="btn btn--primary btn--lock" />
+            </ui:VisualElement>
         </ui:VisualElement>
-        <ui:Label name="dev-badge" text="DEV: CONTROL ALL (F2)  Tab or click a unit to switch" class="badge badge--dev dev-badge" />
+
+        <!-- Right column: the four score boxes, then the emote hint. -->
+        <ui:VisualElement name="right-col" class="side-col right-col" picking-mode="Ignore">
+            <ui:VisualElement name="scores" class="scores" picking-mode="Ignore" />
+            <ui:Label name="emote-hint" text="Emotes: Z X C V" class="emote-hint" picking-mode="Ignore" />
+        </ui:VisualElement>
 
         <ui:VisualElement name="log-panel" class="log-panel">
             <ui:Label text="Turn log" class="log-title" />
             <ui:ScrollView name="log-scroll" class="log-scroll" />
         </ui:VisualElement>
 
-        <ui:VisualElement name="plan-bar" class="plan-bar panel-bar">
-            <ui:VisualElement class="plan-row">
-                <ui:Label name="planning-for" text="Matej" class="planning-for" />
-                <ui:VisualElement name="slots" class="slots" />
-                <ui:Button name="lock" text="Lock in  (Space)" class="btn btn--primary btn--lock" />
+        <!-- Bottom strip (below the arena): big Grit counter, then the grouped action bar. -->
+        <ui:VisualElement name="bottom-bar" class="bottom-bar" picking-mode="Ignore">
+            <ui:VisualElement name="grit-box" class="grit-box" picking-mode="Ignore">
+                <ui:Label text="GRIT" class="grit-title" picking-mode="Ignore" />
+                <ui:VisualElement class="grit-row" picking-mode="Ignore">
+                    <ui:Label name="grit-num" text="5" class="grit-num" picking-mode="Ignore" />
+                    <ui:VisualElement name="grit-pips" class="grit-pips" picking-mode="Ignore" />
+                </ui:VisualElement>
             </ui:VisualElement>
-            <ui:Label name="hint" text="" class="hint" />
             <ui:VisualElement name="actions" class="actions" />
+            <ui:VisualElement name="special-slot" class="special-slot" />
         </ui:VisualElement>
 
         <ui:Label name="tooltip" text="" class="tooltip" picking-mode="Ignore" />
         <ui:VisualElement name="banner" class="banner" picking-mode="Ignore">
             <ui:Label name="banner-text" text="" class="banner-text" picking-mode="Ignore" />
         </ui:VisualElement>
-        <ui:Label text="Emotes: Z X C V" class="emote-hint" picking-mode="Ignore" />
     </ui:VisualElement>
 </ui:UXML>

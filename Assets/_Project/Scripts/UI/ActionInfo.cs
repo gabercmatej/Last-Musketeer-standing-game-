@@ -11,9 +11,25 @@ namespace Musketeers.UI
     {
         public static readonly ActionType[] Bar =
         {
-            ActionType.Move, ActionType.Dash, ActionType.Fire, ActionType.Reload, ActionType.Parry,
-            ActionType.Shove, ActionType.Keg, ActionType.CatchBreath, ActionType.Signature,
+            ActionType.Move, ActionType.Dash, ActionType.CatchBreath,
+            ActionType.Fire, ActionType.Reload, ActionType.Shove, ActionType.Parry, ActionType.Keg,
+            ActionType.Signature,
         };
+
+        // FIXES §3.3: the bar is grouped (Movement | Combat | Special). Bar order == group order == hotkey order.
+        public static readonly string[] GroupNames = { "MOVEMENT", "COMBAT", "SPECIAL" };
+
+        public static int Group(ActionType t)
+        {
+            switch (t)
+            {
+                case ActionType.Move:
+                case ActionType.Dash:
+                case ActionType.CatchBreath: return 0;
+                case ActionType.Signature: return 2;
+                default: return 1;
+            }
+        }
 
         public static string Hotkey(ActionType t)
         {
@@ -21,12 +37,12 @@ namespace Musketeers.UI
             {
                 case ActionType.Move: return "1";
                 case ActionType.Dash: return "2";
-                case ActionType.Fire: return "3";
-                case ActionType.Reload: return "4";
-                case ActionType.Parry: return "5";
+                case ActionType.CatchBreath: return "3";
+                case ActionType.Fire: return "4";
+                case ActionType.Reload: return "5";
                 case ActionType.Shove: return "6";
-                case ActionType.Keg: return "7";
-                case ActionType.CatchBreath: return "8";
+                case ActionType.Parry: return "7";
+                case ActionType.Keg: return "8";
                 case ActionType.Signature: return "Q";
                 default: return "";
             }
@@ -81,6 +97,7 @@ namespace Musketeers.UI
             {
                 case PlanIssue.NoGrit: return "Not enough grit at this tick";
                 case PlanIssue.Unloaded: return "Musket not loaded at this tick (Reload first)";
+                case PlanIssue.AlreadyLoaded: return "Musket is already loaded";
                 case PlanIssue.KegActive: return "You already have a keg out";
                 case PlanIssue.OutOfRange: return "Out of range";
                 case PlanIssue.Dead: return "You'd be dead by then";
@@ -168,13 +185,16 @@ namespace Musketeers.UI
             return -BoardMath.DirAngle(a.Dir) - (a.Type == ActionType.Fire ? 90f : 0f);
         }
 
-        public static string Short(PlannedAction a, CharacterDef c)
+        public static string Short(PlannedAction a, CharacterDef c, string[] playerNames = null)
         {
             if (a.Type == ActionType.Idle)
                 return "";
             string n = Name(a.Type, c);
             if (a.Type == ActionType.Signature && c != null && c.Ability == Ability.Switcheroo)
-                return n;   // picks a musketeer, not a direction
+            {
+                // picks a musketeer, not a direction
+                return playerNames != null && a.Unit < playerNames.Length ? $"Swap with {playerNames[a.Unit]}" : n;
+            }
             if (PlanBuilder.NeedsDirection(a.Type))
                 return $"{n} {a.Dir}";
             if (a.Type == ActionType.Keg)

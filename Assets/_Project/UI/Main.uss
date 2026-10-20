@@ -552,70 +552,96 @@
     white-space: normal;
 }
 
-/* ---------- HUD ---------- */
+/* ---------- HUD ----------
+   The HUD sits around the arena, never on it. HudUI positions the four regions (top strip, bottom bar, left and
+   right columns) from the arena rect the camera reports (HudLayout); the rules here style what is inside them.
+   .hud--compact (narrow side margins) shrinks text; .hud--overlap means a column reaches onto the board edge,
+   so the panels are semi-transparent. */
 
-.top-bar {
+.top-strip {
     position: absolute;
-    left: 0;
-    right: 0;
-    top: 0;
-    height: 64px;
     flex-direction: row;
     align-items: center;
-    padding: 0 14px;
-    border-bottom-width: 2px;
+    justify-content: center;
 }
 
 .top-left {
-    width: 300px;
+    position: absolute;
+    top: 6px;
 }
 
 .round-label {
     -unity-font-definition: url("/Assets/_Project/Art/Fonts/PirataOne-Regular.ttf");
     font-size: 26px;
     color: var(--gold);
+    -unity-text-outline-width: 1.2px;
+    -unity-text-outline-color: rgb(30, 16, 4);
+    margin: 0;
+    padding: 0;
 }
 
 .turn-label {
-    color: var(--ink-dim);
+    color: var(--ink);
     font-size: 13px;
+    margin: 0;
+    padding: 0;
+    -unity-text-outline-width: 1px;
+    -unity-text-outline-color: rgb(20, 12, 4);
 }
 
 .top-center {
-    flex-grow: 1;
     align-items: center;
+    padding: 2px 22px;
+    border-radius: 14px;
+    background-color: rgba(8, 14, 44, 0.55);
 }
 
 .timer {
-    font-size: 32px;
+    font-size: 30px;
     -unity-text-align: middle-center;
     color: var(--ink);
+    margin: 0;
+    padding: 0;
 }
 
 .timer--low {
     color: var(--danger);
-    scale: 1.15 1.15;
 }
 
 .phase-label {
-    font-size: 12px;
+    font-size: 11px;
     color: var(--ink-dim);
+    margin: 0;
+    padding: 0;
+}
+
+.side-col {
+    position: absolute;
+}
+
+.left-col {
+    align-items: stretch;
+}
+
+.right-col {
+    align-items: stretch;
 }
 
 .scores {
-    width: 460px;
-    flex-direction: row;
-    justify-content: flex-end;
+    flex-direction: column;
+    align-items: stretch;
 }
 
 .score {
     flex-direction: row;
     align-items: center;
+    height: 42px;
     padding: 3px 8px 3px 3px;
-    margin-left: 6px;
+    margin-bottom: 5px;
     border-radius: 22px;
-    background-color: rgba(255, 255, 255, 0.07);
+    background-color: rgba(8, 14, 44, 0.78);
     border-width: 2px;
+    overflow: hidden;
 }
 
 .score--dead {
@@ -623,56 +649,73 @@
 }
 
 .score-portrait {
-    width: 34px;
-    height: 34px;
-    border-radius: 17px;
+    width: 32px;
+    height: 32px;
+    flex-shrink: 0;
+    border-radius: 16px;
     margin-right: 6px;
     -unity-background-scale-mode: scale-and-crop;
 }
 
 .score-name {
+    flex-grow: 1;
+    flex-shrink: 1;
+    min-width: 0;
     font-size: 13px;
-    margin-right: 6px;
+    margin: 0 4px 0 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
 
 .score-points {
+    flex-shrink: 0;
     font-size: 20px;
     color: var(--gold);
 }
 
 .score-icon {
-    width: 20px;
-    height: 20px;
-    margin-left: 4px;
+    flex-shrink: 0;
+    width: 18px;
+    height: 18px;
+    margin-left: 3px;
     -unity-background-scale-mode: scale-to-fit;
 }
 
 .corner-buttons {
-    position: absolute;
-    left: 8px;
-    top: 70px;
     flex-direction: row;
+    margin-bottom: 4px;
+}
+
+.btn--hud {
+    flex-grow: 1;
+    flex-basis: 0;
+    min-height: 28px;
+    margin: 0 2px 0 0;
+    padding: 3px 6px;
+    font-size: 12px;
 }
 
 .dev-badge {
-    position: absolute;
-    left: 12px;
-    top: 108px;
+    font-size: 10px;
+    white-space: normal;
+    margin-bottom: 6px;
 }
 
 .emote-hint {
-    position: absolute;
-    right: 12px;
-    top: 72px;
+    margin-top: 2px;
     font-size: 11px;
-    color: rgba(255, 255, 255, 0.55);
+    color: rgba(255, 255, 255, 0.7);
+    -unity-text-align: middle-center;
+    -unity-text-outline-width: 1px;
+    -unity-text-outline-color: rgb(20, 12, 4);
 }
 
 .log-panel {
     position: absolute;
     right: 10px;
-    top: 92px;
-    bottom: 196px;
+    top: 270px;
+    bottom: 92px;
     width: 300px;
     background-color: var(--navy-deep);
     border-radius: 8px;
@@ -710,43 +753,38 @@
     color: var(--ink);
 }
 
-.plan-bar {
-    position: absolute;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    padding: 8px 12px 10px 12px;
-    border-top-width: 2px;
-    align-items: center;
-}
-
-.plan-row {
-    flex-direction: row;
-    align-items: center;
+.plan-panel {
+    padding: 6px;
+    border-radius: 10px;
+    background-color: rgba(8, 14, 44, 0.78);
+    border-width: 1px;
+    border-color: var(--line);
 }
 
 .planning-for {
-    width: 150px;
-    font-size: 17px;
-    -unity-text-align: middle-right;
-    margin-right: 10px;
+    font-size: 15px;
+    -unity-text-align: middle-left;
+    margin: 0 0 4px 2px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
 
 .slots {
-    flex-direction: row;
+    flex-direction: column;
 }
 
 .slot {
-    width: 156px;
-    height: 50px;
-    margin: 0 4px;
+    height: 44px;
+    margin: 0 0 4px 0;
     flex-direction: row;
     align-items: center;
-    padding: 4px 8px;
-    border-radius: 9px;
+    padding: 2px 6px;
+    border-radius: 8px;
     border-width: 2px;
     border-color: rgba(255, 255, 255, 0.12);
     background-color: rgba(20, 40, 110, 0.75);
+    overflow: hidden;
 }
 
 .slot:hover {
@@ -769,30 +807,48 @@
 .slot-num {
     font-size: 12px;
     color: var(--ink-faint);
-    width: 14px;
+    width: 12px;
+    flex-shrink: 0;
 }
 
 .slot-icon {
-    width: 32px;
-    height: 32px;
+    width: 28px;
+    height: 28px;
+    flex-shrink: 0;
     margin-right: 6px;
     -unity-background-scale-mode: scale-to-fit;
 }
 
+.slot-col {
+    flex-grow: 1;
+    flex-shrink: 1;
+    min-width: 0;
+}
+
 .slot-text {
-    font-size: 14px;
+    font-size: 13px;
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
 
 .slot-sub {
     font-size: 10px;
     color: var(--danger);
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
 
 .btn--lock {
-    width: 200px;
-    height: 50px;
-    margin-left: 10px;
-    font-size: 16px;
+    height: 38px;
+    margin: 4px 0 0 0;
+    font-size: 14px;
+    padding: 2px 4px;
 }
 
 .btn--locked {
@@ -800,35 +856,150 @@
 }
 
 .hint {
-    font-size: 13px;
-    color: var(--ink-dim);
-    margin: 4px 0;
-    height: 18px;
-    -unity-text-align: middle-center;
+    font-size: 11px;
+    color: var(--ink);
+    margin: 2px 2px 0 2px;
+    white-space: normal;
+    -unity-text-align: upper-left;
 }
 
-.actions {
+/* Bottom bar: the big Grit counter, then the grouped action bar. */
+.bottom-bar {
+    position: absolute;
+    background-color: rgba(8, 14, 44, 0.5);
     flex-direction: row;
+    align-items: center;
+}
+
+.grit-box {
+    flex-shrink: 0;
+    height: 64px;
+    padding: 2px 10px;
+    border-radius: 10px;
+    border-width: 2px;
+    border-color: var(--gold-dark);
+    background-color: rgba(8, 14, 44, 0.85);
     justify-content: center;
 }
 
+.grit-title {
+    font-size: 10px;
+    color: var(--gold);
+    margin: 0;
+    padding: 0;
+    -unity-text-align: upper-left;
+}
+
+.grit-row {
+    flex-direction: row;
+    align-items: center;
+}
+
+.grit-num {
+    font-size: 42px;
+    color: var(--ink);
+    margin: -6px 10px 0 0;
+    padding: 0;
+    min-width: 32px;
+    -unity-text-align: middle-center;
+}
+
+.grit-pips {
+    flex-direction: row;
+    flex-wrap: nowrap;
+    flex-shrink: 1;
+}
+
+.grit-pip {
+    flex-shrink: 0;
+    width: 15px;
+    height: 15px;
+    margin: 0 2px;
+    border-radius: 8px;
+    border-width: 2px;
+    border-color: var(--gold-dark);
+    background-color: rgba(255, 255, 255, 0.06);
+}
+
+.grit-pip--on {
+    background-color: var(--gold);
+    border-color: rgb(255, 240, 190);
+}
+
+.actions {
+    flex-grow: 1;
+    flex-shrink: 1;
+    min-width: 0;
+    flex-direction: row;
+    align-items: flex-end;
+    justify-content: center;
+}
+
+.special-slot {
+    flex-shrink: 0;
+}
+
+.action-group {
+    flex-shrink: 1;
+    min-width: 0;
+    margin: 0 6px;
+    padding: 0 0 0 8px;
+    border-left-width: 1px;
+    border-left-color: var(--line);
+}
+
+.action-group--0 {
+    border-left-width: 0;
+    padding-left: 0;
+    flex-grow: 3;
+}
+
+.action-group--1 {
+    flex-grow: 5;
+}
+
+.action-group--2 {
+    margin: 0;
+    padding: 0;
+    border-left-width: 0;
+}
+
+.action-group-label {
+    font-size: 11px;
+    color: var(--ink);
+    -unity-text-outline-width: 1px;
+    -unity-text-outline-color: rgb(8, 14, 44);
+    height: 13px;
+    margin: 0;
+    padding: 0;
+    -unity-text-align: middle-left;
+}
+
+.action-row {
+    flex-direction: row;
+}
+
 .action {
-    width: 106px;
-    height: 70px;
-    margin: 0 3px;
-    padding: 4px 4px 3px 4px;
-    border-radius: 9px;
+    flex-grow: 1;
+    flex-basis: 0;
+    min-width: 50px;
+    max-width: 130px;
+    height: 58px;
+    margin: 0 2px;
+    padding: 3px 2px 2px 2px;
+    border-radius: 8px;
     border-width: 2px;
     border-color: rgba(255, 214, 120, 0.25);
-    background-color: rgba(20, 40, 110, 0.8);
+    background-color: rgba(20, 40, 110, 0.85);
     align-items: center;
     justify-content: flex-start;
+    overflow: hidden;
     transition-property: background-color, translate, opacity;
     transition-duration: 0.08s;
 }
 
 .action:hover {
-    background-color: rgba(44, 70, 160, 0.9);
+    background-color: rgba(44, 70, 160, 0.95);
     translate: 0 -2px;
 }
 
@@ -843,42 +1014,105 @@
 
 .action--off:hover {
     translate: 0 0;
-    background-color: rgba(20, 40, 110, 0.8);
+    background-color: rgba(20, 40, 110, 0.85);
 }
 
-.action-top {
+.action--sig {
     flex-direction: row;
     align-items: center;
-    flex-shrink: 0;
-    height: 30px;
+    flex-grow: 1;
+    max-width: none;
+    margin: 0;
+    height: 58px;
+    padding: 3px 6px 3px 6px;
+    border-color: var(--gold);
+    background-color: rgba(70, 40, 120, 0.9);
 }
 
 .action-key {
-    font-size: 11px;
+    position: absolute;
+    left: 2px;
+    top: 1px;
+    font-size: 9px;
     color: rgb(20, 16, 12);
     background-color: var(--ink-dim);
     border-radius: 3px;
-    padding: 0 4px;
-    margin-right: 4px;
+    padding: 0 3px;
+    margin: 0;
 }
 
 .action-icon {
-    width: 30px;
-    height: 30px;
+    width: 24px;
+    height: 24px;
+    flex-shrink: 0;
     -unity-background-scale-mode: scale-to-fit;
 }
 
+.action--sig .action-icon {
+    width: 44px;
+    height: 44px;
+    margin-right: 8px;
+}
+
+.action-text {
+    align-items: center;
+    max-width: 100%;
+    flex-shrink: 1;
+    min-width: 0;
+}
+
+.action--sig .action-text {
+    align-items: flex-start;
+}
+
 .action-name {
-    font-size: 13px;
-    margin: 1px 0 0 0;
+    font-size: 12px;
+    margin: 0;
     padding: 0;
+    max-width: 100%;
+    -unity-text-align: middle-center;
+    min-height: 14px;
+    white-space: nowrap;
+}
+
+.action--sig .action-name {
+    font-size: 15px;
 }
 
 .action-cost {
     font-size: 10px;
     color: var(--gold);
+    min-height: 11px;
     margin: 0;
     padding: 0;
+    max-width: 100%;
+    white-space: nowrap;
+}
+
+/* Narrow screens: smaller text, tighter pieces. */
+.hud--compact .round-label { font-size: 22px; }
+.hud--compact .score { height: 36px; }
+.hud--compact .score-portrait { width: 28px; height: 28px; border-radius: 14px; }
+.hud--compact .score-name { font-size: 11px; }
+.hud--compact .score-points { font-size: 17px; }
+.hud--compact .slot { height: 40px; }
+.hud--compact .slot-icon { width: 24px; height: 24px; }
+.hud--compact .slot-text { font-size: 11px; }
+.hud--compact .hint { font-size: 10px; }
+.hud--compact .grit-box { padding: 2px 6px; }
+.hud--compact .grit-num { font-size: 32px; margin-right: 6px; min-width: 22px; }
+.hud--compact .grit-pip { width: 11px; height: 11px; border-radius: 6px; margin: 0 1px; }
+.hud--compact .action { min-width: 40px; }
+.hud--compact .action-name { font-size: 10px; }
+.hud--compact .action-cost { font-size: 9px; }
+.hud--compact .action--sig .action-icon { width: 32px; height: 32px; margin-right: 5px; }
+.hud--compact .action--sig .action-name { font-size: 12px; }
+.hud--compact .action-group { margin: 0 3px; padding-left: 5px; }
+
+/* Columns that reach onto the board edge get a firmer backing so they stay readable over the art. */
+.hud--overlap .plan-panel,
+.hud--overlap .score {
+    background-color: rgba(8, 14, 44, 0.66);
 }
 
 .tooltip {
@@ -899,7 +1133,7 @@
     position: absolute;
     left: 360px;
     right: 360px;
-    top: 66px;
+    top: 92px;
     height: 76px;
     background-image: url("/Assets/_Project/Art/UI/panels/banner.png");
     -unity-slice-left: 200;

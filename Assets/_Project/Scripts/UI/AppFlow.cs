@@ -104,6 +104,7 @@ namespace Musketeers.UI
             _lobby = new LobbyUI(lobby, _model, _art);
             _loading = new LoadingUI(loading, _tips);
             _hud = new HudUI(hud);
+            _hud.BindArena(_rig);
             _planBar = new PlanBarUI(hud);
             _log = new LogPanelUI(hud);
             _scoreboard = new ScoreboardUI(score);
@@ -354,6 +355,7 @@ namespace Musketeers.UI
 
             _hud.SetVisible(true);
             _hud.BuildScores(setup.Names, _colors, _portraits);
+            _planBar.SetPlayerNames(setup.Names);
             _hud.SetDevBadge(_transport.ControlAll);
             _log.Clear();
             _audio?.Music("Music/battle");
