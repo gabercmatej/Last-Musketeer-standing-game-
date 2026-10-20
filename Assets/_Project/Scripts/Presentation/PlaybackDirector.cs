@@ -560,7 +560,7 @@ namespace Musketeers.Presentation
                             _fx.Burst(GameArt.Stars, PlaceholderArt.Star, Red, u.transform.localPosition + new Vector3(0f, 0.6f, 0f), 0.5f, 1.2f, S(0.5f));
                         _fx.Popup(fell ? "SPLASH!" : "DOWN!", u.transform.localPosition + Vector3.up * 0.8f, Red, S(1.1f), "popup-big");
                         if (!fell)
-                            u.SetAlive(false, false);
+                            u.SetAlive(false, false, instant: false);
                     });
                     Sfx(delay + 0.1f, "SFX/impacts/death");
                     Line(delay + 0.15f, u, "death");

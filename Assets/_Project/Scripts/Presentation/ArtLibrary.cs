@@ -44,7 +44,31 @@ namespace Musketeers.Presentation
 
         public Sprite PillarSprite => Theme != null && Theme.Pillar != null ? Theme.Pillar : PlaceholderArt.Pillar;
         public Sprite CrateSprite => Theme != null && Theme.Crate != null ? Theme.Crate : PlaceholderArt.Crate;
-        public Sprite PitSprite => Theme != null && Theme.Pit != null ? Theme.Pit : PlaceholderArt.Pit;
+        public Sprite PitSprite
+        {
+            get
+            {
+                if (Theme == null || Theme.Pit == null)
+                    return PlaceholderArt.Pit;
+                return Theme.PitInnerCrop > 0.01f && Theme.PitInnerCrop < 0.99f ? Cropped(Theme.Pit, Theme.PitInnerCrop) : Theme.Pit;
+            }
+        }
+
+        // The central `fraction` of a sprite as its own one-unit sprite (cached), made in code so it needs no extra asset.
+        readonly System.Collections.Generic.Dictionary<(Sprite, float), Sprite> _cropped = new System.Collections.Generic.Dictionary<(Sprite, float), Sprite>();
+
+        Sprite Cropped(Sprite source, float fraction)
+        {
+            if (_cropped.TryGetValue((source, fraction), out var cached) && cached != null)
+                return cached;
+            var r = source.textureRect;
+            float w = r.width * fraction, h = r.height * fraction;
+            var inner = new Rect(r.x + (r.width - w) * 0.5f, r.y + (r.height - h) * 0.5f, w, h);
+            var s = UnityEngine.Sprite.Create(source.texture, inner, new Vector2(0.5f, 0.5f), w, 0, SpriteMeshType.FullRect);
+            s.name = source.name + "_inner";
+            _cropped[(source, fraction)] = s;
+            return s;
+        }
         public Sprite KegSprite => Sprite(GameArt.Keg, PlaceholderArt.Keg);
         public Sprite CrownSprite => Sprite(GameArt.Crown, PlaceholderArt.Crown);
 

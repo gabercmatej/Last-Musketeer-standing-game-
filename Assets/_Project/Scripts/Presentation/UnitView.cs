@@ -12,8 +12,11 @@ namespace Musketeers.Presentation
     public sealed class UnitView : MonoBehaviour
     {
         const int MaxPips = 5;
+        const float HeartStep = 0.26f;
+        const float MusketScale = 0.82f;   // the loaded/unloaded indicator: big enough to read at a glance
+        const float MusketSlot = 0.72f;    // horizontal room the icon takes next to the hearts
         public const float FeetY = -0.3f;    // feet sit low on the tile; the body rises into the row above
-        public const float RigScale = 1.18f; // musketeers a bit bigger than the 1.3-tile art, for readability
+        public const float RigScale = 1.62f;  // musketeers fill their tile (the art is ~1.3 tiles tall at 1.0)
 
         public int Slot { get; private set; }
         public Int2 GridPos { get; private set; }
@@ -37,6 +40,7 @@ namespace Musketeers.Presentation
         Sprite _heartFull, _heartEmpty, _loaded, _empty;
         bool _realHearts, _realMusket;
         bool _alive = true;
+        bool _dying;            // lying down and fading; the board leaves a dying unit alone until it is gone
         int _hp;
 
         public void Build(ArtLibrary art, WorldLabels labels, int slot, int character, string displayName, int maxHp, Loadout loadout)
@@ -80,15 +84,15 @@ namespace Musketeers.Presentation
             for (int i = 0; i < maxHp; i++)
             {
                 _hearts[i] = art.MakeRenderer("Heart" + i, transform, _heartFull, Color.white, 60);
-                _hearts[i].transform.localScale = Vector3.one * (_realHearts ? 0.21f : 0.2f);
-                _hearts[i].transform.localPosition = new Vector3((i - (maxHp - 1) * 0.5f) * 0.19f - 0.1f, headY, 0f);
+                _hearts[i].transform.localScale = Vector3.one * (_realHearts ? 0.34f : 0.32f);
+                _hearts[i].transform.localPosition = new Vector3((i - (maxHp - 1) * 0.5f) * HeartStep - MusketSlot * 0.5f, headY, 0f);
             }
             _loaded = art.Sprite(GameArt.MusketLoaded, PlaceholderArt.Musket);
             _empty = art.Sprite(GameArt.MusketEmpty, PlaceholderArt.Musket);
             _realMusket = art.Has(GameArt.MusketLoaded);
             _musketIcon = art.MakeRenderer("MusketIcon", transform, _loaded, Color.white, 60);
-            _musketIcon.transform.localScale = Vector3.one * (_realMusket ? 0.26f : 0.25f);
-            _musketIcon.transform.localPosition = new Vector3((maxHp - 1) * 0.5f * 0.19f + 0.12f, headY, 0f);
+            _musketIcon.transform.localScale = Vector3.one * (_realMusket ? MusketScale : MusketScale * 0.96f);
+            _musketIcon.transform.localPosition = new Vector3((maxHp - 1) * 0.5f * HeartStep + MusketSlot * 0.5f + 0.02f, headY + 0.02f, 0f);
 
             _pips = new SpriteRenderer[MaxPips];
             var grit = art.Sprite(GameArt.Grit, PlaceholderArt.Circle);
@@ -96,8 +100,8 @@ namespace Musketeers.Presentation
             for (int i = 0; i < MaxPips; i++)
             {
                 _pips[i] = art.MakeRenderer("Grit" + i, transform, grit, Color.white, 60);
-                _pips[i].transform.localScale = Vector3.one * (realGrit ? 0.13f : 0.11f);
-                _pips[i].transform.localPosition = new Vector3((i - (MaxPips - 1) * 0.5f) * 0.12f, FeetY - 0.13f, 0f);
+                _pips[i].transform.localScale = Vector3.one * (realGrit ? 0.15f : 0.13f);
+                _pips[i].transform.localPosition = new Vector3((i - (MaxPips - 1) * 0.5f) * 0.14f, FeetY - 0.13f, 0f);
             }
             _crown = art.MakeRenderer("Crown", _bodyRoot, art.CrownSprite, art.Has(GameArt.Crown) ? Color.white : new Color(1f, 0.82f, 0.2f), 50);
             _crown.transform.localScale = Vector3.one * (art.Has(GameArt.Crown) ? 0.28f : 0.3f);
@@ -138,7 +142,7 @@ namespace Musketeers.Presentation
 
         // World position of the feet and of the musket's barrel tip pointing along d (for FX).
         public Vector3 Feet => transform.localPosition + new Vector3(0f, FeetY, 0f);
-        public Vector3 BarrelTip(Dir d) => transform.localPosition + new Vector3(0f, FeetY + 0.48f, 0f) + BoardMath.DirVector(d) * 0.7f;
+        public Vector3 BarrelTip(Dir d) => transform.localPosition + new Vector3(0f, FeetY + 0.6f, 0f) + BoardMath.DirVector(d) * 0.85f;
 
         public void SetFacing(Dir d) => _rig.Face(d);
         public void Aim(Dir d) => _rig.Aim(d);
@@ -193,9 +197,13 @@ namespace Musketeers.Presentation
         }
 
         // Dead units stay where they fell, lying down and faded; a pit fall also shrinks them away.
-        public void SetAlive(bool alive, bool fell)
+        // `instant` (a Sync after playback) removes a dead unit from the board at once; otherwise a death lies
+        // down for a beat, fades and then goes. Coming back alive (a new round) shows everything again.
+        public void SetAlive(bool alive, bool fell, bool instant = true)
         {
             _alive = alive;
+            if (alive)
+                SetOnBoard(true);
             foreach (var h in _hearts) h.enabled = alive;
             foreach (var p in _pips) p.enabled = alive;
             _musketIcon.enabled = alive;
@@ -221,11 +229,29 @@ namespace Musketeers.Presentation
                 if (_rig.Pose != PoseKind.Victory)
                     _rig.SetPose(PoseKind.Idle);
             }
-            _bodyRoot.localScale = alive ? Vector3.one : Vector3.one * (fell ? 0.35f : 1f);
-            _name.Element.style.opacity = alive ? 1f : 0.45f;
+            _bodyRoot.localScale = Vector3.one;
+            _name.Element.style.opacity = 1f;
+            if (alive)
+                return;
+            if (instant)
+            {
+                SetOnBoard(false);
+                return;
+            }
+            _rig.SetTint(Color.white);
+            _dying = true;
+            Tween.Custom(this, 1f, 0f, 0.4f, (self, v) => self._rig.SetTint(new Color(1f, 1f, 1f, v)), Ease.InQuad, startDelay: 0.55f)
+                .OnComplete(this, self => { self._dying = false; if (!self._alive) self.SetOnBoard(false); });
+        }
+
+        void SetOnBoard(bool on)
+        {
+            gameObject.SetActive(on);
+            _name?.SetVisible(on);
         }
 
         public bool Alive => _alive;
+        public bool IsDying => _dying;
 
         public void Flash(Color c, float duration)
         {

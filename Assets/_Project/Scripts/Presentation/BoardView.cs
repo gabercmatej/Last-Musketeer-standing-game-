@@ -12,6 +12,11 @@ namespace Musketeers.Presentation
     public sealed class BoardView : MonoBehaviour
     {
         const float PropFoot = -0.42f;   // tall props stand near the bottom edge of their tile
+        const float PropScale = 1.3f;    // pillars and crates a bit bigger than their tile so they fill it
+        const float CheckerDarken = 0.07f;   // every other square this much darker (chess look)
+        static readonly Color GridLine = new Color(0f, 0f, 0f, 0.38f);
+        static readonly Color BridgeTrim = new Color(0.10f, 0.05f, 0.02f, 0.88f);
+        static readonly Int2[] Sides = { new Int2(0, 1), new Int2(1, 0), new Int2(0, -1), new Int2(-1, 0) };
 
         [SerializeField] private ArtLibrary _art;
         [SerializeField] private WorldLabels _labels;
@@ -23,6 +28,9 @@ namespace Musketeers.Presentation
         public int Height { get; private set; }
 
         SpriteRenderer[] _ground;
+        SpriteRenderer[] _grid;
+        SpriteRenderer[][] _trim;   // bridge tiles only: dark trim on the N/E/S/W sides that border water
+        bool[] _bridge;
         SpriteRenderer[] _props;
         SpriteRenderer[] _debris;
         SpriteRenderer[] _warn;
@@ -39,7 +47,8 @@ namespace Musketeers.Presentation
         public int UnitCount => _units.Length;
         public UnitView Unit(int slot) => slot >= 0 && slot < _units.Length ? _units[slot] : null;
 
-        public void Build(GameState s, GameConfig cfg, int[] characters, string[] names, Loadout[] loadouts)
+        // `bridges` (MapData.Bridges, optional): which tiles are bridge planks.
+        public void Build(GameState s, GameConfig cfg, int[] characters, string[] names, Loadout[] loadouts, bool[] bridges = null)
         {
             Clear();
             Config = cfg;
@@ -54,12 +63,11 @@ namespace Musketeers.Presentation
             _pieceRoot = new GameObject("Pieces").transform;
             _pieceRoot.SetParent(transform, false);
 
-            // A soft dark frame under the board so it reads against any background art.
-            var frame = _art.MakeRenderer("Frame", _tileRoot, PlaceholderArt.RoundedSquare, new Color(0.03f, 0.02f, 0.02f, 0.55f), Layers.Tile - 1);
-            frame.transform.localScale = new Vector3((Width + 0.45f) / 0.94f, (Height + 0.45f) / 0.94f, 1f);
-
             int n = Width * Height;
             _ground = new SpriteRenderer[n];
+            _grid = new SpriteRenderer[n];
+            _trim = new SpriteRenderer[n][];
+            _bridge = new bool[n];
             _props = new SpriteRenderer[n];
             _debris = new SpriteRenderer[n];
             _warn = new SpriteRenderer[n];
@@ -72,16 +80,36 @@ namespace Musketeers.Presentation
             {
                 int i = y * Width + x;
                 var p = new Int2(x, y);
-                var g = _art.MakeRenderer($"Tile {x},{y}", _tileRoot, _art.FloorSprite(x, y), Color.white, Layers.Tile);
-                g.transform.localPosition = BoardMath.ToWorld(p);
+                // The cell holds the tile and its decorations; only the ground sprite itself is rotated.
+                var cell = new GameObject($"Cell {x},{y}").transform;
+                cell.SetParent(_tileRoot, false);
+                cell.localPosition = BoardMath.ToWorld(p);
+                var g = _art.MakeRenderer($"Tile {x},{y}", cell, _art.FloorSprite(x, y), Color.white, Layers.Tile);
                 _ground[i] = g;
-                _debris[i] = _art.MakeRenderer("Debris", g.transform, theme != null ? theme.CrateBroken : null, Color.white, Layers.TileDecal);
+                _grid[i] = _art.MakeRenderer("Grid", cell, PlaceholderArt.Outline, GridLine, Layers.Tile + 1);
+                _bridge[i] = bridges != null && i < bridges.Length && bridges[i];
+                bool edge = theme != null && theme.WaterEdge;
+                if (_bridge[i] || edge)
+                {
+                    float thick = _bridge[i] ? 0.13f : 0.07f;
+                    _trim[i] = new SpriteRenderer[4];
+                    for (int d = 0; d < 4; d++)
+                    {
+                        var tr = _art.MakeRenderer("Trim", cell, PlaceholderArt.Square, BridgeTrim, Layers.Tile + 3);
+                        bool vertical = Sides[d].X == 0;   // north/south edges are horizontal strips
+                        tr.transform.localScale = vertical ? new Vector3(1f, thick, 1f) : new Vector3(thick, 1f, 1f);
+                        tr.transform.localPosition = new Vector3(Sides[d].X * (0.5f - thick * 0.5f), Sides[d].Y * (0.5f - thick * 0.5f), 0f);
+                        tr.enabled = false;
+                        _trim[i][d] = tr;
+                    }
+                }
+                _debris[i] = _art.MakeRenderer("Debris", cell, theme != null ? theme.CrateBroken : null, Color.white, Layers.TileDecal);
                 _debris[i].transform.localScale = Vector3.one * 0.85f;
                 _debris[i].enabled = false;
-                _crack[i] = _art.MakeRenderer("Crack", g.transform, theme != null ? theme.CrackOverlay : null, new Color(1, 1, 1, 0.9f), Layers.TileOverlay);
+                _crack[i] = _art.MakeRenderer("Crack", cell, theme != null ? theme.CrackOverlay : null, new Color(1, 1, 1, 0.9f), Layers.TileOverlay);
                 _crack[i].enabled = false;
                 bool realWarn = theme != null && theme.WarnOverlay != null;
-                _warn[i] = _art.MakeRenderer("Warn", g.transform, realWarn ? theme.WarnOverlay : PlaceholderArt.Square, Color.clear, Layers.TileOverlay + 1);
+                _warn[i] = _art.MakeRenderer("Warn", cell, realWarn ? theme.WarnOverlay : PlaceholderArt.Square, Color.clear, Layers.TileOverlay + 1);
                 if (realWarn)
                     _warn[i].transform.localScale = Vector3.one * 0.94f;
                 var prop = _art.MakeRenderer($"Prop {x},{y}", _pieceRoot, null, Color.white, Layers.Prop(y));
@@ -136,11 +164,14 @@ namespace Musketeers.Presentation
                 SetTile(p, s.Board.Get(p));
                 SetWarned(p, s.Board.Get(p) != TileType.Pit && Crumble.IsWarned(s, p, Config));
             }
+            UpdateBridgeTrim(s.Board);
 
             for (int i = 0; i < _units.Length; i++)
             {
                 var u = s.Units[i];
                 var v = _units[i];
+                if (!u.Alive && v.IsDying)
+                    continue;   // its death animation finishes on its own, then it leaves the board
                 Tween.StopAll(v.transform);
                 Tween.StopAll(v.Body);
                 v.Body.localPosition = Vector3.zero;
@@ -149,8 +180,9 @@ namespace Musketeers.Presentation
                 v.SetGridPos(u.Pos);
                 v.SyncStats(u, crowned == i);
                 v.SetParry(false);
+                // A dead musketeer is gone from the board; the next round's Build() brings everyone back.
                 if (!u.Alive)
-                    v.SetAlive(false, s.Board.Get(u.Pos) == TileType.Pit);
+                    v.SetAlive(false, s.Board.Get(u.Pos) == TileType.Pit, instant: true);
                 else
                     v.Rest();
             }
@@ -225,7 +257,7 @@ namespace Musketeers.Presentation
             var g = _ground[i];
             var prop = _props[i];
             g.transform.localScale = Vector3.one;
-            prop.transform.localScale = Vector3.one;
+            prop.transform.localScale = Vector3.one * PropScale;
             if (_shown[i] == t)
                 return;
             // A crate that became floor leaves its debris behind (cosmetic memory for this round).
@@ -237,15 +269,24 @@ namespace Musketeers.Presentation
             var theme = _art.Theme;
             bool odd = ((p.X + p.Y) & 1) == 1;
             Color floor = theme != null ? (odd ? theme.FloorB : theme.FloorA) : new Color(0.38f, 0.35f, 0.3f);
+            _grid[i].enabled = t != TileType.Pit;
             if (t == TileType.Pit)
             {
                 g.sprite = _art.PitSprite;
                 g.color = g.sprite == PlaceholderArt.Pit ? (theme != null ? theme.PitColor : new Color(0.05f, 0.06f, 0.1f)) : Color.white;
+                g.transform.localRotation = Quaternion.identity;
+                if (_trim[i] != null)
+                    foreach (var tr in _trim[i]) tr.enabled = false;
             }
             else
             {
                 g.sprite = _art.FloorSprite(p.X, p.Y);
-                g.color = g.sprite == PlaceholderArt.Floor ? floor : Color.white;
+                float shade = BoardLayout.CheckerShade(p.X, p.Y, CheckerDarken);
+                g.color = g.sprite == PlaceholderArt.Floor ? floor : new Color(shade, shade, shade, 1f);
+                int rot = _bridge[i]
+                    ? BoardLayout.BridgeRotation(IsBridge(p.X - 1, p.Y), IsBridge(p.X + 1, p.Y), IsBridge(p.X, p.Y + 1), IsBridge(p.X, p.Y - 1))
+                    : BoardLayout.FloorRotation(theme != null && theme.ChessRotate, p.X, p.Y);
+                g.transform.localRotation = Quaternion.Euler(0f, 0f, rot);
             }
 
             Sprite sprite = null;
@@ -265,6 +306,24 @@ namespace Musketeers.Presentation
             prop.color = tint;
             bool placeholder = sprite == PlaceholderArt.Pillar || sprite == PlaceholderArt.Crate;
             prop.transform.localPosition = BoardMath.ToWorld(p) + (placeholder ? Vector3.zero : new Vector3(0f, PropFoot, 0f));
+        }
+
+        bool IsBridge(int x, int y) => x >= 0 && y >= 0 && x < Width && y < Height && _bridge[y * Width + x];
+
+        // Bridge planks (and every walkable tile on a theme with WaterEdge) get a dark trim on every side that borders water (a pit tile, or the open board edge).
+        void UpdateBridgeTrim(Board b)
+        {
+            for (int y = 0; y < Height; y++)
+            for (int x = 0; x < Width; x++)
+            {
+                int i = y * Width + x;
+                var trims = _trim[i];
+                if (trims == null)
+                    continue;
+                bool here = b.Get(new Int2(x, y)) != TileType.Pit;
+                for (int d = 0; d < 4; d++)
+                    trims[d].enabled = here && b.Get(new Int2(x + Sides[d].X, y + Sides[d].Y)) == TileType.Pit;
+            }
         }
 
         // §3: a warned ring cracks and pulses red for the turn before it falls.

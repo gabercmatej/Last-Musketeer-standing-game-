@@ -143,6 +143,16 @@ namespace Musketeers.UI
 
             ShowMenu();
             ReadUrlFlags();
+#if UNITY_EDITOR
+            // Dev hook (Tools/Musketeers/Dev): start a bot match on a chosen map from Play mode.
+            string devMap = UnityEditor.EditorPrefs.GetString("Musketeers.DevAutoplayMap", "");
+            if (!string.IsNullOrEmpty(devMap) && _art.Maps != null && _art.Maps.IndexOf(devMap) >= 0)
+            {
+                _model.Map = _art.Maps.IndexOf(devMap);
+                DevFlags.AutoPlay = true;
+                DevFlags.AutoStartPlayers = 4;
+            }
+#endif
             if (DevFlags.AutoStartPlayers >= 2)
             {
                 _model.Players = Mathf.Clamp(DevFlags.AutoStartPlayers, 2, 4);
@@ -315,7 +325,7 @@ namespace Musketeers.UI
             var map = _art.Maps != null ? _art.Maps.Get(_art.Maps.IndexOf(setup.MapId)) : null;
             var theme = map != null ? map.Theme : null;
             _art.SetTheme(theme);
-            _rig.SetBackground(theme != null ? theme.BackgroundArt : null, theme != null ? theme.Background : new Color(0.09f, 0.08f, 0.11f));
+            _rig.SetBackground(theme != null ? theme.BackgroundArt : null, theme != null ? theme.Background : new Color(0.09f, 0.08f, 0.11f), theme != null ? theme.ArenaRect : default);
             Debug.Log($"[AppFlow] Match: {n} players on {setup.MapId}, seed {setup.Seed}, you are {setup.Names[0]} ({_art.CharacterName(setup.Characters[0])})");
 
             _transport = new LocalTransport
@@ -339,6 +349,16 @@ namespace Musketeers.UI
             _mc.Start();
         }
 
+        // Which tiles of the map are bridge planks (presentation only), read from the map's layout text.
+        bool[] BridgesOf(string mapId)
+        {
+            var layout = _art.Maps != null ? _art.Maps.Get(_art.Maps.IndexOf(mapId))?.Layout : null;
+            if (layout == null)
+                return null;
+            try { return MapParser.Parse(layout.text).Bridges; }
+            catch (System.FormatException) { return null; }
+        }
+
         // Bots never wear cosmetics (FIXES_v0.2 §1.3), whatever the setup carries.
         Loadout[] SetupLoadouts()
         {
@@ -356,7 +376,7 @@ namespace Musketeers.UI
         void OnRoundStarted(EventLog opening)
         {
             var m = _mc.Match;
-            _board.Build(m.Round, m.Cfg, _setup.Characters, _setup.Names, SetupLoadouts());
+            _board.Build(m.Round, m.Cfg, _setup.Characters, _setup.Names, SetupLoadouts(), BridgesOf(_setup.MapId));
             _rig.Fit(m.Round.Board.Width, m.Round.Board.Height);
             _director.ShowState(m.Round, m.Crowned);
             _log.Line($"Round {m.RoundNumber}{(m.SuddenDeath ? " (sudden death)" : "")}: En garde!", "log-line--turn");

@@ -23,6 +23,15 @@ MonoBehaviour:
   CrackOverlay: {fileID: 21300000, guid: 79682b8b0dd2e4e52ba8a9027e50417f, type: 3}
   WarnOverlay: {fileID: 21300000, guid: e2ff270c0b6ef45fdac9939ca1d5e789, type: 3}
   BackgroundArt: {fileID: 21300000, guid: f586122c89b0e4f7e8bb28a205ec08d5, type: 3}
+  ArenaRect:
+    serializedVersion: 2
+    x: 0.15
+    y: 0.1327
+    width: 0.7
+    height: 0.747
+  ChessRotate: 1
+  PitInnerCrop: 0.7
+  WaterEdge: 1
   FloorA: {r: 0.36, g: 0.33, b: 0.29, a: 1}
   FloorB: {r: 0.4, g: 0.37, b: 0.32, a: 1}
   PillarColor: {r: 0.62, g: 0.62, b: 0.66, a: 1}

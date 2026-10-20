@@ -26,6 +26,13 @@ namespace Musketeers.Presentation
             return new Color(v, v, v, 1f);
         });
 
+        // A hollow square (white rim, clear inside): thin grid lines between tiles, tinted dark by the board.
+        public static Sprite Outline => GetColored("outline", Size, (x, y) =>
+        {
+            bool rim = Math.Abs(x) > 0.5f - 1.5f / Size || Math.Abs(y) > 0.5f - 1.5f / Size;
+            return new Color(1f, 1f, 1f, rim ? 1f : 0f);
+        });
+
         public static Sprite Pillar => GetColored("pillar", Size, (x, y) =>
         {
             float a = Sdf(Box(x, y, 0.36f, 0.36f) - 0.06f);
