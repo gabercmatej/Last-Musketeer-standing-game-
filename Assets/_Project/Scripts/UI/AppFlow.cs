@@ -89,6 +89,10 @@ namespace Musketeers.UI
 
         void Start()
         {
+            // 4F §5: a turn-based board game doesn't need 120 Hz; on ProMotion / high-refresh screens the browser
+            // would otherwise render twice as many frames.
+            QualitySettings.vSyncCount = 0;
+            Application.targetFrameRate = 60;
             PrimeTween.PrimeTweenConfig.warnEndValueEqualsCurrent = false;
             UiArt.Art = _art;
             _rig.Init(_art.SpriteMaterial);

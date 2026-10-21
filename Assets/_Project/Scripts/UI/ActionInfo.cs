@@ -186,19 +186,12 @@ namespace Musketeers.UI
             return -BoardMath.DirAngle(a.Dir) - (a.Type == ActionType.Fire ? 90f : 0f);
         }
 
-        public static string Arrow(Dir d)
-        {
-            switch (d)
-            {
-                case Dir.N: return "\u2191";
-                case Dir.E: return "\u2192";
-                case Dir.S: return "\u2193";
-                default: return "\u2190";
-            }
-        }
+        // UI rotation for the small direction arrow after a slot label (PlaceholderArt.Arrow points north).
+        public static float DirArrowAngle(Dir d) => -BoardMath.DirAngle(d);
 
-        // The short plan-slot label (FIXES §2.7, Matej fix 4): "Move \u2192", "Fire \u2190", "Reload", "Keg (3,4)",
-        // "Swap: Nik". At most 15 characters except a musketeer's name; the slot clips a long name with "...".
+        // The short plan-slot label (FIXES §2.7, Matej fix 4): "Move", "Fire", "Reload", "Keg (3,4)", "Swap: Nik".
+        // Direction is a rotated arrow sprite next to the label, not a glyph: Fredoka has no U+2190..2193 (4F §1).
+        // At most 15 characters except a musketeer's name; the slot clips a long name with "...".
         public static string SlotLabel(PlannedAction a, CharacterDef c, string[] playerNames = null)
         {
             if (a.Type == ActionType.Idle)
@@ -206,8 +199,6 @@ namespace Musketeers.UI
             if (a.Type == ActionType.Signature && c != null && c.Ability == Ability.Switcheroo)
                 return playerNames != null && a.Unit >= 0 && a.Unit < playerNames.Length ? "Swap: " + playerNames[a.Unit] : "Swap";
             string n = Name(a.Type, c);
-            if (PlanBuilder.NeedsDirection(a.Type))
-                return $"{n} {Arrow(a.Dir)}";
             if (a.Type == ActionType.Keg)
                 return $"Keg ({a.Target.X},{a.Target.Y})";
             return n;

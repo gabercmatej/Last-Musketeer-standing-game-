@@ -66,8 +66,14 @@ namespace Musketeers.Presentation
             for (int i = 0; i < _labels.Count; i++)
             {
                 var wl = _labels[i];
+                if (!wl.Visible)
+                    continue;
                 Vector3 world = (wl.Follow != null ? wl.Follow.position : wl.World) + wl.Offset;
                 Vector2 p = RuntimePanelUtils.CameraTransformWorldToPanel(_layer.panel, world, _camera);
+                // 4F §5: writing left/top dirties the panel's layout, so skip labels that didn't move.
+                if ((p - wl.Shown).sqrMagnitude < 0.01f)
+                    continue;
+                wl.Shown = p;
                 wl.Element.style.left = p.x;
                 wl.Element.style.top = p.y;
             }
@@ -95,7 +101,16 @@ namespace Musketeers.Presentation
             set => Element.text = value;
         }
 
-        public void SetVisible(bool visible) => Element.style.display = visible ? DisplayStyle.Flex : DisplayStyle.None;
+        public bool Visible { get; private set; } = true;
+        internal Vector2 Shown = new Vector2(float.NaN, float.NaN);
+
+        public void SetVisible(bool visible)
+        {
+            if (visible && !Visible)
+                Shown = new Vector2(float.NaN, float.NaN);   // re-place it on the next LateUpdate
+            Visible = visible;
+            Element.style.display = visible ? DisplayStyle.Flex : DisplayStyle.None;
+        }
 
         public void Destroy()
         {

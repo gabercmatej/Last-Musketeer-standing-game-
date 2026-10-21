@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using Musketeers.Data;
 using Musketeers.Game;
+using Musketeers.Presentation;
 using Musketeers.Sim;
 using UnityEngine;
 using UnityEngine.UIElements;
@@ -35,6 +36,7 @@ namespace Musketeers.UI
         readonly VisualElement[] _slotIcons = new VisualElement[TurnPlan.Length];
         readonly Label[] _slotTexts = new Label[TurnPlan.Length];
         readonly Label[] _slotSubs = new Label[TurnPlan.Length];
+        readonly VisualElement[] _slotDirs = new VisualElement[TurnPlan.Length];
         string[] _tooltips = new string[ActionInfo.Bar.Length];
 
         public PlanBarUI(VisualElement hudRoot)
@@ -67,7 +69,14 @@ namespace Musketeers.UI
                 text.AddToClassList("slot-text");
                 var sub = new Label("");
                 sub.AddToClassList("slot-sub");
-                col.Add(text);
+                var line = new VisualElement { pickingMode = PickingMode.Ignore };
+                line.AddToClassList("slot-line");
+                var dir = new VisualElement { pickingMode = PickingMode.Ignore };
+                dir.AddToClassList("slot-dir");
+                dir.style.backgroundImage = new StyleBackground(PlaceholderArt.Arrow);
+                line.Add(text);
+                line.Add(dir);
+                col.Add(line);
                 col.Add(sub);
                 slot.Add(num);
                 slot.Add(icon);
@@ -78,6 +87,7 @@ namespace Musketeers.UI
                 _slotIcons[t] = icon;
                 _slotTexts[t] = text;
                 _slotSubs[t] = sub;
+                _slotDirs[t] = dir;
             }
 
             var actions = hudRoot.Q("actions");
@@ -188,6 +198,9 @@ namespace Musketeers.UI
                 _slotIcons[t].style.backgroundImage = icon != null ? new StyleBackground(icon) : new StyleBackground(StyleKeyword.None);
                 _slotIcons[t].style.unityBackgroundImageTintColor = ActionInfo.IconTint(a.Type, _ability);
                 _slotIcons[t].style.rotate = new Rotate(ActionInfo.IconAngle(a, _ability));
+                bool directional = a.Type != ActionType.Idle && b.TakesDirection(a.Type);
+                _slotDirs[t].style.display = directional ? DisplayStyle.Flex : DisplayStyle.None;
+                _slotDirs[t].style.rotate = new Rotate(ActionInfo.DirArrowAngle(a.Dir));
             }
 
             SetGrit(b.CursorState.Grit, cfg.MaxGrit);

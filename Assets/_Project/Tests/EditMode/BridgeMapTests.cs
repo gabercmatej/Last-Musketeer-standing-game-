@@ -17,7 +17,14 @@ namespace Musketeers.Sim.Tests
             Assert.That(map.Spawns, Is.EqualTo(new[] { new Int2(1, 7), new Int2(13, 7), new Int2(1, 1), new Int2(13, 1) }));
             Assert.That(map.Board.IsRemoved(new Int2(0, 8)), Is.True, "corner L of 3 removed (FIXES_4E §4.4)");
             Assert.That(map.Board.Get(new Int2(2, 8)), Is.EqualTo(TileType.Pit));
-            Assert.That(map.Board.Get(new Int2(7, 5)), Is.EqualTo(TileType.Pillar));
+            Assert.That(map.Board.Get(new Int2(7, 4)), Is.EqualTo(TileType.Pillar), "one pillar, dead centre (4F §3)");
+            Assert.That(map.Board.Get(new Int2(7, 3)), Is.EqualTo(TileType.Floor));
+            Assert.That(map.Board.Get(new Int2(7, 5)), Is.EqualTo(TileType.Floor));
+            int pillars = 0;
+            for (int y = 0; y < map.Board.Height; y++)
+                for (int x = 0; x < map.Board.Width; x++)
+                    if (map.Board.Get(new Int2(x, y)) == TileType.Pillar) pillars++;
+            Assert.That(pillars, Is.EqualTo(1));
             Assert.That(map.RandomCrates && !map.RandomPits, Is.True);
             int bridges = 0;
             foreach (bool b in map.Bridges) if (b) bridges++;

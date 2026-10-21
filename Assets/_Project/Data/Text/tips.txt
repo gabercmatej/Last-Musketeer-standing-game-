@@ -1,14 +1,19 @@
+You get 30 seconds (by default) to plan 3 actions. When time runs out, whatever you planned is used.
+Unplanned ticks are Idle: nothing happens and you gain no Grit. Catch Breath gives +1 Grit.
+Signature moves cost 5 Grit, the most you can hold. Save up, then make it count.
+Triple Charge needs a loaded musket. Watch Aljaž's musket before you stand in his line.
 Parry bounces a musket shot straight back at the shooter. Riposte!
 A shove against a parrying musketeer is a Guard Break: they fly two tiles.
 Moving beats shoving and shooting, as long as you move where they didn't aim.
 Kegs explode on the same tick of the next turn. Plan your escape before you throw.
 Watch the muskets over everyone's heads: an unloaded musket can't shoot you.
-Catch Breath gives +1 grit, but only if you plan it. Idle ticks give nothing.
+Break a crate with a shot, a shove or a blast for a 50% chance at +1 Grit.
+Crates are placed at random every round, and on the Courtyard so are the pits. Read the board first.
 The outer ring crumbles from turn 6. Red tiles fall at the start of next turn.
 The leader wears the Crown. Taking it off them is worth 2 points.
-A dash can leap over a one-tile pit.
+A dash can leap over a one-tile pit, a crate or another musketeer.
 Two musketeers walking into the same tile both take a bonk.
 Shoot a keg to set it off early.
 Lock in early to make everyone else sweat.
-Press Z, X, C or V to taunt your friends.
-Last one standing gets 3 points, every kill 1. First to 12 wins.
+Taunt your friends with the emote buttons next to the chat, or press Enter to type.
+Last one standing gets 3 points, every kill 1. First to 12 wins (the host can change it).

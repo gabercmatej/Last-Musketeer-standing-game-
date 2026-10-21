@@ -227,56 +227,105 @@ namespace Musketeers.Presentation
                     break;
                 }
                 case Ability.BullRush:
-                {
-                    var rush = PlanProjection.BullRush(s, b.Slot, from, a.Dir, cfg.BullRushDistance, cfg.BullRushPush);
-                    var rc = invalid ? Invalid : new Color(c.r, c.g, c.b, 1f);
-                    if (rush.End != from)
-                        Line(wf, BoardMath.ToWorld(rush.End), rc, 0.26f, Layers.PreviewUnder + 1);
-                    if (rush.HasImpact)
-                    {
-                        var iw = BoardMath.ToWorld(rush.ImpactTile);
-                        var hot = invalid ? Invalid : new Color(1f, 0.3f, 0.2f, 1f);
-                        var x = Get(PlaceholderArt.Cross, hot, Layers.PreviewOver);
-                        x.transform.localPosition = iw;
-                        x.transform.localScale = Vector3.one * 0.7f;
-                        if (rush.HitUnit && rush.Landing != rush.ImpactTile)
-                        {
-                            var lw = BoardMath.ToWorld(rush.Landing);
-                            Line(iw, lw, hot, 0.14f, Layers.PreviewOver);
-                            Arrow(lw - dv * 0.3f, a.Dir, hot, 0.5f);
-                            Marker(lw, hot);
-                            if (rush.Falls)
-                                Label("falls!", lw + new Vector3(0, 0.35f, 0), "ghost-dead");
-                            else if (rush.Slam)
-                                Label("slam", lw + new Vector3(0, 0.35f, 0), "ghost-tag");
-                        }
-                    }
+                    DrawBullRush(b, s, cfg, a, from, c, invalid);
                     break;
-                }
                 case Ability.TripleCharge:
-                {
-                    var sc = invalid ? Invalid : new Color(1f, 0.5f, 0.1f, 1f);
-                    var tiles = ShotRange(s, b.Slot, from, a.Dir, cfg.FireRange, true, sc, 0.18f);
-                    if (tiles.Count > 0)
-                    {
-                        var last = tiles[tiles.Count - 1];
-                        var lw = BoardMath.ToWorld(last);
-                        // Three bullets, one after another, bunched at the end of the line.
-                        for (int k = 0; k < cfg.TripleChargeShots; k++)
-                        {
-                            var dot = Get(PlaceholderArt.Circle, sc, Layers.PreviewOver + 1);
-                            dot.transform.localPosition = lw - dv * (0.12f + 0.2f * k);
-                            dot.transform.localScale = Vector3.one * 0.28f;
-                        }
-                        if (s.UnitAt(last) != null && s.UnitAt(last).Slot != b.Slot)
-                        {
-                            var pw = lw + dv * cfg.TripleChargePush;
-                            Arrow(lw + dv * 0.5f, a.Dir, sc, 0.46f);
-                            Label("push " + cfg.TripleChargePush, pw + new Vector3(0, 0.3f, 0), "ghost-tag");
-                        }
-                    }
+                    DrawTripleCharge(b, s, cfg, a, from, invalid);
                     break;
-                }
+            }
+        }
+
+        // 4F §2: the whole Bull Rush always shows: the charge path, the impact tile and the 5-tile knockback arrow
+        // with its landing marker. With nobody in the way the impact and knockback are faint (what would happen
+        // to a musketeer who steps in front of the charge); a real hit draws them solid.
+        void DrawBullRush(PlanBuilder b, GameState s, GameConfig cfg, PlannedAction a, Int2 from, Color c, bool invalid)
+        {
+            Vector3 wf = BoardMath.ToWorld(from);
+            Vector3 dv = BoardMath.DirVector(a.Dir);
+            var rush = PlanProjection.BullRush(s, b.Slot, from, a.Dir, cfg.BullRushDistance, cfg.BullRushPush);
+            var rc = invalid ? Invalid : Color.Lerp(new Color(c.r, c.g, c.b, 1f), Color.white, 0.25f);
+            var ew = BoardMath.ToWorld(rush.End);
+            if (rush.End != from)
+            {
+                Line(wf + dv * 0.25f, ew, rc, 0.24f, Layers.PreviewOver);
+                Arrow(ew + dv * 0.1f, a.Dir, rc, 0.5f);
+            }
+            else
+            {
+                Arrow(wf + dv * 0.45f, a.Dir, rc, 0.35f);
+            }
+
+            // The impact tile: the unit or keg that stopped the charge, else the tile right after its end.
+            Int2 impact = rush.HasImpact ? rush.ImpactTile : rush.End + a.Dir.ToInt2();
+            bool real = rush.HasImpact;
+            if (s.Board.IsVoid(impact) || (!real && (s.Board.Get(impact).IsSolid() || s.Board.Get(impact) == TileType.Pit)))
+                return;   // stops at a wall, water, a pit or the map edge: nobody can stand there to be hit
+            var hot = invalid ? Invalid : new Color(1f, 0.3f, 0.2f, real ? 1f : 0.55f);
+            var iw = BoardMath.ToWorld(impact);
+            var sq = Get(PlaceholderArt.Square, new Color(hot.r, hot.g * 0.8f, hot.b, real ? 0.45f : 0.25f), Layers.PreviewUnder);
+            sq.transform.localPosition = iw;
+            sq.transform.localScale = Vector3.one * 0.94f;
+            var x = Get(PlaceholderArt.Cross, hot, Layers.PreviewOver + 1);
+            x.transform.localPosition = iw;
+            x.transform.localScale = Vector3.one * 0.6f;
+            if (real && !rush.HitUnit)
+                return;   // a keg gets kicked, not pushed
+
+            // Same slide as rush.Landing on a real hit; for the faint "what if" it starts at the empty impact tile.
+            Int2 landing = PlanProjection.SlideEnd(s, impact, a.Dir, cfg.BullRushPush, out bool slam, out bool falls);
+            if (landing != impact)
+            {
+                var lw = BoardMath.ToWorld(landing);
+                Line(iw + dv * 0.3f, lw, hot, 0.12f, Layers.PreviewOver);
+                Arrow(lw - dv * 0.25f, a.Dir, hot, 0.5f);
+                Marker(lw, hot);
+                var ring = Get(PlaceholderArt.Ring, hot, Layers.PreviewOver);
+                ring.transform.localPosition = lw;
+                ring.transform.localScale = Vector3.one * 0.8f;
+            }
+            string tag = falls ? "falls!" : slam ? "slam" : "push " + cfg.BullRushPush;
+            Label(tag, BoardMath.ToWorld(landing) + new Vector3(0, 0.4f, 0), falls ? "ghost-dead" : "ghost-tag");
+        }
+
+        // 4F §2: Triple Charge shows its line, three bullet markers spread along it and a knockback arrow per
+        // bullet past the end of the line (each hit slides the target TripleChargePush tiles, §4).
+        void DrawTripleCharge(PlanBuilder b, GameState s, GameConfig cfg, PlannedAction a, Int2 from, bool invalid)
+        {
+            var sc = invalid ? Invalid : new Color(1f, 0.5f, 0.1f, 1f);
+            Vector3 wf = BoardMath.ToWorld(from);
+            Vector3 dv = BoardMath.DirVector(a.Dir);
+            var tiles = ShotRange(s, b.Slot, from, a.Dir, cfg.FireRange, true, sc, 0.14f);
+            if (tiles.Count == 0)
+                return;
+            var last = tiles[tiles.Count - 1];
+            var lw = BoardMath.ToWorld(last);
+            // Three bullets evenly along the line, each a dark-rimmed ball so it reads on the light floor.
+            int shots = Mathf.Max(1, cfg.TripleChargeShots);
+            for (int k = 0; k < shots; k++)
+            {
+                float t = (k + 1) / (float)(shots + 1);
+                var pos = Vector3.Lerp(wf + dv * 0.3f, lw, t);
+                var rim = Get(PlaceholderArt.Circle, new Color(0.2f, 0.1f, 0.05f, invalid ? 0.4f : 0.9f), Layers.PreviewOver + 1);
+                rim.transform.localPosition = pos;
+                rim.transform.localScale = Vector3.one * 0.3f;
+                var dot = Get(PlaceholderArt.Circle, sc, Layers.PreviewOver + 2);
+                dot.transform.localPosition = pos;
+                dot.transform.localScale = Vector3.one * 0.22f;
+            }
+            // Knockback: one arrow per bullet, chained past the end tile. Solid on a musketeer, faint otherwise.
+            var hitUnit = s.UnitAt(last);
+            bool real = hitUnit != null && hitUnit.Slot != b.Slot;
+            var kc = new Color(sc.r, sc.g, sc.b, real ? 1f : 0.5f);
+            int push = shots * cfg.TripleChargePush;
+            for (int k = 0; k < shots; k++)
+                Arrow(lw + dv * (0.45f + 0.32f * k), a.Dir, kc, 0.36f);
+            if (real)
+            {
+                var landing = PlanProjection.SlideEnd(s, last, a.Dir, push, out bool slam, out bool falls);
+                if (landing != last)
+                    Marker(BoardMath.ToWorld(landing), kc);
+                string tag = falls ? "falls!" : slam ? "slam" : "push " + push;
+                Label(tag, BoardMath.ToWorld(landing) + new Vector3(0, 0.35f, 0), falls ? "ghost-dead" : "ghost-tag");
             }
         }
 

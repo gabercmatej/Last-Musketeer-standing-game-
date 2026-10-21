@@ -449,9 +449,13 @@
     -unity-text-align: middle-center;
 }
 
+/* 4F §8: "3" and the heart touch, centred as one unit between the - and + buttons. */
 .gm-value--tight {
     flex-grow: 0;
-    min-width: 30px;
+    flex-basis: auto;
+    min-width: 0;
+    margin: 0;
+    padding: 0;
 }
 
 .gm-value-box {
@@ -465,8 +469,21 @@
 .gm-heart {
     width: 20px;
     height: 20px;
-    margin-right: 5px;
+    margin: 0;
     -unity-background-scale-mode: scale-to-fit;
+}
+
+/* 4F §7: the map row gets a short label and a fixed, wider selector so "The Courtyard" fits whole and the
+   arrows don't move when the name changes to "The Bridge". */
+.gm-label--map {
+    width: 44px;
+}
+
+.gm-control--map {
+    flex-grow: 0;
+    flex-basis: auto;
+    width: 256px;
+    margin-left: auto;
 }
 
 .map-name {
@@ -605,8 +622,9 @@
     margin: 0 8px;
 }
 
+/* 4F §10: the Boots tab opens (a sneak peek), so it is only dimmed a little. */
 .info-tab--soon {
-    opacity: 0.4;
+    opacity: 0.75;
 }
 
 .tab-soon-name {
@@ -623,10 +641,6 @@
     margin: 0;
     padding: 0;
     -unity-text-align: middle-center;
-}
-
-.info-tab--soon:hover {
-    scale: 1 1;
 }
 
 .wardrobe .title--panel {
@@ -668,6 +682,28 @@
     width: 70px;
     height: 70px;
     -unity-background-scale-mode: scale-to-fit;
+}
+
+/* 4F §10: boots preview: greyed out, "Coming soon" across the bottom, not equippable. */
+.item--soon .item-icon {
+    opacity: 0.4;
+}
+
+.item--soon:hover {
+    scale: 1 1;
+}
+
+.item-soon {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 4px;
+    font-size: 10px;
+    color: var(--ink);
+    background-color: rgba(20, 14, 10, 0.75);
+    -unity-text-align: middle-center;
+    margin: 0;
+    padding: 1px 0;
 }
 
 .item-none {
@@ -1543,6 +1579,22 @@
     text-overflow: ellipsis;
     -unity-text-overflow-position: end;
     white-space: nowrap;
+}
+
+.slot-line {
+    flex-direction: row;
+    align-items: center;
+    min-width: 0;
+    overflow: hidden;
+}
+
+.slot-dir {
+    width: 12px;
+    height: 12px;
+    flex-shrink: 0;
+    margin-left: 4px;
+    -unity-background-scale-mode: scale-to-fit;
+    -unity-background-image-tint-color: rgb(255, 230, 170);
 }
 
 .slot-sub {

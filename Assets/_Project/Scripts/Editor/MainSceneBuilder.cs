@@ -54,6 +54,8 @@ namespace Musketeers.EditorTools
             cam.backgroundColor = theme.Background;
             cam.nearClipPlane = 0.1f;
             cam.farClipPlane = 50f;
+            cam.allowHDR = false;    // 4F §5: flat 2D sprites, no HDR / MSAA / post-processing needed on Web
+            cam.allowMSAA = false;
             rigGo.transform.position = new Vector3(0, 0, -10);
             Set(rig, "_camera", cam);
 

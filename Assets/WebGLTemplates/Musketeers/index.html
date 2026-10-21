@@ -24,6 +24,16 @@
       <span><b>Keep this tab open and visible while playing.</b> Hidden tabs pause the game.</span>
       <span>v{{{ PRODUCT_VERSION }}}</span>
     </div>
+    <script>
+      // 4F §5: show any error that happens before or while the game starts (Safari gives no other clue).
+      window.addEventListener("error", function (e) {
+        var w = document.querySelector("#warning");
+        if (w && !document.querySelector("#loader").classList.contains("done")) {
+          w.textContent = "Couldn't start the game: " + (e.message || e.type) + (e.filename ? " (" + e.filename.split("/").pop() + ":" + e.lineno + ")" : "");
+          w.style.display = "block";
+        }
+      }, true);
+    </script>
     <script src="Build/{{{ LOADER_FILENAME }}}"></script>
     <script>
       var canvas = document.querySelector("#unity-canvas");
@@ -62,7 +72,15 @@
         productVersion: {{{ JSON.stringify(PRODUCT_VERSION) }}},
         showBanner: showBanner,
         autoSyncPersistentDataPath: true,
+        // 4F §5: cap the drawing buffer at 1.5x. Retina (2x) and 4K screens otherwise render 2-4x the pixels of a
+        // 2D board that looks the same at 1.5x.
+        devicePixelRatio: Math.min(window.devicePixelRatio || 1, 1.5),
       };
+
+      if (typeof createUnityInstance !== "function") {
+        statusEl.textContent = "Couldn't start the game.";
+        showBanner("The game loader didn't load. Reload the page, or try Chrome if this keeps happening.", 'error');
+      }
 
       // Unity reports byte progress only when the server sends Content-Length. Netlify doesn't, and then
       // the loader only reports whole files done (0.9 * k / 3: 0, 0.3, 0.6, 0.9), which would freeze the
@@ -76,7 +94,7 @@
             if (Math.abs(p - 0.9 * k / n) < 0.002) return true;
         return false;
       }
-      createUnityInstance(canvas, config, function (progress) {
+      if (typeof createUnityInstance === "function") createUnityInstance(canvas, config, function (progress) {
         if (!determinate && progress > 0.01 && progress < 0.85 && !isFileStep(progress)) {
           determinate = true;
           bar.classList.remove("indeterminate");

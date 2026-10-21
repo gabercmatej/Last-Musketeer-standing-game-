@@ -183,11 +183,20 @@ namespace Musketeers.UI
         }
 
         // matchPoint[i]: that player holds match point (FIXES_4E §8.7): gold border and name.
+        // Called every frame: only touch a label when its number changed (4F §5, no per-frame string garbage).
+        readonly int[] _shownPoints = { -1, -1, -1, -1, -1, -1, -1, -1 };
+        int _shownTimer = -1;
+
         public void SetScores(int[] points, int crowned, GameState round, int lockMask, bool planning, bool[] matchPoint = null)
         {
             for (int i = 0; i < _scoreEls.Length && i < points.Length; i++)
             {
-                _points[i].text = points[i].ToString();
+                if (i >= _shownPoints.Length || _shownPoints[i] != points[i])
+                {
+                    if (i < _shownPoints.Length)
+                        _shownPoints[i] = points[i];
+                    _points[i].text = points[i].ToString();
+                }
                 bool mp = matchPoint != null && i < matchPoint.Length && matchPoint[i];
                 if (mp != _matchPoint[i])
                 {
@@ -235,6 +244,9 @@ namespace Musketeers.UI
         {
             _timer.style.visibility = show ? Visibility.Visible : Visibility.Hidden;
             int s = Mathf.CeilToInt(seconds);
+            if (s == _shownTimer)
+                return;
+            _shownTimer = s;
             _timer.text = s.ToString();
             _timer.EnableInClassList("timer--low", s <= 5);
         }

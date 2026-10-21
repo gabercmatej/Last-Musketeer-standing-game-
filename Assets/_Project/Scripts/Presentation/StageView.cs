@@ -13,11 +13,14 @@ namespace Musketeers.Presentation
         public static readonly Vector3 Center = new Vector3(100f, 0f, 0f);
         public const float Width = 16f;
         public const float Height = 9f;
-        // Feet on the stage floor of the lobby art (about 71% down the screen); the line-up is nudged right so the
-        // game-master panel in the top-left corner never covers the first musketeer.
+        // Feet on the stage floor of the lobby art (about 71% down the screen).
         const float FloorY = -1.9f;
         const float Scale = 2.15f;
-        const float LineupShift = 1.6f;
+        // 4F §6: the match-settings panel sits top-right (340 + 14 px of the 1280 px reference = 4.43 stage units),
+        // so its left edge is never left of x = 3.58 at any aspect (ViewFit: the camera always shows the whole stage).
+        // The line-up spreads evenly over the free area to its left, keeping half a body (0.7) clear of the panel.
+        public const float LineupLeft = -7.3f;
+        public const float LineupRight = 2.9f;
         const float BackgroundFill = 1.15f;
 
         [SerializeField] private ArtLibrary _art;
@@ -169,7 +172,7 @@ namespace Musketeers.Presentation
                 _status[i].Follow = spot.transform;
                 if (_hasStatus[i])
                     SetStatus(i, ready[i]);
-                Place(i, new Vector3(Spot(i, count), FloorY, 0f), Scale, true);
+                Place(i, new Vector3(Spot(i, count), FloorY, 0f), LineupScale(count), true);
                 SetLabelsVisible(i, true);
             }
         }
@@ -191,10 +194,14 @@ namespace Musketeers.Presentation
             }
         }
 
-        static float Spot(int i, int count)
+        // Four in the free area stand a little closer, so they are drawn a little smaller to keep names apart.
+        public static float LineupScale(int count) => count >= 4 ? 2.0f : Scale;
+
+        // Even slots: each musketeer stands in the middle of its 1/count share of the free area.
+        public static float Spot(int i, int count)
         {
-            float spacing = count <= 2 ? 4.2f : count == 3 ? 3.4f : 2.95f;
-            return (i - (count - 1) * 0.5f) * spacing + LineupShift;
+            count = Mathf.Max(1, count);
+            return LineupLeft + (LineupRight - LineupLeft) * (i + 0.5f) / count;
         }
 
         void Place(int i, Vector3 local, float scale, bool instant)
@@ -253,7 +260,7 @@ namespace Musketeers.Presentation
                 if (_spots[i] == null) continue;
                 _spots[i].gameObject.SetActive(true);
                 SetLabelsVisible(i, true);
-                Place(i, new Vector3(Spot(i, _count), FloorY, 0f), Scale, false);
+                Place(i, new Vector3(Spot(i, _count), FloorY, 0f), LineupScale(_count), false);
                 _rigs[i].SetFacingRight(i < _count / 2.0f);
             }
         }

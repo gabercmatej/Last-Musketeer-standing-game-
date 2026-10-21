@@ -38,6 +38,14 @@ namespace Musketeers.EditorTools.ArtImport
             ti.crunchedCompression = true;
             ti.compressionQuality = 60;
             ti.maxTextureSize = MaxSize(rel);
+            if (rel.EndsWith(".jpg"))
+            {
+                // 4F §4: full-screen backgrounds (menu, splash, lobby, results, arena) are stretched over the whole
+                // window, so crunch / normal-quality blocks show as blur. Keep them sharp: high quality, no crunch.
+                ti.textureCompression = TextureImporterCompression.CompressedHQ;
+                ti.crunchedCompression = false;
+                ti.compressionQuality = 100;
+            }
 
             var s = new TextureImporterSettings();
             ti.ReadTextureSettings(s);
@@ -51,7 +59,7 @@ namespace Musketeers.EditorTools.ArtImport
         static int MaxSize(string rel)
         {
             if (rel.EndsWith(".jpg"))
-                return 2048;                      // backgrounds
+                return 2048;                      // backgrounds: sources are 1672x941, so this is the source size
             if (rel.StartsWith("Board/"))
                 return rel.Contains("/floor") || rel.Contains("/pit") ? 1024 : 512;
             if (rel.StartsWith("UI/logo/") || rel.StartsWith("UI/panels/"))

@@ -88,9 +88,9 @@ Islands, four bridges (two horizontal on row 4, two vertical on column 7) and wa
 xx~.........~xx
 x1....~b~....2x
 ....~~~b~~~....
-.~..~~.#.~~..~.
-.~..bb...bb..~.
-.~..~~.#.~~..~.
+.~..~~...~~..~.
+.~..bb.#.bb..~.
+.~..~~...~~..~.
 ....~~~b~~~....
 x3....~b~....4x
 xx~.........~xx

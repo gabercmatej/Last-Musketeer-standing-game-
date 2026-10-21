@@ -4,8 +4,8 @@
         <ui:VisualElement name="gm-panel" class="panel gm-panel">
             <ui:Label name="gm-header" text="Match settings" class="gm-header" />
             <ui:VisualElement class="gm-line" picking-mode="Ignore">
-                <ui:Label text="Map" class="gm-label" />
-                <ui:VisualElement class="gm-control" picking-mode="Ignore">
+                <ui:Label text="Map" class="gm-label gm-label--map" />
+                <ui:VisualElement class="gm-control gm-control--map" picking-mode="Ignore">
                     <ui:Button name="map-prev" text="&lt;" class="btn btn--icon gm-step" />
                     <ui:Label name="map-name" text="The Courtyard" class="map-name name-clip" />
                     <ui:Button name="map-next" text="&gt;" class="btn btn--icon gm-step" />
@@ -25,8 +25,8 @@
                 <ui:VisualElement class="gm-control" picking-mode="Ignore">
                     <ui:Button name="hearts-minus" text="-" class="btn btn--icon gm-step" />
                     <ui:VisualElement class="gm-value-box" picking-mode="Ignore">
-                        <ui:VisualElement name="hearts-icon" class="gm-heart" picking-mode="Ignore" />
                         <ui:Label name="hearts-value" text="3" class="gm-value gm-value--tight" />
+                        <ui:VisualElement name="hearts-icon" class="gm-heart" picking-mode="Ignore" />
                     </ui:VisualElement>
                     <ui:Button name="hearts-plus" text="+" class="btn btn--icon gm-step" />
                 </ui:VisualElement>

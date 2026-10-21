@@ -22,9 +22,11 @@ namespace Musketeers.EditorTools
             PlayerSettings.companyName = "Los Cuatro Mosqueteros";
             PlayerSettings.productName = "The Last Musketeer Standing";
 
-            // Gzip + JS decompression fallback: no server Content-Encoding headers needed.
-            PlayerSettings.WebGL.compressionFormat = WebGLCompressionFormat.Gzip;
-            PlayerSettings.WebGL.decompressionFallback = true;
+            // 4F §5: uncompressed build. Netlify brotli-compresses every file at the edge anyway, so a gzip build was
+            // double-compressed (br over gzip) and every browser had to gunzip 30 MB in JavaScript (decompression
+            // fallback). Uncompressed lets Safari and Chrome decode natively and stream-compile the .wasm.
+            PlayerSettings.WebGL.compressionFormat = WebGLCompressionFormat.Disabled;
+            PlayerSettings.WebGL.decompressionFallback = false;
             PlayerSettings.WebGL.nameFilesAsHashes = true;
             PlayerSettings.WebGL.dataCaching = true;
             PlayerSettings.WebGL.exceptionSupport = WebGLExceptionSupport.ExplicitlyThrownExceptionsOnly;

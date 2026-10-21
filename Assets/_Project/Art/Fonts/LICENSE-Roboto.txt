@@ -1,0 +1,3 @@
+Roboto Medium, Copyright 2011 Google Inc. Licensed under the Apache License, Version 2.0:
+https://www.apache.org/licenses/LICENSE-2.0
+Used as the UI fallback font for letters Fredoka lacks (c/C caron, c/C acute, d/D stroke) in player names and chat.
