@@ -106,8 +106,7 @@ namespace Musketeers.Sim
                         Int2 p = new Int2(center.X + dx, center.Y + dy);
                         if (s.Board.Get(p) != TileType.Crate)
                             continue;
-                        s.Board.Set(p, TileType.Floor);
-                        c.Log.Add(SimEventKind.CrateDestroyed, unit: credit[e], keg: exploding[e].Id, to: p);
+                        BreakCrate(c, p, credit[e], exploding[e].Id);
                     }
                 }
             }

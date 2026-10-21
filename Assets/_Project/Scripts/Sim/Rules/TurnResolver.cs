@@ -113,7 +113,43 @@ namespace Musketeers.Sim
             var u = c.S.Units[unit];
             u.Alive = false;
             u.Parrying = false;
-            c.Log.Add(SimEventKind.Died, unit: unit, other: Killer(c.S, u, c.Cfg), to: u.Pos, reason: (byte)cause);
+            int killer = Killer(c.S, u, c.Cfg);
+            c.Log.Add(SimEventKind.Died, unit: unit, other: killer, to: u.Pos, reason: (byte)cause);
+            ScoreKill(c.S, c.Log, c.Cfg, unit, killer);
+        }
+
+        // FIXES_4E §8.6: kill points are scored the moment of death (§2: +1, +2 on the Crowned; self-kills
+        // score nothing). MatchRunner adds them to the player's points; the +3 for surviving waits for round end.
+        internal static void ScoreKill(GameState s, EventLog log, GameConfig cfg, int victim, int killer)
+        {
+            if (killer < 0 || killer == victim)
+                return;
+            bool crown = victim == s.Crowned;
+            log.Add(SimEventKind.PointsScored, unit: killer, other: victim,
+                amount: crown ? cfg.CrownKillPoints : cfg.KillPoints,
+                reason: (byte)(crown ? PointReason.CrownKill : PointReason.Kill));
+        }
+
+        // FIXES_4E §5.1-5.2: a crate always breaks (shot, shove or explosion). If someone is to credit, the
+        // sim's own Rng rolls CrateGritChancePct and the winner gets CrateGrit Grit (capped). The roll is
+        // always drawn when there is a destroyer (even at full Grit) so the Rng stays in step on every client.
+        static void BreakCrate(TickContext c, Int2 p, int destroyer, int keg = SimEvent.None)
+        {
+            var s = c.S;
+            s.Board.Set(p, TileType.Floor);
+            int gained = 0;
+            if (destroyer >= 0 && destroyer < s.Units.Length)
+            {
+                bool lucky = s.Rng.Range(0, 100) < c.Cfg.CrateGritChancePct;
+                var u = s.Units[destroyer];
+                if (lucky && u.Alive)
+                {
+                    int before = u.Grit;
+                    u.Grit = Math.Min(c.Cfg.MaxGrit, u.Grit + c.Cfg.CrateGrit);
+                    gained = u.Grit - before;
+                }
+            }
+            c.Log.Add(SimEventKind.CrateDestroyed, unit: destroyer, keg: keg, to: p, amount: gained);
         }
     }
 }

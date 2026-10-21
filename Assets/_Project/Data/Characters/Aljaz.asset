@@ -19,10 +19,10 @@ MonoBehaviour:
   AbilityName: Triple Charge
   AbilityDescription: Fire 3 shots down one line (5 tiles). Each hit deals 1 damage and knocks back 1 tile, so up to 3 damage and 3 tiles of knockback. A Parry reflects them. Needs a loaded musket.
   Portrait: {fileID: 21300000, guid: 58f165eb181354f75b00c3bb0e7354d3, type: 3}
-  Title: Quickfingers
+  Title: The Quickdraw
   Strength: Finger speed
-  Weakness: Being tied up
-  Bio: He reloads faster than you can blink, and once won a duel before his opponent finished saying "En garde". Tie his hands, though, and he's just a very angry man with very nice glasses.
+  Weakness: On a leash
+  Bio: 'There was a time when Aljaž was the first man into battle. These days, he''s more reserved when lunging into combat. Instead, he''s the first to make sure everyone knows exactly when and where it''s happening. His wife expects him home by supper, and even the King''s orders won''t change that. Beloved by guards and tavern keepers alike, he believes his lightning-fast musician''s fingers and impeccable reputation make him the rightful commander of the Musketeers.'
   SignatureText: Fire 3 shots down one line (5 tiles). Each hit deals 1 damage and knocks back 1 tile, so up to 3 damage and 3 tiles of knockback. A Parry reflects them. Needs a loaded musket.
   Idle:
     Sprite: {fileID: 21300000, guid: 7239633505f734974973af212efc9a76, type: 3}

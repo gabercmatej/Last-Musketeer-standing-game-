@@ -295,7 +295,7 @@ namespace Musketeers.Sim.Tests
             Assert.That(r.End, Is.EqualTo(new Int2(2, 0)));
             Assert.That(r.HasImpact && r.HitUnit);
             Assert.That(r.ImpactTile, Is.EqualTo(new Int2(3, 0)));
-            Assert.That(r.Landing, Is.EqualTo(new Int2(7, 0)), "pushed BullRushPush (4) tiles");
+            Assert.That(r.Landing, Is.EqualTo(new Int2(8, 0)), "pushed BullRushPush (5) tiles");
             Assert.That(r.Slam, Is.False);
 
             var wall = Scenario.From("A..B..#....");

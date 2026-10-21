@@ -71,6 +71,10 @@ namespace Musketeers.Sim.Tests
                     {
                         kegs.Add(p);
                     }
+                    else if (c == 'x')
+                    {
+                        board.SetRemoved(p);   // FIXES_4E §4.4
+                    }
                     else if (MapParser.TryParseTile(c, out TileType tile, out _))
                     {
                         board.Set(p, tile);
@@ -337,6 +341,7 @@ namespace Musketeers.Sim.Tests
                     var u = State.UnitAt(p);
                     if (u != null) sb.Append((char)('A' + u.Slot));
                     else if (State.KegAt(p) != null) sb.Append('K');
+                    else if (b.IsRemoved(p)) sb.Append('x');
                     else sb.Append(b.Get(p).ToChar());
                 }
                 sb.Append('\n');

@@ -40,25 +40,6 @@ namespace Musketeers.Sim
             return tie ? SimEvent.None : best;
         }
 
-        // §2: +1 per kill, +2 if the victim wore the Crown. Self-kills score nothing.
-        public static void AddKillGains(EventLog log, int crowned, GameConfig cfg, List<PointGain> gains)
-        {
-            for (int i = 0; i < log.Count; i++)
-            {
-                var e = log[i];
-                if (e.Kind != SimEventKind.Died || e.Other < 0 || e.Other == e.Unit)
-                    continue;
-                bool crown = e.Unit == crowned;
-                gains.Add(new PointGain
-                {
-                    Player = e.Other,
-                    Amount = crown ? cfg.CrownKillPoints : cfg.KillPoints,
-                    Reason = crown ? PointReason.CrownKill : PointReason.Kill,
-                    Victim = e.Unit,
-                });
-            }
-        }
-
         // §2 ranking: total points, then the last round's points, then the round before, and so on back.
         // Equal in every round = a shared place (competition ranking: 1, 1, 3). Places are 1-based per slot.
         public static int[] Rank(int[] points, List<int[]> roundPoints)

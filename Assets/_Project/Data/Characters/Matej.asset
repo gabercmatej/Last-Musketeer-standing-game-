@@ -17,13 +17,13 @@ MonoBehaviour:
   Color: {r: 0.62, g: 0.38, b: 0.98, a: 1}
   Ability: 0
   AbilityName: Grappin
-  AbilityDescription: Throw a hook in a straight line (5 tiles). Hit a musketeer and you yank them to the tile next to you, over pits too. Hit a pillar or crate and you pull yourself to it. On the Courtyard, the walls count too.
+  AbilityDescription: 'Throw a hook in a straight line (5 tiles). Hit a musketeer and you drag them toward you: if they''re dragged across a pit or water, they fall in. Otherwise they land next to you. Hit a pillar, wall or crate and you pull yourself to it (the crate is not destroyed).'
   Portrait: {fileID: 21300000, guid: d2d80b760506b475d843ddaee5313679, type: 3}
-  Title: The Golden Mane
+  Title: The Renegade
   Strength: Hair
   Weakness: Stairs
-  Bio: 'His curls have their own fan club and possibly their own lawyer. Matej never loses a duel, only his footing: he has fallen down every staircase in the Louvre, twice. He carries a grappling hook "for emergencies", which means any time someone stands near a pit.'
-  SignatureText: Throw a hook in a straight line (5 tiles). Hit a musketeer and you yank them to the tile next to you, over pits too. Hit a pillar or crate and you pull yourself to it. On the Courtyard, the walls count too.
+  Bio: 'Matej enters every room as though the King himself is about to announce him. He takes his duties seriously, himself considerably less so, and has talked his way out of more executions than most men survive battles. His looks and charisma once charmed everyone, from commoners to the royal court. But since falling for a Spanish princess, France has been divided: a hero to some, a traitor to others. Now he seeks command of the Musketeers to restore his reputation and prove what he has always known: he is the greatest of them all.'
+  SignatureText: 'Throw a hook in a straight line (5 tiles). Hit a musketeer and you drag them toward you: if they''re dragged across a pit or water, they fall in. Otherwise they land next to you. Hit a pillar, wall or crate and you pull yourself to it (the crate is not destroyed).'
   Idle:
     Sprite: {fileID: 21300000, guid: 1dd8c825ec4fd4fc697fb4f0f6e9c77b, type: 3}
     Front: 0

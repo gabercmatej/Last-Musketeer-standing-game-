@@ -12,23 +12,23 @@ namespace Musketeers.Game
     }
 
     // Post-match badges from MatchStats (GAME_DESIGN §8.5). "Most" awards need at least 1 and go to
-    // everyone tied for the top; Swan Dive and Regicide go to everyone who did it at least once. Names here are placeholders until Day 6 moves them to a data asset.
+    // everyone tied for the top; Regicide goes to everyone who did it at least once. Swan Dive is a Most award. Names here are placeholders until Day 6 moves them to a data asset.
     public static class Awards
     {
         public static List<Award> Compute(MatchStats st)
         {
             var list = new List<Award>();
-            Most(list, st.ShotHits, "sharpshooter", "Sharpshooter", "Most shots on target");
-            Most(list, st.ShotsParried, "wall_of_steel", "Wall of Steel", "Most shots parried");
-            Most(list, st.Bonks, "bonk_lord", "Bonk Lord", "Most collisions");
-            Any(list, st.SelfRingOuts, "swan_dive", "Swan Dive", "Jumped into a pit all alone");
-            Any(list, st.CrownKills, "regicide", "Regicide", "Took the Crown off someone");
-            Most(list, st.KegDamage, "powder_monkey", "Powder Monkey", "Most keg damage");
-            Most(list, st.Fizzles, "click_click", "Click Click", "Most fizzled actions");
+            Most(list, st.ShotHits, "sharpshooter", "Sharpshooter", "Landed the most musket hits this match. Every bullet had an address.");
+            Most(list, st.ShotsParried, "wall_of_steel", "Wall of Steel", "Parried the most shots. Bullets went in, ripostes came out.");
+            Most(list, st.Bonks, "bonk_lord", "Bonk Lord", "Bumped into other musketeers more than anyone. Personal space is merely a suggestion.");
+            Most(list, st.SelfRingOuts, "swan_dive", "Swan Dive", "Fell into a pit or the river the most times, all on his own. Graceful. Pointless. Wet.");
+            Any(list, st.CrownKills, "regicide", "Regicide", "Brought down the Crowned leader. Heavy is the head that wears the crown, and lighter once you're done with it.");
+            Most(list, st.KegDamage, "powder_monkey", "Powder Monkey", "Dealt the most damage with powder kegs. Ka-boom is a love language.");
+            Most(list, st.Fizzles, "click_click", "Click Click", "Pulled the trigger on an empty musket the most times. Click. Click. Oops.");
             for (int p = 0; p < st.DamageDealt.Length; p++)
             {
                 if (st.DamageDealt[p] == 0)
-                    list.Add(new Award { Player = p, Id = "pacifist", Name = "Pacifist", Description = "Dealt zero damage" });
+                    list.Add(new Award { Player = p, Id = "pacifist", Name = "Pacifist", Description = "Dealt zero damage the whole match. A true man of peace, or just a terrible shot." });
             }
             return list;
         }

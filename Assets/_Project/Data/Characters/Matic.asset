@@ -19,10 +19,10 @@ MonoBehaviour:
   AbilityName: Switcheroo
   AbilityDescription: Click any musketeer to swap places with them, wherever they are when the swap happens. Fails if you're standing on a cracked tile.
   Portrait: {fileID: 21300000, guid: b42afe4bd9a92419ca86516e59869668, type: 3}
-  Title: The Chiseled
+  Title: The Unfazed
   Strength: Abs
   Weakness: Buzzcuts
-  Bio: Sculptors in Florence have asked to borrow his torso. Matic would agree, if they promised to keep the clippers away. The last barber who came near him with a buzzcut in mind was swapped into the Seine before he finished his sentence.
+  Bio: 'Matic approaches both battle and royal ceremonies with the same expression: absolute nonchalance. He can outrun most cavalrymen but refuses to hurry without an exceptionally good reason. The only recorded occasion on which he abandoned his legendary composure involved a beautiful thick black noblewoman visiting the royal court. He denies everything, although three palace guards have sworn otherwise. Convinced that his superior athleticism makes him unmatched among the Musketeers, he considers the title of Captain not a prize to be won, but a formality long overdue.'
   SignatureText: Click any musketeer to swap places with them, wherever they are when the swap happens. Fails if you're standing on a cracked tile.
   Idle:
     Sprite: {fileID: 21300000, guid: fb6875f613821438e97dc9081e2a50e9, type: 3}

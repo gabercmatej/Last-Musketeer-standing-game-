@@ -15,16 +15,16 @@ namespace Musketeers.Sim.Tests
             Assert.That(map.Board.Width, Is.EqualTo(15));
             Assert.That(map.Board.Height, Is.EqualTo(9));
             Assert.That(map.Spawns, Is.EqualTo(new[] { new Int2(1, 7), new Int2(13, 7), new Int2(1, 1), new Int2(13, 1) }));
-            Assert.That(map.Board.Get(new Int2(0, 8)), Is.EqualTo(TileType.Pit));
+            Assert.That(map.Board.IsRemoved(new Int2(0, 8)), Is.True, "corner L of 3 removed (FIXES_4E §4.4)");
+            Assert.That(map.Board.Get(new Int2(2, 8)), Is.EqualTo(TileType.Pit));
             Assert.That(map.Board.Get(new Int2(7, 5)), Is.EqualTo(TileType.Pillar));
-            Assert.That(map.Board.Get(new Int2(2, 5)), Is.EqualTo(TileType.Crate));
-            // Bridge tiles: floor in the sim, flagged for the presentation. Rows 2 and 6 hold bbb~bbb.
+            Assert.That(map.RandomCrates && !map.RandomPits, Is.True);
             int bridges = 0;
             foreach (bool b in map.Bridges) if (b) bridges++;
-            Assert.That(bridges, Is.EqualTo(12));
-            Assert.That(map.Bridges[6 * 15 + 4], Is.True);
-            Assert.That(map.Board.Get(new Int2(4, 6)), Is.EqualTo(TileType.Floor));
-            Assert.That(map.Board.Get(new Int2(7, 6)), Is.EqualTo(TileType.Pit), "the 1-tile water gap between the bridges");
+            Assert.That(bridges, Is.EqualTo(8), "two horizontal bridges and two vertical ones");
+            Assert.That(map.Bridges[4 * 15 + 4], Is.True);
+            Assert.That(map.Board.Get(new Int2(4, 4)), Is.EqualTo(TileType.Floor));
+            Assert.That(map.Board.Get(new Int2(7, 6)), Is.EqualTo(TileType.Floor), "vertical bridge plank");
         }
 
         [Test]

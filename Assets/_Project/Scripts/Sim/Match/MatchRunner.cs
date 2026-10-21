@@ -82,7 +82,10 @@ namespace Musketeers.Sim
                 // §3: spawns in slot order.
                 units[i] = Unit.Spawn(i, m.Characters[i], m.Abilities[i], m.Map.Spawns[i], cfg);
             }
-            m.Round = new GameState(m.Map.Board.Clone(), units, new DeterministicRng(m.Rng.NextUInt()));
+            var board = m.Map.Board.Clone();
+            // FIXES_4E §5.3: fresh random pits and crates every round, from the match seed and round number.
+            RoundSetup.Apply(m.Map, board, cfg, m.Seed, m.RoundNumber);
+            m.Round = new GameState(board, units, new DeterministicRng(m.Rng.NextUInt())) { Crowned = m.Crowned };
 
             var log = TurnStart.Begin(m.Round, cfg);
             Observe(m, log);
@@ -92,10 +95,19 @@ namespace Musketeers.Sim
         static void Observe(MatchState m, EventLog log)
         {
             m.Stats.Record(log, m.Crowned);
-            Scoring.AddKillGains(log, m.Crowned, m.Cfg, m.RoundGains);
+            // FIXES_4E §8.6: kill points land the moment they happen (the resolver emits PointsScored right
+            // after Died). Each log is observed exactly once, so nothing is counted twice.
+            for (int i = 0; i < log.Count; i++)
+            {
+                var e = log[i];
+                if (e.Kind != SimEventKind.PointsScored)
+                    continue;
+                m.Points[e.Unit] += e.Amount;
+                m.RoundGains.Add(new PointGain { Player = e.Unit, Amount = e.Amount, Reason = (PointReason)e.Reason, Victim = e.Other });
+            }
         }
 
-        // §2: +3 to the last musketeer standing (not on a draw), apply the round's gains, then check
+        // §2: +3 to the last musketeer standing (not on a draw; kills were scored live), then check
         // for the match end.
         static RoundResult EndRound(MatchState m)
         {
@@ -106,12 +118,13 @@ namespace Musketeers.Sim
                 m.RoundGains.Add(new PointGain { Player = winner, Amount = cfg.WinPoints, Reason = PointReason.LastStanding, Victim = SimEvent.None });
                 m.RoundWins[winner]++;
             }
+            // Kill points were added to m.Points live; only the survival bonus is still owed. RoundGains holds
+            // everything for the scoreboard and the per-round tiebreak.
+            if (winner >= 0)
+                m.Points[winner] += cfg.WinPoints;
             var scored = new int[m.PlayerCount];
             foreach (var g in m.RoundGains)
-            {
-                m.Points[g.Player] += g.Amount;
                 scored[g.Player] += g.Amount;
-            }
             m.RoundPoints.Add(scored);
 
             var result = new RoundResult

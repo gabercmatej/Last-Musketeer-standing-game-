@@ -172,7 +172,7 @@ namespace Musketeers.Presentation
                     for (int dx = -1; dx <= 1; dx++)
                     {
                         var p = new Int2(target.X + dx, target.Y + dy);
-                        if (!s.Board.InBounds(p))
+                        if (s.Board.IsVoid(p))
                             continue;
                         var sq = Get(PlaceholderArt.Square, invalid ? new Color(0.5f, 0.5f, 0.5f, 0.2f) : BlastColor, Layers.PreviewUnder);
                         sq.transform.localPosition = BoardMath.ToWorld(p);

@@ -19,10 +19,12 @@ namespace Musketeers.Sim.Tests
             Assert.That(b.EdgeWalls, Is.True, "the Courtyard is walled");
             Assert.That(map.Spawns, Is.EqualTo(new[] { new Int2(1, 7), new Int2(13, 7), new Int2(1, 1), new Int2(13, 1) }));
 
-            int pits = 0, pillars = 0, crates = 0;
+            // FIXES_4E §4.6: only the pillars are fixed; pits and crates are random every round.
+            int pits = 0, pillars = 0, crates = 0, removed = 0;
             for (int y = 0; y < 9; y++)
             for (int x = 0; x < 15; x++)
             {
+                if (b.IsRemoved(new Int2(x, y))) { removed++; continue; }
                 switch (b.Get(new Int2(x, y)))
                 {
                     case TileType.Pit: pits++; break;
@@ -30,16 +32,13 @@ namespace Musketeers.Sim.Tests
                     case TileType.Crate: crates++; break;
                 }
             }
-            Assert.That(pits, Is.EqualTo(4));
+            Assert.That(pits, Is.EqualTo(0));
+            Assert.That(crates, Is.EqualTo(0));
             Assert.That(pillars, Is.EqualTo(5));
-            Assert.That(crates, Is.EqualTo(6));
-
-            foreach (var p in new[] { new Int2(5, 5), new Int2(9, 5), new Int2(5, 3), new Int2(9, 3) })
-                Assert.That(b.Get(p), Is.EqualTo(TileType.Pit), $"pit at {p}");
+            Assert.That(removed, Is.EqualTo(12));
+            Assert.That(map.RandomPits && map.RandomCrates, Is.True);
             foreach (var p in new[] { new Int2(3, 6), new Int2(11, 6), new Int2(3, 2), new Int2(11, 2), new Int2(7, 4) })
                 Assert.That(b.Get(p), Is.EqualTo(TileType.Pillar), $"pillar at {p}");
-            foreach (var p in new[] { new Int2(6, 7), new Int2(8, 7), new Int2(1, 4), new Int2(13, 4), new Int2(6, 1), new Int2(8, 1) })
-                Assert.That(b.Get(p), Is.EqualTo(TileType.Crate), $"crate at {p}");
             foreach (var p in map.Spawns)
                 Assert.That(b.Get(p), Is.EqualTo(TileType.Floor), $"spawn {p} is floor");
         }
@@ -100,7 +99,7 @@ namespace Musketeers.Sim.Tests
             Assert.That(s.Board, Is.Not.SameAs(map.Board), "the round gets its own copy of the board");
         }
 
-        [TestCase(".x.", TestName = "Rejects_UnknownSymbol")]
+        [TestCase(".z.", TestName = "Rejects_UnknownSymbol")]
         [TestCase("...\n..", TestName = "Rejects_RaggedRows")]
         [TestCase(".1.\n.3.", TestName = "Rejects_SpawnGap")]
         [TestCase("1.1", TestName = "Rejects_DuplicateSpawn")]

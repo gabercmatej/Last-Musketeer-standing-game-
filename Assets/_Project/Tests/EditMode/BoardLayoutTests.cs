@@ -61,7 +61,7 @@ namespace Musketeers.Sim.Tests
         }
 
         [Test]
-        public void BridgeMap_BridgeTilesAreHorizontalRuns()
+        public void BridgeMap_PlanksRunAcrossTheWalkingDirection()
         {
             var data = MapParser.Parse(System.IO.File.ReadAllText("Assets/_Project/Data/Maps/bridge.txt"));
             int bridges = 0;
@@ -72,9 +72,13 @@ namespace Musketeers.Sim.Tests
                 bridges++;
                 bool left = x > 0 && data.Bridges[y * data.Board.Width + x - 1];
                 bool right = x < data.Board.Width - 1 && data.Bridges[y * data.Board.Width + x + 1];
-                Assert.AreEqual(90, BoardLayout.BridgeRotation(left, right, false, false));
+                bool up = y < data.Board.Height - 1 && data.Bridges[(y + 1) * data.Board.Width + x];
+                bool down = y > 0 && data.Bridges[(y - 1) * data.Board.Width + x];
+                // FIXES_4E §4.5: two horizontal bridges (row 4) and two vertical ones (column 7).
+                int want = x == 7 ? 0 : 90;
+                Assert.AreEqual(want, BoardLayout.BridgeRotation(left, right, up, down), $"plank at ({x},{y})");
             }
-            Assert.AreEqual(12, bridges);
+            Assert.AreEqual(8, bridges);
         }
     
         static readonly Rect Arena = new Rect(0.15f, 0.11f, 0.70f, 0.747f);

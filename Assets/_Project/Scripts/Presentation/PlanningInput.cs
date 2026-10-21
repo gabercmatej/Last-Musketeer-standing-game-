@@ -130,7 +130,7 @@ namespace Musketeers.Presentation
                     if (over >= 0 && Builder.IsSwitcherooTarget(over))
                         hover = PlannedAction.Switcheroo(over);
                 }
-                else if (Builder.PendingTakesDirection && TryDirection(from, tile.Value, out Dir d))
+                else if (Builder.PendingTakesDirection && TryDirection(from, tile.Value, out Dir d) && !Builder.IsDirectionBlocked(Builder.Pending, d))
                     hover = Builder.Directional(Builder.Pending, d);
                 else if (PlanBuilder.NeedsTarget(Builder.Pending) && Builder.TargetIssue(tile.Value) == PlanIssue.None)
                     hover = new PlannedAction(Builder.Pending, Dir.N, tile.Value);

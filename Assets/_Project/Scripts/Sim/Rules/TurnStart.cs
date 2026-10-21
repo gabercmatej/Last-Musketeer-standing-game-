@@ -50,7 +50,9 @@ namespace Musketeers.Sim
                     u.Alive = false;
                     u.Parrying = false;
                     log.Add(SimEventKind.Fell, unit: i, to: u.Pos);
-                    log.Add(SimEventKind.Died, unit: i, other: TurnResolver.Killer(s, u, cfg), to: u.Pos, reason: (byte)DeathCause.Fell);
+                    int killer = TurnResolver.Killer(s, u, cfg);
+                    log.Add(SimEventKind.Died, unit: i, other: killer, to: u.Pos, reason: (byte)DeathCause.Fell);
+                    TurnResolver.ScoreKill(s, log, cfg, i, killer);
                 }
                 foreach (var keg in s.Kegs.ToArray())
                 {
@@ -71,7 +73,8 @@ namespace Musketeers.Sim
                 for (int x = 0; x < b.Width; x++)
                 {
                     var p = new Int2(x, y);
-                    if (b.RingIndex(p) == ring)
+                    // §3/§4.4: removed `x` corners are outside the board, so they never warn or crumble.
+                    if (b.RingIndex(p) == ring && !b.IsRemoved(p))
                         f(p);
                 }
             }

@@ -61,8 +61,11 @@ namespace Musketeers.Sim
                     continue;
                 }
 
-                // Empty floor, pit, pillar or crate: nothing to push. Crates are not shovable.
+                // FIXES_4E §5.1: a shove breaks a crate instead of moving it (the shover may win Grit).
                 c.Log.Add(SimEventKind.Shoved, unit: i, from: u.Pos, to: at, dir: dir);
+                if (s.Board.Get(at) == TileType.Crate)
+                    BreakCrate(c, at, i);
+                // Empty floor, pit or pillar: nothing to push.
             }
 
             // Guard Break cancels the parry for the rest of the tick, so Phase 4 shots hit.

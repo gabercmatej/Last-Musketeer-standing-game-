@@ -88,11 +88,15 @@ namespace Musketeers.Game
 
         public bool CommitDirection(Dir dir)
         {
-            if (!PendingTakesDirection)
+            if (!PendingTakesDirection || IsDirectionBlocked(Pending, dir))
                 return false;
             Place(new PlannedAction(Pending, dir));
             return true;
         }
+
+        // FIXES_4E §8.1: Move and Dash never offer a tile off the map or an 'x' tile.
+        public bool IsDirectionBlocked(ActionType type, Dir dir) =>
+            PlanProjection.WalksIntoVoid(_s.Board, CursorState.Pos, type, dir);
 
         // The action for a direction pick (hover preview and commit share it).
         public PlannedAction Directional(ActionType type, Dir dir) => new PlannedAction(type, dir);

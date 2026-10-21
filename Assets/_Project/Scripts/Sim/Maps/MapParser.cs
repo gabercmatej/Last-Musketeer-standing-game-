@@ -8,6 +8,8 @@ namespace Musketeers.Sim
         public Board Board;
         public Int2[] Spawns;   // Spawns[slot]: '1' is slot 0
         public bool[] Bridges;  // y*Width+x: the 'b' tiles. Floor in the sim; presentation-only (FIXES_v0.2 §3.1)
+        public bool RandomPits;   // '@randompits': FIXES_4E §5.3 scatters pits at the start of every round
+        public bool RandomCrates; // '@randomcrates': same for crates
     }
 
     // ASCII map → Board + spawns, using the §3 legend. The top text line is y = Height - 1.
@@ -19,10 +21,12 @@ namespace Musketeers.Sim
         public static MapData Parse(string ascii)
         {
             string[] rows = SplitRows(ascii);
-            bool walls = false;
+            bool walls = false, randomPits = false, randomCrates = false;
             foreach (string d in Directives(ascii))
             {
                 if (d == "walls") walls = true;
+                else if (d == "randompits") randomPits = true;
+                else if (d == "randomcrates") randomCrates = true;
                 else throw new FormatException($"Unknown map directive '@{d}'.");
             }
             int height = rows.Length;
@@ -38,6 +42,11 @@ namespace Musketeers.Sim
                 for (int x = 0; x < width; x++)
                 {
                     char c = rows[r][x];
+                    if (c == 'x')
+                    {
+                        board.SetRemoved(new Int2(x, y));   // FIXES_4E §4.4: outside the board
+                        continue;
+                    }
                     if (!TryParseTile(c, out TileType tile, out int spawnSlot))
                         throw new FormatException($"Unknown map symbol '{c}' at ({x},{y}).");
                     board.Set(new Int2(x, y), tile);
@@ -64,7 +73,7 @@ namespace Musketeers.Sim
 
             var result = new Int2[count];
             Array.Copy(spawns, result, count);
-            return new MapData { Board = board, Spawns = result, Bridges = bridges };
+            return new MapData { Board = board, Spawns = result, Bridges = bridges, RandomPits = randomPits, RandomCrates = randomCrates };
         }
 
         // The '@name' lines of a map text, without the '@', in order.

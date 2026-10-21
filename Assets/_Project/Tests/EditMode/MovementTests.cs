@@ -180,13 +180,17 @@ namespace Musketeers.Sim.Tests
         }
 
         [Test]
-        public void WalkOffBoard_CountsAsPit()
+        public void WalkOffBoard_IsBlocked_NoDamage()
         {
+            // FIXES_4E §8.1: a move off the map is blocked; the unit stays put.
             Scenario.From("A.B")
                 .Plan('A', Act.Move(Dir.W))
                 .ResolveTick()
-                .AssertDead('A')
-                .AssertEvent(SimEventKind.Fell, 'A');
+                .AssertAlive('A')
+                .AssertPos('A', 0, 0)
+                .AssertHp('A', 3)
+                .AssertEvent(SimEventKind.MoveBlocked, 'A')
+                .AssertNoEvent(SimEventKind.Fell);
         }
 
         [Test]

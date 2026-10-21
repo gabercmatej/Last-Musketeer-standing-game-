@@ -14,10 +14,13 @@ namespace Musketeers.Sim.Tests
                 .ResolveTick()
                 .AssertAlive('A')
                 .AssertEvent(SimEventKind.MoveBlocked, 'A');
+            // FIXES_4E §8.1: nobody walks off an open board either.
             Scenario.From("A")
                 .Plan('A', Act.Move(Dir.E))
                 .ResolveTick()
-                .AssertDead('A');
+                .AssertAlive('A')
+                .AssertPos('A', 0, 0)
+                .AssertEvent(SimEventKind.MoveBlocked, 'A');
         }
 
         [Test]
@@ -54,7 +57,9 @@ namespace Musketeers.Sim.Tests
             Scenario.From("A.")
                 .Plan('A', Act.Dash(Dir.E))
                 .ResolveTick()
-                .AssertDead('A');
+                .AssertAlive('A')
+                .AssertGrit('A', 1)
+                .AssertEvent(SimEventKind.MoveBlocked, 'A');
         }
 
         [Test]
@@ -66,7 +71,7 @@ namespace Musketeers.Sim.Tests
                 .ResolveTick()
                 .AssertPos('A', 1, 0)
                 .AssertPos('B', 2, 0)
-                .AssertHp('B', 2)
+                .AssertHp('B', 1)   // 1 Bull Rush damage + 1 wall slam
                 .AssertEvent(SimEventKind.WallSlam, 'B');
         }
 

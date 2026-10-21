@@ -23,9 +23,15 @@ namespace Musketeers.Sim
         public GameState Round;
         public MatchStats Stats;
         public DeterministicRng Rng;    // seeds each round's GameState
+        public uint Seed;               // the match seed; with the round number it fixes each round's random pits and crates (FIXES_4E §5.3)
         public List<PointGain> RoundGains = new List<PointGain>();   // this round so far; applied at round end
 
         public int PlayerCount => Abilities.Length;
+
+        // FIXES_4E §8.7: a player whose current points already reach the target holds match point; if nobody
+        // overtakes them by the end of the round they win (§2 ranking breaks ties).
+        public bool IsMatchPoint(int player) =>
+            player >= 0 && player < Points.Length && Points[player] >= Cfg.PointsToWin;
 
         public MatchState Clone()
         {
@@ -46,6 +52,7 @@ namespace Musketeers.Sim
                 Round = Round?.Clone(),
                 Stats = Stats.Clone(),
                 Rng = Rng.Clone(),
+                Seed = Seed,
                 RoundGains = new List<PointGain>(RoundGains),
             };
         }
@@ -82,6 +89,7 @@ namespace Musketeers.Sim
             h.Add(MatchOver);
             h.Add(MatchWinner);
             h.Add(Rng.State);
+            h.Add((int)Seed);
             h.Add(RoundGains.Count);
             foreach (var g in RoundGains)
             {
@@ -118,6 +126,7 @@ namespace Musketeers.Sim
                 RoundWins = new int[n],
                 Stats = new MatchStats(n),
                 Rng = new DeterministicRng(seed),
+                Seed = seed,
             };
         }
     }

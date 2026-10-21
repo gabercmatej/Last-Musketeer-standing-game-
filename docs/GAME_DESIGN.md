@@ -29,8 +29,9 @@ This document is the **source of truth for the rules**. Every number here lives 
 
 ### Scoring
 - **Last musketeer standing:** +3
-- **Kill:** +1
-- **Kill on the Crowned:** +2 instead of +1 (see Crown)
+- **Kill:** +1, added **the moment it happens** (same tick, with a "+1" pop on the score box)
+- **Kill on the Crowned:** +2 instead of +1 (see Crown), also added at once
+- The +3 for surviving is awarded at **round end**. The **match end** is still checked only at round end. A player whose current points are already **at or above the target** is on **match point** (gold border); if nobody overtakes them by the end of the round, they win (ranking rule below for ties).
 - **Draw** (everyone left dies on the same tick): nobody gets the +3; kills still count.
 - **Match end and ranking:** the match ends at the end of the round in which the top total reaches the points target (12 by default). Players are ranked by total points; a tie is decided by the points scored in the last round, then the round before it, and so on backwards. Equal in every round = a **shared place** (1st, 1st, 3rd). The winner is 1st place (co-winners share it). There is no sudden death.
 
@@ -49,42 +50,50 @@ At the start of each round, the player with strictly the most match points wears
 | Floor | `.` | yes | pass | |
 | Bridge | `b` | yes | pass | Plain Floor for the rules. It only looks like a bridge; pushes off its sides drop you into the water. |
 | Pillar | `#` | no | block | Indestructible |
-| Crate | `o` | no | block | Destroyed by 1 shot or explosion → becomes Floor |
+| Crate | `o` | no | block | Always destructible: by a shot, a **Shove** (the crate breaks instead of moving) or an explosion → becomes Floor. The destroyer has a **50% chance of +1 Grit** (capped at max Grit). |
 | Pit / moat / water | `~` | deadly | pass | Entering = **ring-out** (instant death). Off-board counts as pit, unless the map has walled edges. |
+| Removed | `x` | no | block | Outside the board (the background shows). Treated exactly like off-board on that map: a wall on walled maps, a deadly drop otherwise. |
 | Spawn | `1`–`4` | Floor | | Player slot spawn |
 
 Kegs (section 5) are objects that sit on a floor tile and behave like crates for movement.
 
-**Walled edges.** A map whose first line is `@walls` has solid walls around it: the outside counts as a **pillar**. You can't walk, dash or Bull Rush off it, a push into the edge is a **Wall Slam**, and kicked kegs stop there. Shots and keg throws still end at the edge; a Grappin hook treats the wall like a pillar (see Grappin). Crumbling still makes pits inside. Without `@walls` the outside is a pit. Lines starting with `@` are directives and aren't part of the grid.
+**Walled edges.** A map whose first line is `@walls` has solid walls around it: the outside counts as a **pillar**. You can't walk, dash or Bull Rush off it, a push into the edge is a **Wall Slam**, and kicked kegs stop there. Shots and keg throws still end at the edge; a Grappin hook treats the wall like a pillar (see Grappin). Crumbling still makes pits inside. Without `@walls` the outside is a pit. Lines starting with `@` are directives and aren't part of the grid. `@randompits` and `@randomcrates` ask for the random per-round setup below.
+
+**Nobody can walk off the map.** A Move or Dash whose destination (or, for a dash, the tile it flies over) is off the board or an `x` tile is **blocked**: the unit stays put, takes no damage, and a Dash still spends its Grit. Pits and water are still walkable. Pushes are different: on the **Bridge** you can be pushed off the board or into an `x` tile and fall; on the **Courtyard** the edge and `x` tiles are walls (Wall Slam), but pits still swallow you.
+
+**Random setup (every round).** From a deterministic RNG seeded by the match seed and the round number, each round places random objects on the map: the **Courtyard** gets 3-6 pits and 3 crates, the **Bridge** 3 crates and no pits. They go only on plain floor (`.`): not on the outer ring, not within one tile (diagonals included) of any spawn, never on pillars, planks, water or `x`. Random pits are never next to each other (8 neighbours), and a pit that would cut any spawn off from the others (flood fill over non-pit, non-pillar tiles) is rerolled. The random crates and pits **replace** the old fixed ones.
 
 ### Map 1: "The Courtyard" (ships first, walled)
-Top row is y = 8. The first line `@walls` is a directive.
+Top row is y = 8. The first lines are directives. Only the pillars are fixed; pits and crates are random each round. The 12 `x` tiles are the corner L's (3 tiles per corner), so each spawn sits in the inner corner of its L.
 ```
 @walls
-...............
-.1....o.o....2.
+@randompits
+@randomcrates
+xx...........xx
+x1...........2x
 ...#.......#...
-.....~...~.....
-.o.....#.....o.
-.....~...~.....
-...#.......#...
-.3....o.o....4.
 ...............
+.......#.......
+...............
+...#.......#...
+x3...........4x
+xx...........xx
 ```
 With 2 or 3 players, use the spawns in slot order.
 
 ### Map 2: "The Bridge"
-Islands, bridges and water. Falling off the edge or into the water is death. The 1-tile water gaps between the bridges can be leaped with a Dash.
+Islands, four bridges (two horizontal on row 4, two vertical on column 7) and water. Falling off the edge, into an `x` tile or into the water is death for pushed units. The 1-tile water gaps between the bridges can be leaped with a Dash. Crates are random each round.
 ```
-~~~~~~~~~~~~~~~
-~1..~~~~~~~..2~
-~...bbb~bbb...~
-~.o.~~.#.~~.o.~
-~...~~...~~...~
-~.o.~~.#.~~.o.~
-~...bbb~bbb...~
-~3..~~~~~~~..4~
-~~~~~~~~~~~~~~~
+@randomcrates
+xx~.........~xx
+x1....~b~....2x
+....~~~b~~~....
+.~..~~.#.~~..~.
+.~..bb...bb..~.
+.~..~~.#.~~..~.
+....~~~b~~~....
+x3....~b~....4x
+xx~.........~xx
 ```
 
 Maps are plain-text files, so new maps (your hangout spots) are easy to add. The board size comes from the map file (any rectangle), and each map picks a tileset and background.
@@ -150,13 +159,13 @@ Each turn you plan **3 actions**, one per tick. Unplanned ticks become **Idle**:
 
 ### Signature abilities
 - **Grappin** (Matej). Fire a hook in a direction, range 5. The first thing it touches decides the result:
-  - A **unit**: yank it to the tile right next to you (it passes over pits safely).
-  - A **pillar, crate or keg**: pull yourself to the tile right before it. Exception: a keg is pulled to you instead, so it lands on the tile next to you.
+  - A **unit**: drag it **tile by tile** toward you until it is next to you. If it passes over (or lands on) a pit or water tile, it **falls in** (kill credit to you). Otherwise it ends next to you.
+  - A **pillar, crate or keg**: pull yourself (safe; a crate is **not** destroyed) to the tile right before it. Exception: a keg is pulled to you instead, so it lands on the tile next to you.
   - On a **walled map** the edge wall counts as a pillar: the hook pulls you to the tile next to it (already next to the wall = you stay).
   - **Nothing:** the hook misses, and the Grit is still spent.
 - **Switcheroo** (Matic). Pick **any living musketeer** and swap positions with them, wherever they are when it resolves (no range, no line of sight). It **fails** (the Grit is still spent) if Matic stands on a warned tile when it resolves, or if the target is dead. The target is credited to Matic for kill credit. Kegs can't be swapped.
 - **Triple Charge** (Aljaž). Needs a loaded musket, and unloads it. Fires **3 shots in a row down one line**, each with range 5 (`FireRange`) from the shooter. Each shot that hits a unit deals **1 damage and pushes it 1 tile** away (normal push rules: Wall Slam, Bonk, fall), so the next shot meets it one tile further along: up to 3 hits of 1 damage, each knocking back 1 tile. A target pinned against a wall or another musketeer also takes the Wall Slam / Bonk damage, but **at most 3 damage to any one musketeer per use** (`TripleChargeMaxDamage`), Wall Slam and Bonk damage included, a bystander bonked by the slide counted separately and a reflected shot counted too; the knockback still happens. No pierce. A **crate** is destroyed (the next shot can pass), a **keg** is detonated and stops the shot, a pillar stops it. It **can be parried**: each shot that meets a parrying unit does nothing to it and is reflected like a normal shot.
-- **Bull Rush** (Nik). Charge up to 3 tiles in a direction, stopping before any pillar, crate, keg, unit or pit. If the charge stopped because of a **unit**, that unit is **pushed 4 tiles**. If it stopped because of a **keg**, the keg is kicked.
+- **Bull Rush** (Nik). Charge up to 3 tiles in a direction, stopping before any pillar, crate, keg, unit or pit. If the charge stopped because of a **unit**, that unit takes **1 damage** and is **knocked back 5 tiles** (normal push rules). If it stopped because of a **keg**, the keg is kicked.
 
 ### Invalid actions (fizzles)
 When it's time for an action to happen, the simulation checks it. If you don't have enough Grit, your musket isn't loaded, or you already have an active keg, the action **fizzles**: nothing happens, it costs nothing, and a sad "click" plays. The planning UI tries to prevent this by projecting your Grit and musket state across your 3 ticks.
@@ -177,8 +186,8 @@ For every living unit, look at its action for this tick. Check the cost and requ
 ### Phase 2: Movement (Move, Dash)
 1. Compute each mover's desired destination:
    - **Move** goes to `pos + d`.
-   - **Dash** goes to `pos + 2d` and flies over the middle tile. Only a **pillar** (or a wall) on the middle tile blocks it; a crate, keg, unit or pit there is flown over. The **landing** tile must not be a pillar, crate or keg, or the dash fails: you stay put, and the Grit stays spent. Landing on a pit (or off an unwalled board) is a fall.
-   - A destination that is a pillar, crate or keg cancels the move.
+   - **Dash** goes to `pos + 2d` and flies over the middle tile. Only a **pillar** (or a wall) on the middle tile blocks it; a crate, keg, unit or pit there is flown over. The **landing** tile must not be a pillar, crate or keg, or the dash fails: you stay put, and the Grit stays spent. Landing on a pit is a fall. A middle or landing tile that is off the board or an `x` tile blocks the dash (Grit still spent).
+   - A destination that is a pillar, crate or keg cancels the move, and so does one that is off the board or an `x` tile (no damage).
 2. **Head-on collisions (Bonk):**
    - If two or more movers want the **same tile**, none of them move, and each takes **1 damage**.
    - If two movers try to **swap tiles** (each enters the other's start tile), neither moves, and both take **1 damage**.
@@ -199,7 +208,8 @@ These resolve one at a time in **initiative order**, each using the positions le
 4. Apply pushes in initiative order of the **targets**. A pushed unit slides one tile at a time, up to the push strength:
    - If the next tile is a pillar, crate or keg, it stops and takes 1 damage (**Wall Slam**).
    - If the next tile holds a unit, both stop and both take 1 damage (**Bonk**). There's no chain pushing.
-   - If the next tile is a pit or off an unwalled board, it **falls** and dies instantly. (On a walled board the edge is a pillar, so it's a Wall Slam.)
+   - If the next tile is a pit, off an unwalled board or an `x` tile on an unwalled board, it **falls** and dies instantly. (On a walled board the edge is a pillar, so it's a Wall Slam.)
+   A **crate** hit by a shove is simply destroyed (it doesn't move); the shover rolls for Grit (see Tiles).
 5. **Kegs** that get shoved (kicked) slide up to 3 tiles until blocked. A keg that slides into a pit is gone.
 
 ### Phase 4: Shots (Fire, Triple Charge)
@@ -337,7 +347,9 @@ Offline (vs bots) the lobby is local; online (Day 5) the same lobby is shared an
 | KegThrowRange / KegFuseTicks / MaxKegsPerPlayer | 3 / 3 / 1 |
 | KegKickDistance | 3 |
 | Costs: Dash / Parry / Keg / Signature | 1 / 1 / 2 / 5 |
-| GrappleRange / BullRushDistance / BullRushPush | 5 / 3 / 4 |
+| GrappleRange / BullRushDistance / BullRushPush / BullRushDamage | 5 / 3 / 5 / 1 |
+| CrateGritChancePct / CrateGrit | 50 / 1 |
+| RandomPitsMin / RandomPitsMax / RandomCrates | 3 / 6 / 3 |
 | CrumbleStartTurn / CrumbleEvery | 5 / 2 |
 | PointsToWin / WinPoints / KillPoints / CrownKillPoints | 12 (lobby: 10-30) / 3 / 1 / 2 |
 

@@ -46,7 +46,7 @@ namespace Musketeers.Sim
                         // §5 Powder Keg: 2 Grit, max 1 active per player, target within Manhattan 3.
                         if (u.Grit < cfg.KegCost) reason = FizzleReason.NotEnoughGrit;
                         else if (ActiveKegs(c.S, i) >= cfg.MaxKegsPerPlayer) reason = FizzleReason.KegLimit;
-                        else if (!c.S.Board.InBounds(a.Target) || u.Pos.Manhattan(a.Target) > cfg.KegThrowRange) reason = FizzleReason.OutOfRange;
+                        else if (c.S.Board.IsVoid(a.Target) || u.Pos.Manhattan(a.Target) > cfg.KegThrowRange) reason = FizzleReason.OutOfRange;
                         else u.Grit -= cfg.KegCost;
                         break;
                     case ActionType.Signature:
@@ -58,6 +58,8 @@ namespace Musketeers.Sim
                             u.Grit -= cfg.SignatureCost;
                             if (u.Ability == Ability.TripleCharge)
                                 u.Loaded = false;
+                            // FIXES_4E §8.5: lets the announcer call "Signature move!" for every ability.
+                            c.Log.Add(SimEventKind.SignatureUsed, unit: i, to: u.Pos, amount: (int)u.Ability);
                         }
                         break;
                 }

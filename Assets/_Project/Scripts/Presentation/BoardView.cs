@@ -117,6 +117,12 @@ namespace Musketeers.Presentation
                 prop.enabled = false;
                 _props[i] = prop;
                 _shown[i] = (TileType)255;
+                // FIXES_4E §4.4: a removed ('x') tile is outside the board: nothing is drawn, the background shows.
+                if (s.Board.IsRemoved(p))
+                {
+                    cell.gameObject.SetActive(false);
+                    prop.gameObject.SetActive(false);
+                }
             }
 
             _units = new UnitView[s.Units.Length];
@@ -161,6 +167,8 @@ namespace Musketeers.Presentation
             for (int x = 0; x < Width; x++)
             {
                 var p = new Int2(x, y);
+                if (s.Board.IsRemoved(p))
+                    continue;
                 SetTile(p, s.Board.Get(p));
                 SetWarned(p, s.Board.Get(p) != TileType.Pit && Crumble.IsWarned(s, p, Config));
             }

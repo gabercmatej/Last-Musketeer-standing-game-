@@ -161,13 +161,14 @@ namespace Musketeers.Sim.Tests
         }
 
         [Test]
-        public void Shove_EmptyTileOrCrate_DoesNothing()
+        public void Shove_EmptyTile_DoesNothing_ShoveOnACrateBreaksIt()
         {
+            // FIXES_4E §5.1: B's shove breaks the crate instead of moving it.
             Scenario.From("A.BoC")
                 .Plan('A', Act.Shove(Dir.E))
                 .Plan('B', Act.Shove(Dir.E))
                 .ResolveTick()
-                .AssertBoard("A.BoC")
+                .AssertBoard("A.B.C")
                 .AssertEventCount(SimEventKind.Shoved, 2)
                 .AssertNoEvent(SimEventKind.Pushed);
         }

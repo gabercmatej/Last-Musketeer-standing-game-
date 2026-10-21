@@ -8,7 +8,7 @@ namespace Musketeers.Sim
 
     public enum DeathCause : byte { Damage, Fell }
 
-    public enum DamageKind : byte { Shot, ReflectedShot, Bonk, WallSlam, Squeeze, Explosion, TripleCharge }
+    public enum DamageKind : byte { Shot, ReflectedShot, Bonk, WallSlam, Squeeze, Explosion, TripleCharge, BullRush }
 
     // What a Grappin hook touched (§4).
     public enum GrappleResult : byte { Miss, YankUnit, PullSelf, PullKeg }

@@ -73,8 +73,7 @@ namespace Musketeers.Sim
                 Int2 p = buf.Crates[k];
                 if (s.Board.Get(p) != TileType.Crate)
                     continue;   // already destroyed by an earlier shot this tick
-                s.Board.Set(p, TileType.Floor);
-                c.Log.Add(SimEventKind.CrateDestroyed, unit: buf.CrateShooters[k], to: p);
+                BreakCrate(c, p, buf.CrateShooters[k]);
             }
 
             // §6 Phase 4.1: a keg hit by a shot explodes this tick, in Phase 5.
@@ -107,7 +106,7 @@ namespace Musketeers.Sim
             for (int step = 1; step <= range; step++)
             {
                 Int2 next = p + d;
-                if (!s.Board.InBounds(next))
+                if (s.Board.IsVoid(next))
                     break;
                 p = next;
 
@@ -173,7 +172,7 @@ namespace Musketeers.Sim
             for (int step = 1; step <= c.Cfg.FireRange; step++)
             {
                 Int2 next = p + d;
-                if (!s.Board.InBounds(next))
+                if (s.Board.IsVoid(next))
                     break;
                 p = next;
 

@@ -13,6 +13,7 @@ namespace Musketeers.Sim
         public DeterministicRng Rng;
         public int NextKegId;
         public bool RoundOver;
+        public int Crowned = -1;            // §2 Crown holder for this round (slot) so kill points can be scored on the spot (FIXES_4E §8.6)
         public int RoundWinner = -1;        // slot of the last musketeer standing, -1 for a draw
 
         public GameState(Board board, Unit[] units, DeterministicRng rng)
@@ -83,6 +84,7 @@ namespace Musketeers.Sim
                 NextKegId = NextKegId,
                 RoundOver = RoundOver,
                 RoundWinner = RoundWinner,
+                Crowned = Crowned,
                 Kegs = new List<Keg>(Kegs.Count),
             };
             for (int i = 0; i < Kegs.Count; i++)
@@ -98,6 +100,7 @@ namespace Musketeers.Sim
             h.Add(NextKegId);
             h.Add(RoundOver);
             h.Add(RoundWinner);
+            h.Add(Crowned);
             h.Add(Rng.State);
             Board.AddToHash(ref h);
             h.Add(Units.Length);

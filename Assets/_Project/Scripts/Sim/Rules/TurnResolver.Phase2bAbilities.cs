@@ -39,7 +39,7 @@ namespace Musketeers.Sim
             for (int step = 1; step <= range; step++)
             {
                 Int2 next = last + d;
-                if (!s.Board.InBounds(next))
+                if (s.Board.IsVoid(next))
                 {
                     // §4 Grappin: on a walled map the edge is a wall, like a pillar (the hook pulls you next to it).
                     if (s.Board.EdgeWalls)
@@ -75,12 +75,26 @@ namespace Musketeers.Sim
             {
                 case LineHit.Unit:
                 {
+                    // FIXES_4E §8.3: dragged tile by tile toward the grappler; the first pit or water tile on the
+                    // way (the landing tile included) swallows the target, with the kill credited to the grappler.
                     Int2 from = target.Pos;
-                    target.Pos = next;
+                    Int2 back = dir.Opposite().ToInt2();
+                    Int2 end = from;
+                    bool falls = false;
+                    while (end != next)
+                    {
+                        end = end + back;
+                        if (IsPit(s, end))
+                        {
+                            falls = true;
+                            break;
+                        }
+                    }
+                    target.Pos = end;
                     Credit(c, target.Slot, i);
-                    c.Log.Add(SimEventKind.Grappled, unit: i, other: target.Slot, from: from, to: next, dir: dir, reason: (byte)GrappleResult.YankUnit);
-                    if (IsPit(s, next))
-                        Fall(c, target.Slot, next);
+                    c.Log.Add(SimEventKind.Grappled, unit: i, other: target.Slot, from: from, to: end, dir: dir, reason: (byte)GrappleResult.YankUnit);
+                    if (falls)
+                        Fall(c, target.Slot, end);
                     break;
                 }
                 case LineHit.Keg:
@@ -153,7 +167,7 @@ namespace Musketeers.Sim
             for (int step = 0; step < c.Cfg.BullRushDistance; step++)
             {
                 Int2 next = p + d;
-                if (s.Board.Get(next).IsSolid() || IsPit(s, next))
+                if (s.Board.IsVoid(next) || s.Board.Get(next).IsSolid() || IsPit(s, next))
                     break;
                 hitKeg = s.KegAt(next);
                 if (hitKeg != null)
@@ -169,7 +183,9 @@ namespace Musketeers.Sim
 
             if (hitUnit != null)
             {
+                // FIXES_4E §8.4: 1 damage, then flung BullRushPush tiles with the normal push rules.
                 Credit(c, hitUnit.Slot, i);
+                Damage(c, hitUnit.Slot, c.Cfg.BullRushDamage, i, DamageKind.BullRush);
                 SlideUnit(c, hitUnit.Slot, dir, c.Cfg.BullRushPush, i);
             }
             else if (hitKeg != null)

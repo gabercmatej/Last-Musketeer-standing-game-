@@ -29,7 +29,8 @@ namespace Musketeers.Sim
         public int SignatureCost = 5;
         public int GrappleRange = 5;
         public int BullRushDistance = 3;
-        public int BullRushPush = 4;
+        public int BullRushPush = 5;          // FIXES_4E §8.4: was 4
+        public int BullRushDamage = 1;        // FIXES_4E §8.4
         public int CrumbleStartTurn = 5;
         public int CrumbleEvery = 2;
         public int PointsToWin = 12;
@@ -51,6 +52,11 @@ namespace Musketeers.Sim
         public int TripleChargeShots = 3;     // §4 Triple Charge: shots per charge (range is FireRange)
         public int TripleChargeMaxDamage = 3; // §4 Triple Charge: max damage any one musketeer takes from one use
         public int TripleChargePush = 1;      // §4 Triple Charge: tiles each hit slides the target
+        public int CrateGritChancePct = 50;   // FIXES_4E §5.2: chance a destroyed crate pays the destroyer Grit
+        public int CrateGrit = 1;             // FIXES_4E §5.2: Grit paid (capped at MaxGrit)
+        public int RandomPitsMin = 3;         // FIXES_4E §5.3: random pits per round on '@randompits' maps
+        public int RandomPitsMax = 6;
+        public int RandomCrates = 3;          // FIXES_4E §5.3: random crates per round on '@randomcrates' maps
         public int KillCreditTurns = 1;       // §6 Kill credit: last attacker counts this turn or last turn
     }
 }

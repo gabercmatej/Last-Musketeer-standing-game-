@@ -2,4 +2,8 @@ Every turn, everyone plans 3 actions in secret. When the timer ends (or all of y
 
 Last musketeer standing wins the round. Points decide the match, and whoever wears the Crown becomes the target. Grit pays for the strong moves, and Catch Breath earns you more.
 
+Nobody can walk off the map. On the Bridge, a push over an edge or into a missing corner is a deadly fall. On the Courtyard, the edges are walls. Crates break when shot, shoved or blown up, and may give +1 Grit. Kill points count the moment they happen, and a gold border means match point: if nobody overtakes you by the end of the round, you win.
+
+Grappin (Matej, 5 Grit): hook a musketeer and drag them toward you. If they're dragged across a pit or water, they fall in. Hit a pillar, wall or crate and you pull yourself to it. Bull Rush (Nik, 5 Grit): charge up to 3 tiles. Whoever you hit takes 1 damage and flies back 5 tiles.
+
 <color=#FFCE60><b>Fire beats standing still. Parry beats Fire. Shove beats Parry. Moving beats everything, if you guess right.</b></color>

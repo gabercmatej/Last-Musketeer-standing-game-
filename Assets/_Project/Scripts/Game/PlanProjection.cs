@@ -108,7 +108,7 @@ namespace Musketeers.Game
 
         // §5 Powder Keg: a tile on the board within Manhattan KegThrowRange (the sim fizzles anything else).
         public static bool KegTargetInRange(Board board, GameConfig cfg, Int2 from, Int2 target) =>
-            board.InBounds(target) && from.Manhattan(target) <= cfg.KegThrowRange;
+            !board.IsVoid(target) && from.Manhattan(target) <= cfg.KegThrowRange;
 
         static void Apply(GameState s, int slot, GameConfig cfg, Ability ability, PlannedAction a, ref TickProjection p)
         {
@@ -158,7 +158,7 @@ namespace Musketeers.Game
         // the plan (FIXES §3.2 rule 2): the sim decides, and the projection assumes it steps away.
         static void StepTo(GameState s, int slot, ref TickProjection p, Int2 to)
         {
-            if (IsSolid(s, to))
+            if (s.Board.IsVoid(to) || IsSolid(s, to))   // FIXES_4E §8.1: off the map or an 'x' tile is blocked
                 return;
             Land(s, ref p, to);
         }
@@ -169,7 +169,7 @@ namespace Musketeers.Game
         {
             Int2 first = p.Pos + d;
             Int2 second = p.Pos + d * 2;
-            if (s.Board.Get(first) == TileType.Pillar || IsSolid(s, second))
+            if (s.Board.IsVoid(first) || s.Board.IsVoid(second) || s.Board.Get(first) == TileType.Pillar || IsSolid(s, second))
                 return;
             Land(s, ref p, second);
         }
@@ -231,7 +231,7 @@ namespace Musketeers.Game
             for (int step = 1; step <= range; step++)
             {
                 Int2 next = last + d;
-                if (!s.Board.InBounds(next))
+                if (s.Board.IsVoid(next))
                 {
                     if (grappleWalls && s.Board.EdgeWalls)
                     {
@@ -262,7 +262,7 @@ namespace Musketeers.Game
             for (int step = 1; step <= range; step++)
             {
                 p += d;
-                if (!s.Board.InBounds(p) || s.Board.Get(p) == TileType.Pillar)
+                if (s.Board.IsVoid(p) || s.Board.Get(p) == TileType.Pillar)
                     break;
                 tiles.Add(p);
                 if (s.Board.Get(p).IsSolid() || s.KegAt(p) != null || (stopAtUnits && OtherUnitAt(s, self, p)))
@@ -282,6 +282,17 @@ namespace Musketeers.Game
             public Int2 Landing;      // where the pushed unit ends up (== ImpactTile when it can't move)
             public bool Slam;         // the push ended against a wall, crate, keg or unit
             public bool Falls;        // the pushed unit ends in a pit
+        }
+
+        // FIXES_4E §8.1: would a Move or Dash this way end at (or fly over) the void? The planning UI doesn't offer it.
+        public static bool WalksIntoVoid(Board board, Int2 from, ActionType type, Dir dir)
+        {
+            Int2 d = dir.ToInt2();
+            if (type == ActionType.Move)
+                return board.IsVoid(from + d);
+            if (type == ActionType.Dash)
+                return board.IsVoid(from + d) || board.IsVoid(from + d * 2);
+            return false;
         }
 
         public static RushPreview BullRush(GameState s, int slot, Int2 from, Dir dir, int distance, int push)

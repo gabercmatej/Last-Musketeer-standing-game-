@@ -38,13 +38,43 @@ namespace Musketeers.Sim.Tests
         }
 
         [Test]
-        public void Grappin_YankOverAPit_IsSafe()
+        public void Grappin_YankOverAPit_TargetFallsIn_KillCreditToGrappler()
         {
+            // FIXES_4E §8.3: the drag goes tile by tile, so the pit on the way swallows the target.
             With("A.~.B", Ability.Grappin)
+                .Plan('A', Act.Sig(Dir.E))
+                .ResolveTick()
+                .AssertDead('B')
+                .AssertKilledBy('B', 'A')
+                .AssertEvent(SimEventKind.Fell, 'B');
+        }
+
+        [Test]
+        public void Grappin_YankOverEmptyFloor_LandsNextToGrappler()
+        {
+            With("A...B", Ability.Grappin)
                 .Plan('A', Act.Sig(Dir.E))
                 .ResolveTick()
                 .AssertAlive('B')
                 .AssertPos('B', 1, 0);
+        }
+
+        [Test]
+        public void Grappin_PullSelfToPillarOrCrate_IsSafe_CrateSurvives()
+        {
+            With("A..o.", Ability.Grappin)
+                .Plan('A', Act.Sig(Dir.E))
+                .ResolveTick()
+                .AssertAlive('A')
+                .AssertPos('A', 2, 0)
+                .AssertTile(3, 0, TileType.Crate)
+                .AssertNoEvent(SimEventKind.CrateDestroyed)
+                .AssertHp('A', 3);
+            With("A..#.", Ability.Grappin)
+                .Plan('A', Act.Sig(Dir.E))
+                .ResolveTick()
+                .AssertPos('A', 2, 0)
+                .AssertHp('A', 3);
         }
 
         [Test]
@@ -273,15 +303,16 @@ namespace Musketeers.Sim.Tests
         }
 
         [Test]
-        public void BullRush_StoppedByUnit_PushesItFour()
+        public void BullRush_StoppedByUnit_Deals1AndPushesFive()
         {
             var s = With("A..B.......", Ability.BullRush)
                 .Plan('A', Act.Sig(Dir.E))
                 .ResolveTick()
                 .AssertPos('A', 2, 0)
-                .AssertPos('B', 7, 0)
-                .AssertHp('B', 3);
+                .AssertPos('B', 8, 0)   // stopped on 2, B on 3 slides 5 (FIXES_4E §8.4)
+                .AssertHp('B', 2);      // ... and takes 1 damage
             Assert.That(s.Unit('B').LastAttacker, Is.EqualTo(0));
+            s.AssertEvent(SimEventKind.Damaged, 'B');
         }
 
         [Test]
@@ -302,7 +333,7 @@ namespace Musketeers.Sim.Tests
                 .Plan('A', Act.Sig(Dir.E))
                 .ResolveTick()
                 .AssertPos('B', 2, 0)
-                .AssertHp('B', 2)
+                .AssertHp('B', 1)       // 1 Bull Rush damage + 1 wall slam
                 .AssertEvent(SimEventKind.WallSlam, 'B');
         }
 
@@ -328,7 +359,7 @@ namespace Musketeers.Sim.Tests
         }
 
         [Test]
-        public void BullRush_OnParrier_PushesFour_ParryStillBlocksShots()
+        public void BullRush_OnParrier_PushesFive_ParryStillBlocksShots()
         {
             Scenario.From("A.B.......C")
                 .WithAbility('A', Ability.BullRush).WithGrit('A', 5)
@@ -336,20 +367,20 @@ namespace Musketeers.Sim.Tests
                 .Plan('B', Act.Parry())
                 .Plan('C', Act.Fire(Dir.W))
                 .ResolveTick()
-                .AssertPos('B', 6, 0)
-                .AssertHp('B', 3)
+                .AssertPos('B', 7, 0)
+                .AssertHp('B', 2)            // the parry doesn't stop the Bull Rush damage
                 .AssertHp('C', 2)            // riposte: Bull Rush isn't a shove, so no Guard Break
                 .AssertNoEvent(SimEventKind.GuardBreak);
         }
 
         [Test]
-        public void BullRush_PushIsFourTiles_NotMore()
+        public void BullRush_PushIsFiveTiles_NotMore()
         {
             With("A.B........", Ability.BullRush)
                 .Plan('A', Act.Sig(Dir.E))
                 .ResolveTick()
-                .AssertPos('B', 6, 0)   // A stopped on 1, B was on 2 and slid 4
-                .AssertHp('B', 3);
+                .AssertPos('B', 7, 0)   // A stopped on 1, B was on 2 and slid 5
+                .AssertHp('B', 2);
         }
 
         // --- Triple Charge (FIXES §3.2 rule 7) ---

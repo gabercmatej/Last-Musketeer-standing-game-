@@ -20,7 +20,7 @@ namespace Musketeers.Sim
         public static bool IsWarned(GameState s, Int2 p, GameConfig cfg)
         {
             int ring = WarnedRing(s.Turn, s.Board, cfg);
-            return ring >= 0 && s.Board.InBounds(p) && s.Board.RingIndex(p) == ring;
+            return ring >= 0 && !s.Board.IsVoid(p) && s.Board.RingIndex(p) == ring;
         }
 
         static int RingFor(int turn, Board b, GameConfig cfg, int offset)

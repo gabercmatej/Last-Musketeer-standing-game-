@@ -26,7 +26,8 @@ namespace Musketeers.Sim
                 Int2 step1 = u.Pos + d;
                 if (a.Type == ActionType.Move)
                 {
-                    if (IsSolid(s, step1))
+                    // FIXES_4E §8.1: nobody walks off the map or onto an 'x' tile (pits and water are still walkable).
+                    if (s.Board.IsVoid(step1) || IsSolid(s, step1))
                     {
                         c.Log.Add(SimEventKind.MoveBlocked, unit: i, from: u.Pos, to: step1, dir: a.Dir, reason: (byte)BlockReason.Obstacle);
                         continue;
@@ -40,9 +41,10 @@ namespace Musketeers.Sim
                 // unit, pit). Only a pillar there (or the wall of a walled board) blocks it. The landing
                 // tile must not be solid; otherwise the dash fails and the Grit stays spent (Phase 0).
                 Int2 step2 = step1 + d;
-                if (s.Board.Get(step1) == TileType.Pillar || IsSolid(s, step2))
+                // FIXES_4E §8.1: a dash over or onto the void is blocked too; the Grit stays spent (Phase 0).
+                if (s.Board.IsVoid(step1) || s.Board.Get(step1) == TileType.Pillar || s.Board.IsVoid(step2) || IsSolid(s, step2))
                 {
-                    Int2 hit = s.Board.Get(step1) == TileType.Pillar ? step1 : step2;
+                    Int2 hit = s.Board.IsVoid(step1) || s.Board.Get(step1) == TileType.Pillar ? step1 : step2;
                     c.Log.Add(SimEventKind.MoveBlocked, unit: i, from: u.Pos, to: hit, dir: a.Dir, reason: (byte)BlockReason.Obstacle);
                     continue;
                 }

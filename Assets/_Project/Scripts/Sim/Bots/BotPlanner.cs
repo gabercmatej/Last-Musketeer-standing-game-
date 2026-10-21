@@ -405,7 +405,7 @@ namespace Musketeers.Sim
                 for (int step = 1; step <= _cfg.FireRange && e < 0; step++)
                 {
                     p += dv;
-                    if (!_s.Board.InBounds(p) || Solid(p))
+                    if (_s.Board.IsVoid(p) || Solid(p))
                         break;
                     for (int i = 0; i < pos.Length; i++)
                         if (alive[i] && pos[i] == p) { e = i; break; }
@@ -641,7 +641,7 @@ namespace Musketeers.Sim
         }
 
         // A dash flies over everything but a pillar (or a wall) on the middle tile.
-        bool DashClear(Int2 mid) => _s.Board.Get(mid) != TileType.Pillar;
+        bool DashClear(Int2 mid) => !_s.Board.IsVoid(mid) && _s.Board.Get(mid) != TileType.Pillar;   // FIXES_4E §8.1
 
         // No possible tile would put the dash landing in a pit.
         bool DashLandingPitFree(Dir d)
@@ -739,7 +739,7 @@ namespace Musketeers.Sim
             for (dist = 1; dist <= range; dist++)
             {
                 p += d.ToInt2();
-                if (!_s.Board.InBounds(p) || Solid(p))
+                if (_s.Board.IsVoid(p) || Solid(p))
                     return -1;
                 if (!passPits && Pit(p))
                     return -1;

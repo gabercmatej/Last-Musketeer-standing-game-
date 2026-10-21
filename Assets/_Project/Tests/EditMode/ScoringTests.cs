@@ -112,13 +112,14 @@ namespace Musketeers.Sim.Tests
         {
             var m = Match(Duel, Two);
             m.Crowned = 1;
+            m.Round.Crowned = 1;   // the round copy is what scores the kill on the spot
             AKillsB(m);
             Assert.That(m.Points, Is.EqualTo(new[] { 5, 0 }));
             Assert.That(m.Stats.CrownKills[0], Is.EqualTo(1));
         }
 
         [Test]
-        public void Points_AreAppliedOnlyAtRoundEnd()
+        public void KillPoints_AreScoredAtOnce_SurvivalWaitsForRoundEnd()
         {
             var m = Match(@"
                 .......
@@ -130,7 +131,7 @@ namespace Musketeers.Sim.Tests
             var o = MatchRunner.PlayTurn(m, p);
             Assert.That(o.RoundResult, Is.Null);
             Assert.That(m.Round.Units[2].Alive, Is.False);
-            Assert.That(m.Points, Is.EqualTo(new[] { 0, 0, 0 }));
+            Assert.That(m.Points, Is.EqualTo(new[] { 1, 0, 0 }), "FIXES_4E §8.6: the kill point lands at once");
             Assert.That(m.RoundGains.Count, Is.EqualTo(1));
         }
 
