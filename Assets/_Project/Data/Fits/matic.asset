@@ -92,31 +92,35 @@ MonoBehaviour:
       Invert: 0
     HandPath:
       Points:
-      - P: {x: 0.211, y: 0.293}
+      - P: {x: 0.20664985, y: 0.32388216}
         In: {x: 0, y: 0}
         Out: {x: 0, y: 0}
         Broken: 0
-      - P: {x: 0.234, y: 0.316}
+      - P: {x: 0.21179366, y: 0.38642442}
         In: {x: 0, y: 0}
         Out: {x: 0, y: 0}
         Broken: 0
-      - P: {x: 0.238, y: 0.379}
+      - P: {x: 0.204, y: 0.416}
         In: {x: 0, y: 0}
         Out: {x: 0, y: 0}
         Broken: 0
-      - P: {x: 0.211, y: 0.438}
+      - P: {x: 0.181, y: 0.467}
         In: {x: 0, y: 0}
         Out: {x: 0, y: 0}
         Broken: 0
-      - P: {x: 0.152, y: 0.43}
+      - P: {x: 0.154, y: 0.467}
         In: {x: 0, y: 0}
         Out: {x: 0, y: 0}
         Broken: 0
-      - P: {x: 0.152, y: 0.391}
+      - P: {x: 0.11799999, y: 0.451}
         In: {x: 0, y: 0}
         Out: {x: 0, y: 0}
         Broken: 0
-      - P: {x: 0.176, y: 0.293}
+      - P: {x: 0.11799999, y: 0.416}
+        In: {x: 0, y: 0}
+        Out: {x: 0, y: 0}
+        Broken: 0
+      - P: {x: 0.142, y: 0.326}
         In: {x: 0, y: 0}
         Out: {x: 0, y: 0}
         Broken: 0
@@ -485,39 +489,7 @@ MonoBehaviour:
       Closed: 1
       Invert: 0
     HandPath:
-      Points:
-      - P: {x: 0.555, y: 0.629}
-        In: {x: 0, y: 0}
-        Out: {x: 0, y: 0}
-        Broken: 0
-      - P: {x: 0.695, y: 0.617}
-        In: {x: 0, y: 0}
-        Out: {x: 0, y: 0}
-        Broken: 0
-      - P: {x: 0.762, y: 0.66}
-        In: {x: 0, y: 0}
-        Out: {x: 0, y: 0}
-        Broken: 0
-      - P: {x: 0.777, y: 0.746}
-        In: {x: 0, y: 0}
-        Out: {x: 0, y: 0}
-        Broken: 0
-      - P: {x: 0.75, y: 0.809}
-        In: {x: 0, y: 0}
-        Out: {x: 0, y: 0}
-        Broken: 0
-      - P: {x: 0.676, y: 0.801}
-        In: {x: 0, y: 0}
-        Out: {x: 0, y: 0}
-        Broken: 0
-      - P: {x: 0.551, y: 0.711}
-        In: {x: 0, y: 0}
-        Out: {x: 0, y: 0}
-        Broken: 0
-      - P: {x: 0.547, y: 0.652}
-        In: {x: 0, y: 0}
-        Out: {x: 0, y: 0}
-        Broken: 0
+      Points: []
       Closed: 1
       Invert: 0
     BootMaskBack: []

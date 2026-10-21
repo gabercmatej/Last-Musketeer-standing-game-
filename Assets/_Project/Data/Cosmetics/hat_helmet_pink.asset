@@ -29,23 +29,135 @@ MonoBehaviour:
       Offset: {x: 0, y: 0.11}
       Rotation: 0
       Scale: 1.25
+  - Character: nik
+    AnyPose: 0
+    Pose: 0
+    Fit:
+      Offset: {x: -0.0011981092, y: -0.026866078}
+      Rotation: 0
+      Scale: 1.3
+  - Character: matej
+    AnyPose: 0
+    Pose: 0
+    Fit:
+      Offset: {x: 0.024239626, y: -0.043824434}
+      Rotation: 0
+      Scale: 1.3
+  - Character: matic
+    AnyPose: 0
+    Pose: 0
+    Fit:
+      Offset: {x: -0.00543773, y: 0.007050991}
+      Rotation: 0
+      Scale: 1.3
+  - Character: aljaz
+    AnyPose: 0
+    Pose: 0
+    Fit:
+      Offset: {x: 0.024239618, y: 0.024009466}
+      Rotation: 0
+      Scale: 1.3
+  - Character: nik
+    AnyPose: 0
+    Pose: 3
+    Fit:
+      Offset: {x: 0.07511508, y: -0.043824494}
+      Rotation: 0
+      Scale: 1.3
+  - Character: aljaz
+    AnyPose: 0
+    Pose: 3
+    Fit:
+      Offset: {x: 0.109032065, y: -0.048064113}
+      Rotation: 0
+      Scale: 1.3
+  - Character: matic
+    AnyPose: 0
+    Pose: 3
+    Fit:
+      Offset: {x: 0.07087545, y: -0.08198106}
+      Rotation: 0
+      Scale: 1.3
+  - Character: matej
+    AnyPose: 0
+    Pose: 3
+    Fit:
+      Offset: {x: 0.041198105, y: -0.08622074}
+      Rotation: 0
+      Scale: 1.3
+  - Character: nik
+    AnyPose: 0
+    Pose: 1
+    Fit:
+      Offset: {x: 0.029932301, y: -0.061840504}
+      Rotation: 0
+      Scale: 1.3
+  - Character: aljaz
+    AnyPose: 0
+    Pose: 1
+    Fit:
+      Offset: {x: -0.00900957, y: -0.098711}
+      Rotation: 0
+      Scale: 1.3
+  - Character: matic
+    AnyPose: 0
+    Pose: 1
+    Fit:
+      Offset: {x: 0.03940883, y: -0.062099352}
+      Rotation: 0
+      Scale: 1.3
+  - Character: matej
+    AnyPose: 0
+    Pose: 1
+    Fit:
+      Offset: {x: 0.015179705, y: -0.13185304}
+      Rotation: 0
+      Scale: 1.3
+  - Character: matej
+    AnyPose: 0
+    Pose: 2
+    Fit:
+      Offset: {x: 0.025437735, y: -0.13165857}
+      Rotation: 0
+      Scale: 1.1197507
+  - Character: nik
+    AnyPose: 0
+    Pose: 2
+    Fit:
+      Offset: {x: 0.021198109, y: -0.03414716}
+      Rotation: 0
+      Scale: 1.1104593
+  - Character: aljaz
+    AnyPose: 0
+    Pose: 2
+    Fit:
+      Offset: {x: -0.0042396225, y: -0.03414716}
+      Rotation: 0
+      Scale: 1.0907831
+  - Character: matic
+    AnyPose: 0
+    Pose: 2
+    Fit:
+      Offset: {x: 0.0042396206, y: -0.012949005}
+      Rotation: 0
+      Scale: 1.1790668
   Tuned: 1
   Masks:
     Base:
       Points:
-      - P: {x: 0.215, y: -0.2}
+      - P: {x: 0.19302046, y: -0.14405215}
         In: {x: 0, y: 0}
         Out: {x: 0, y: 0}
         Broken: 0
-      - P: {x: 0.215, y: -0.02}
+      - P: {x: 0.15505584, y: 0.031951595}
         In: {x: 0, y: 0}
         Out: {x: 0, y: 0}
         Broken: 0
-      - P: {x: 0.1, y: 0.03}
-        In: {x: 0.06, y: 0}
-        Out: {x: -0.07, y: 0}
+      - P: {x: 0.04005584, y: -0.0019701915}
+        In: {x: 0.036970824, y: 0.039304342}
+        Out: {x: -0.036970824, y: -0.039304342}
         Broken: 0
-      - P: {x: -0.02, y: -0.1}
+      - P: {x: 0.041942295, y: -0.105994396}
         In: {x: 0, y: 0.07}
         Out: {x: 0, y: -0.05}
         Broken: 0
@@ -55,5 +167,38 @@ MonoBehaviour:
         Broken: 0
       Closed: 1
       Invert: 0
-    PerPose: []
-  CheckedMask: 0
+    PerPose:
+    - Pose: 2
+      Path:
+        Points:
+        - P: {x: -0.12408451, y: -0.17599106}
+          In: {x: 0, y: 0}
+          Out: {x: 0, y: 0}
+          Broken: 0
+        - P: {x: -0.101607315, y: -0.114193246}
+          In: {x: 0.012359567, y: -0.06605177}
+          Out: {x: -0.012359567, y: 0.06605177}
+          Broken: 0
+        - P: {x: -0.08677583, y: -0.0064062118}
+          In: {x: -0.050875463, y: -0.023741914}
+          Out: {x: 0.050875463, y: 0.023741914}
+          Broken: 0
+        - P: {x: -0.006754768, y: 0.012909221}
+          In: {x: -0.044264525, y: -0}
+          Out: {x: 0.044264525, y: 0}
+          Broken: 0
+        - P: {x: 0.109942615, y: -0.025319194}
+          In: {x: -0.008048095, y: 0.01609621}
+          Out: {x: 0.008048095, y: -0.01609621}
+          Broken: 0
+        - P: {x: 0.10591857, y: -0.11586027}
+          In: {x: -0.0040240437, y: 0.028168395}
+          Out: {x: 0.0040240437, y: -0.028168395}
+          Broken: 0
+        - P: {x: 0.14414702, y: -0.17823306}
+          In: {x: 0, y: 0}
+          Out: {x: 0, y: 0}
+          Broken: 0
+        Closed: 1
+        Invert: 0
+  CheckedMask: 15

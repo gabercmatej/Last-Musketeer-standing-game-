@@ -21,18 +21,25 @@ MonoBehaviour:
       Offset: {x: 0, y: 0}
       Rotation: 0
       Scale: 1
-    FitOverrides: []
+    FitOverrides:
+    - Character: matej
+      AnyPose: 0
+      Pose: 3
+      Fit:
+        Offset: {x: 0.10076644, y: 0.04702429}
+        Rotation: 0
+        Scale: 1
     ItemMasks:
       Base:
         Points: []
         Closed: 0
         Invert: 0
       PerPose: []
-    Checked: 0
+    Checked: 15
   Active:
     Name: active
     Fit:
-      Offset: {x: 0, y: 0}
+      Offset: {x: -0.3184631, y: -0.6015141}
       Rotation: 60
       Scale: 1.2413794
     FitOverrides:
@@ -40,7 +47,7 @@ MonoBehaviour:
       AnyPose: 0
       Pose: 3
       Fit:
-        Offset: {x: 0, y: 0}
+        Offset: {x: -0.02495996, y: -0.031199947}
         Rotation: -0
         Scale: 1.2413794
     - Character: 
@@ -57,10 +64,94 @@ MonoBehaviour:
         Offset: {x: 0, y: 0}
         Rotation: -90
         Scale: 1.2413794
+    - Character: matej
+      AnyPose: 0
+      Pose: 2
+      Fit:
+        Offset: {x: 0.07645447, y: -0.036106564}
+        Rotation: -90
+        Scale: 1.2413794
+    - Character: nik
+      AnyPose: 0
+      Pose: 2
+      Fit:
+        Offset: {x: 0.060419586, y: -0.045314703}
+        Rotation: -90
+        Scale: 1.2413794
+    - Character: matic
+      AnyPose: 0
+      Pose: 2
+      Fit:
+        Offset: {x: 0.030209893, y: -0.045314703}
+        Rotation: -90
+        Scale: 1.2413794
+    - Character: matej
+      AnyPose: 0
+      Pose: 0
+      Fit:
+        Offset: {x: -0.27602974, y: -0.5859064}
+        Rotation: 60
+        Scale: 1.2413794
+    - Character: aljaz
+      AnyPose: 0
+      Pose: 0
+      Fit:
+        Offset: {x: -0.19959873, y: -0.5562992}
+        Rotation: 60
+        Scale: 1.2413794
+    - Character: nik
+      AnyPose: 0
+      Pose: 0
+      Fit:
+        Offset: {x: -0.21687765, y: -0.5716213}
+        Rotation: 60
+        Scale: 1.2413794
+    - Character: matic
+      AnyPose: 0
+      Pose: 0
+      Fit:
+        Offset: {x: -0.20690164, y: -0.56894827}
+        Rotation: 60
+        Scale: 1.2413794
+    - Character: matej
+      AnyPose: 0
+      Pose: 3
+      Fit:
+        Offset: {x: -0.02495996, y: -0.031199947}
+        Rotation: -0
+        Scale: 1.2413794
+    - Character: aljaz
+      AnyPose: 0
+      Pose: 2
+      Fit:
+        Offset: {x: 0.04127745, y: -0.02948384}
+        Rotation: -90
+        Scale: 1.2413794
     ItemMasks:
       Base:
         Points: []
         Closed: 0
         Invert: 0
-      PerPose: []
-    Checked: 0
+      PerPose:
+      - Pose: 0
+        Path:
+          Points:
+          - P: {x: 0.05152841, y: 0.071084164}
+            In: {x: 0.0029414482, y: -0}
+            Out: {x: -0.0029414482, y: 0}
+            Broken: 0
+          - P: {x: 0.013289517, y: 0.0034307437}
+            In: {x: 0.020590177, y: 0.02941452}
+            Out: {x: -0.020590177, y: -0.02941452}
+            Broken: 0
+          - P: {x: -0.08966134, y: 0.006372192}
+            In: {x: 0.029414527, y: -0.023531623}
+            Out: {x: -0.029414527, y: 0.023531623}
+            Broken: 0
+          - P: {x: -0.12790024, y: 0.059318334}
+            In: {x: -0, y: -0}
+            Out: {x: 0, y: 0}
+            Broken: 0
+          Closed: 1
+          Invert: 0
+    Checked: 6

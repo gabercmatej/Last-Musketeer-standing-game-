@@ -29,11 +29,102 @@ MonoBehaviour:
       Offset: {x: 0, y: -0.27}
       Rotation: 0
       Scale: 1.5
-  Tuned: 0
+  - Character: matej
+    AnyPose: 0
+    Pose: 2
+    Fit:
+      Offset: {x: 0.017384227, y: 0.6290127}
+      Rotation: 0
+      Scale: 1.5
+  - Character: aljaz
+    AnyPose: 0
+    Pose: 3
+    Fit:
+      Offset: {x: -0.22026464, y: -0.25251654}
+      Rotation: 0
+      Scale: 1.45
+  - Character: aljaz
+    AnyPose: 0
+    Pose: 0
+    Fit:
+      Offset: {x: -0.19543001, y: -0.255}
+      Rotation: 0
+      Scale: 1.45
+  - Character: matej
+    AnyPose: 0
+    Pose: 0
+    Fit:
+      Offset: {x: -0.23268193, y: -0.255}
+      Rotation: 0
+      Scale: 1.45
+  - Character: nik
+    AnyPose: 0
+    Pose: 0
+    Fit:
+      Offset: {x: -0.22026464, y: -0.26990077}
+      Rotation: 0
+      Scale: 1.45
+  - Character: matic
+    AnyPose: 0
+    Pose: 0
+    Fit:
+      Offset: {x: -0.22026461, y: -0.25748342}
+      Rotation: 0
+      Scale: 1.45
+  - Character: matic
+    AnyPose: 0
+    Pose: 1
+    Fit:
+      Offset: {x: -0.32456997, y: -0.2102977}
+      Rotation: 0
+      Scale: 1.45
+  - Character: matej
+    AnyPose: 0
+    Pose: 1
+    Fit:
+      Offset: {x: -0.3096692, y: -0.23761576}
+      Rotation: 0
+      Scale: 1.45
+  - Character: aljaz
+    AnyPose: 0
+    Pose: 1
+    Fit:
+      Offset: {x: -0.29228497, y: -0.22271502}
+      Rotation: 0
+      Scale: 1.45
+  - Character: nik
+    AnyPose: 0
+    Pose: 1
+    Fit:
+      Offset: {x: -0.32456997, y: -0.22271502}
+      Rotation: 0
+      Scale: 1.45
+  - Character: nik
+    AnyPose: 0
+    Pose: 2
+    Fit:
+      Offset: {x: 0.0024834573, y: -0.23523158}
+      Rotation: 0
+      Scale: 1.5
+  - Character: aljaz
+    AnyPose: 0
+    Pose: 2
+    Fit:
+      Offset: {x: 0, y: -0.24516541}
+      Rotation: 0
+      Scale: 1.5
+  - Character: matic
+    AnyPose: 0
+    Pose: 2
+    Fit:
+      Offset: {x: 0.0024834573, y: -0.21039698}
+      Rotation: 0
+      Scale: 1.5
+  Tuned: 1
   Masks:
     Base:
       Points: []
       Closed: 0
       Invert: 0
     PerPose: []
-  CheckedMask: 0
+  CheckedMask: 15

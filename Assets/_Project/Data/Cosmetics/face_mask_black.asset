@@ -29,11 +29,151 @@ MonoBehaviour:
       Offset: {x: 0, y: -0.1}
       Rotation: 0
       Scale: 0.66
-  Tuned: 0
+  - Character: matej
+    AnyPose: 0
+    Pose: 2
+    Fit:
+      Offset: {x: 0.024417438, y: -0.080787174}
+      Rotation: 0
+      Scale: 0.65296614
+  - Character: nik
+    AnyPose: 0
+    Pose: 2
+    Fit:
+      Offset: {x: 0.0072384253, y: -0.12155464}
+      Rotation: 0
+      Scale: 0.7488307
+  - Character: matic
+    AnyPose: 0
+    Pose: 2
+    Fit:
+      Offset: {x: -0.014705898, y: -0.074829236}
+      Rotation: 0
+      Scale: 0.7305606
+  - Character: aljaz
+    AnyPose: 0
+    Pose: 2
+    Fit:
+      Offset: {x: -0.054706372, y: -0.1209255}
+      Rotation: 0
+      Scale: 0.73376805
+  - Character: matej
+    AnyPose: 0
+    Pose: 0
+    Fit:
+      Offset: {x: -0.080086365, y: -0.09568798}
+      Rotation: 0
+      Scale: 0.5791001
+  - Character: matej
+    AnyPose: 0
+    Pose: 3
+    Fit:
+      Offset: {x: -0.03538409, y: -0.10065489}
+      Rotation: 0
+      Scale: 0.5791001
+  - Character: matej
+    AnyPose: 0
+    Pose: 1
+    Fit:
+      Offset: {x: -0.017999858, y: -0.108105235}
+      Rotation: 0
+      Scale: 0.5791001
+  - Character: nik
+    AnyPose: 0
+    Pose: 0
+    Fit:
+      Offset: {x: -0.05504657, y: -0.101686925}
+      Rotation: 0
+      Scale: 0.52398986
+  - Character: nik
+    AnyPose: 0
+    Pose: 3
+    Fit:
+      Offset: {x: -0.0028938912, y: -0.091753095}
+      Rotation: 0
+      Scale: 0.6026518
+  - Character: nik
+    AnyPose: 0
+    Pose: 1
+    Fit:
+      Offset: {x: -0.03766234, y: -0.13645539}
+      Rotation: 0
+      Scale: 0.6026518
+  - Character: matic
+    AnyPose: 0
+    Pose: 0
+    Fit:
+      Offset: {x: -0.07202396, y: -0.07979615}
+      Rotation: 0
+      Scale: 0.5939747
+  - Character: matic
+    AnyPose: 0
+    Pose: 3
+    Fit:
+      Offset: {x: -0.044705898, y: -0.1095977}
+      Rotation: 0
+      Scale: 0.5939747
+  - Character: matic
+    AnyPose: 0
+    Pose: 1
+    Fit:
+      Offset: {x: -0.044705898, y: -0.1095977}
+      Rotation: 0
+      Scale: 0.5939747
+  - Character: aljaz
+    AnyPose: 0
+    Pose: 0
+    Fit:
+      Offset: {x: -0.052421384, y: -0.06380589}
+      Rotation: 0
+      Scale: 0.59202266
+  - Character: aljaz
+    AnyPose: 0
+    Pose: 3
+    Fit:
+      Offset: {x: 0.017115518, y: -0.1134751}
+      Rotation: 0
+      Scale: 0.59202266
+  - Character: aljaz
+    AnyPose: 0
+    Pose: 1
+    Fit:
+      Offset: {x: -0.08222291, y: -0.14079316}
+      Rotation: 0
+      Scale: 0.59202266
+  Tuned: 1
   Masks:
     Base:
-      Points: []
-      Closed: 0
+      Points:
+      - P: {x: -0.25714144, y: 0.04298218}
+        In: {x: 0, y: 0}
+        Out: {x: 0, y: 0}
+        Broken: 0
+      - P: {x: -0.124103725, y: 0.14190595}
+        In: {x: 0, y: 0}
+        Out: {x: 0, y: 0}
+        Broken: 0
+      - P: {x: -0.054872293, y: 0.09514503}
+        In: {x: -0, y: -0}
+        Out: {x: 0, y: 0}
+        Broken: 0
+      - P: {x: -0.07595437, y: 0.027348634}
+        In: {x: 0, y: 0}
+        Out: {x: 0, y: 0}
+        Broken: 0
+      - P: {x: -0.08434279, y: -0.045067944}
+        In: {x: 0, y: 0}
+        Out: {x: 0, y: 0}
+        Broken: 0
+      - P: {x: -0.07916269, y: -0.09007888}
+        In: {x: 0, y: 0}
+        Out: {x: 0, y: 0}
+        Broken: 0
+      - P: {x: -0.21332051, y: -0.07359351}
+        In: {x: 0, y: 0}
+        Out: {x: 0, y: 0}
+        Broken: 0
+      Closed: 1
       Invert: 0
     PerPose: []
-  CheckedMask: 0
+  CheckedMask: 15

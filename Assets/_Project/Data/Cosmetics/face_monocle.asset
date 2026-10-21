@@ -17,7 +17,7 @@ MonoBehaviour:
   Slot: 1
   Sprite: {fileID: 21300000, guid: 8148f78173ca34d06ad697f3f8f8db5e, type: 3}
   FrontSprite: {fileID: 21300000, guid: bc3da65076cef4906ba1aba40c0f329f, type: 3}
-  EnabledInV1: 0
+  EnabledInV1: 1
   Offset: {x: -0.015, y: -0.02}
   Scale: 0.42
   Rotation: 0
@@ -29,11 +29,123 @@ MonoBehaviour:
       Offset: {x: -0.075, y: -0.025}
       Rotation: 0
       Scale: 0.44
-  Tuned: 0
+  - Character: matej
+    AnyPose: 0
+    Pose: 2
+    Fit:
+      Offset: {x: 0.098824486, y: -0.0038019065}
+      Rotation: 0
+      Scale: 0.44
+  - Character: nik
+    AnyPose: 0
+    Pose: 2
+    Fit:
+      Offset: {x: 0.103064105, y: -0.0038018469}
+      Rotation: 0
+      Scale: 0.44
+  - Character: matic
+    AnyPose: 0
+    Pose: 2
+    Fit:
+      Offset: {x: 0.09034523, y: 0.017396187}
+      Rotation: 0
+      Scale: 0.44
+  - Character: aljaz
+    AnyPose: 0
+    Pose: 2
+    Fit:
+      Offset: {x: 0.081865996, y: -0.008041406}
+      Rotation: 0
+      Scale: 0.44
+  - Character: aljaz
+    AnyPose: 0
+    Pose: 1
+    Fit:
+      Offset: {x: -0.09158911, y: -0.046358287}
+      Rotation: 0
+      Scale: 0.42
+  - Character: nik
+    AnyPose: 0
+    Pose: 1
+    Fit:
+      Offset: {x: -0.044465292, y: -0.057129465}
+      Rotation: 0
+      Scale: 0.42
+  - Character: matic
+    AnyPose: 0
+    Pose: 1
+    Fit:
+      Offset: {x: -0.054956842, y: -0.024598477}
+      Rotation: 0
+      Scale: 0.42
+  - Character: matej
+    AnyPose: 0
+    Pose: 1
+    Fit:
+      Offset: {x: -0.01679174, y: -0.016157601}
+      Rotation: 0
+      Scale: 0.42
+  - Character: matej
+    AnyPose: 0
+    Pose: 3
+    Fit:
+      Offset: {x: -0.044677354, y: -0.0030415244}
+      Rotation: 0
+      Scale: 0.42
+  - Character: nik
+    AnyPose: 0
+    Pose: 3
+    Fit:
+      Offset: {x: 0.0019584903, y: -0.0030415244}
+      Rotation: 0
+      Scale: 0.42
+  - Character: matic
+    AnyPose: 0
+    Pose: 3
+    Fit:
+      Offset: {x: -0.023479238, y: -0.024239618}
+      Rotation: 0
+      Scale: 0.42
+  - Character: aljaz
+    AnyPose: 0
+    Pose: 3
+    Fit:
+      Offset: {x: 0.010437728, y: -0.011520762}
+      Rotation: 0
+      Scale: 0.42
+  - Character: matej
+    AnyPose: 0
+    Pose: 0
+    Fit:
+      Offset: {x: -0.099792436, y: 0.001198154}
+      Rotation: 0
+      Scale: 0.42
+  - Character: nik
+    AnyPose: 0
+    Pose: 0
+    Fit:
+      Offset: {x: -0.07859433, y: -0.011520762}
+      Rotation: 0
+      Scale: 0.42
+  - Character: aljaz
+    AnyPose: 0
+    Pose: 0
+    Fit:
+      Offset: {x: -0.065875456, y: 0.030875426}
+      Rotation: 0
+      Scale: 0.42
+  - Character: matic
+    AnyPose: 0
+    Pose: 0
+    Fit:
+      Offset: {x: -0.099792436, y: 0.022396188}
+      Rotation: 0
+      Scale: 0.42
+  Tuned: 1
   Masks:
     Base:
       Points: []
       Closed: 0
       Invert: 0
     PerPose: []
-  CheckedMask: 0
+  CheckedMask: 15
