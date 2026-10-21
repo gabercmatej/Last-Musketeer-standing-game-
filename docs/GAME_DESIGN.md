@@ -285,7 +285,7 @@ Ranked by fun-per-hour-of-work. Days 5–6 of the build plan.
 3. **Loading screen:** splash art, a random gameplay tip and a bar, for a few seconds.
 4. **Arena:** the match. Emotes on **Z / X / C / V**.
 5. **Scoreboard** between rounds (points with reasons, portraits).
-6. **Results:** the winner in their victory pose, everyone's portraits, final points and badges. Then back to the **Lobby** for the next match.
+6. **Results:** the played map's podium art; musketeers stand on the podiums by final place (1st tallest and a bit bigger in the Victory pose with the Crown, 2nd and 3rd Idle, 4th Hurt on the small block beside them; shared places show the same ordinal, 2-3 players leave podiums empty). A card on the right lists the winner ("Shared victory" on a tied 1st), the standings in rank order with portraits and points, and every badge each player earned, revealed one by one with a pop, a shine sweep and a sound. **Play again** goes back to the **Lobby**, **Quit** to the menu.
 
 Each map defines its own lobby background, lobby music and results podium art (`MapDef`); the lobby switches when the map changes and the results show the art of the map that was played. In-match music is the same on every map.
 

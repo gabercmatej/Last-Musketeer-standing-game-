@@ -30,7 +30,10 @@ namespace Musketeers.Sim.Tests
                     var fit = c.Fit.Get(kind);
                     Assert.That(fit, Is.Not.Null, $"{c.Id} {kind} anchors");
                     Assert.That(fit.BootPathBack.Valid && fit.BootPathFront.Valid, Is.True, $"{c.Id} {kind} boot masks");
-                    Assert.That(fit.HandPath.Valid, Is.True, $"{c.Id} {kind} hand mask");
+                    // An empty hand mask is allowed (deleted in the Wardrobe Studio = no front-hand overlay on that pose);
+                    // one that exists must be a closed shape.
+                    bool noHandMask = fit.HandPath.Points == null || fit.HandPath.Points.Count == 0;
+                    Assert.That(noHandMask || fit.HandPath.Valid, Is.True, $"{c.Id} {kind} hand mask");
                 }
                 Assert.That(c.Victory.Front, Is.True, "the victory pose faces the camera");
                 foreach (var slot in Loadout.Slots)

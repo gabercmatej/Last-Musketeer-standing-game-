@@ -21,8 +21,8 @@ MonoBehaviour:
   LobbyMusic: Music/bridge_lobby
   ResultsBackground: {fileID: 21300000, guid: 6d90a6383e721449d86fb13c81172842, type: 3}
   PodiumSpots:
-  - {x: 0.19736843, y: 0.46333688}
-  - {x: 0.082535885, y: 0.4048884}
-  - {x: 0.30801436, y: 0.4048884}
-  - {x: 0.40669855, y: 0.35706693}
+  - {x: 0.19736843, y: 0.441}
+  - {x: 0.082535885, y: 0.381}
+  - {x: 0.30801436, y: 0.375}
+  - {x: 0.40669855, y: 0.333}
   PodiumScale: 1

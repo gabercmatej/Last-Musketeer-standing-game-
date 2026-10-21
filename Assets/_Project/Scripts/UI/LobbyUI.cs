@@ -183,8 +183,10 @@ namespace Musketeers.UI
             _header.text = host ? "Match settings" : "Set by the host";
             _start.style.display = host ? DisplayStyle.Flex : DisplayStyle.None;
             _ready.style.display = host ? DisplayStyle.None : DisplayStyle.Flex;
-            _ready.text = _model.MyReady ? "Ready" : "Not ready";
-            _ready.EnableInClassList("btn--ready-on", _model.MyReady);
+            // The label names the action: "I'm ready" (primary) when you are not, "Not ready" (quiet) when you are.
+            _ready.text = _model.MyReady ? "Not ready" : "I'm ready";
+            _ready.EnableInClassList("btn--secondary", _model.MyReady);
+            _ready.EnableInClassList("btn--back", _model.MyReady);
 
             _points.text = _model.PointsToWin.ToString();
             _hearts.text = _model.Hearts.ToString();

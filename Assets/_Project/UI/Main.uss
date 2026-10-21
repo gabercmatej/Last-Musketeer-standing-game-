@@ -516,8 +516,9 @@
     margin: 0;
 }
 
-.btn--ready-on {
-    -unity-background-image-tint-color: rgb(170, 255, 170);
+.btn--start.btn--secondary {
+    -unity-background-image-tint-color: rgb(185, 195, 225);
+    opacity: 0.9;
 }
 
 .icon-btn--big {
@@ -1657,33 +1658,155 @@
     align-items: stretch;
 }
 
-.results-banner {
-    position: absolute;
-    left: 250px;
-    right: 250px;
-    top: 14px;
-    height: 100px;
-    background-image: url("/Assets/_Project/Art/UI/panels/banner.png");
-    -unity-slice-left: 200;
-    -unity-slice-right: 200;
-    -unity-slice-top: 50;
-    -unity-slice-bottom: 50;
-    -unity-slice-scale: 0.55px;
-    align-items: center;
-    justify-content: center;
-}
-
 .banner-text--static {
     font-size: 36px;
 }
 
+/* Results: the card sits on the right half, over the open floor; the podiums are on the left. */
 .results-card {
     position: absolute;
     right: 30px;
-    top: 120px;
-    bottom: 20px;
-    width: 560px;
+    top: 28px;
+    bottom: 28px;
+    width: 640px;
     align-items: stretch;
+    padding: 22px 28px;
+}
+
+.results-title {
+    -unity-font-definition: url("/Assets/_Project/Art/Fonts/PirataOne-Regular.ttf");
+    font-size: 30px;
+    color: var(--gold);
+    -unity-text-align: middle-center;
+    -unity-text-outline-width: 1px;
+    -unity-text-outline-color: rgb(20, 10, 4);
+}
+
+.winner-line {
+    margin-bottom: 8px;
+    font-size: 15px;
+    max-width: 560px;
+    align-self: center;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+}
+
+.standings {
+    flex-grow: 1;
+    justify-content: space-around;
+    border-top-width: 1px;
+    border-color: var(--line);
+    padding-top: 6px;
+}
+
+.standing {
+    flex-shrink: 0;
+    flex-direction: row;
+    align-items: center;
+    padding: 4px 0;
+}
+
+.standing-place {
+    width: 44px;
+    font-size: 20px;
+    color: var(--ink-dim);
+    -unity-font-style: bold;
+}
+
+.standing-place--first {
+    color: var(--gold);
+}
+
+.standing-info {
+    width: 150px;
+    flex-shrink: 0;
+    margin-left: 4px;
+}
+
+.standing-name {
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    font-size: 21px;
+    -unity-font-style: bold;
+}
+
+.standing-points {
+    font-size: 16px;
+    color: var(--ink-dim);
+}
+
+.standing-badges {
+    flex-direction: row;
+    flex-wrap: wrap;
+    flex-grow: 1;
+    flex-shrink: 1;
+    min-width: 0;
+    margin-left: 6px;
+}
+
+.badge-chip {
+    width: 80px;
+    align-items: center;
+    margin: 1px 2px;
+}
+
+.badge-icon {
+    width: 42px;
+    height: 42px;
+    border-radius: 9px;
+    overflow: hidden;
+}
+
+.badge-art {
+    width: 42px;
+    height: 42px;
+    -unity-background-scale-mode: scale-to-fit;
+}
+
+.badge-shine {
+    position: absolute;
+    top: -12px;
+    left: 0;
+    width: 12px;
+    height: 72px;
+    background-color: rgba(255, 255, 255, 0.4);
+    rotate: 25deg;
+    opacity: 0;
+}
+
+.badge-name {
+    font-size: 11px;
+    color: var(--gold);
+    -unity-text-align: middle-center;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 80px;
+}
+
+.results-buttons {
+    flex-direction: row;
+    justify-content: center;
+    margin-top: 6px;
+}
+
+.results-btn {
+    flex-grow: 1;
+    flex-basis: 0;
+    margin: 4px 8px;
+    min-height: 64px;
+    font-size: 28px;
+}
+
+.results-btn--again {
+    flex-grow: 1.4;
+}
+
+.btn--secondary {
+    -unity-background-image-tint-color: rgb(185, 195, 225);
+    opacity: 0.9;
 }
 
 .gains {
@@ -1859,8 +1982,12 @@
 }
 
 .stage-tag {
-    font-size: 12px;
-    color: var(--ink-dim);
+    font-size: 19px;
+    -unity-font-style: bold;
+    color: rgb(255, 240, 200);
+    -unity-text-outline-width: 1.5px;
+    -unity-text-outline-color: rgba(14, 8, 4, 0.95);
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.8);
 }
 
 .keg-fuse {

@@ -32,7 +32,8 @@ namespace Musketeers.Presentation
         readonly WorldLabel[] _tags = new WorldLabel[4];
         readonly WorldLabel[] _status = new WorldLabel[4];
         readonly bool[] _hasStatus = new bool[4];
-        SpriteRenderer _crown;
+        readonly SpriteRenderer[] _crowns = new SpriteRenderer[4];
+        float _fill = BackgroundFill;
         int _count;
 
         public bool Visible => _root != null && _root.gameObject.activeSelf;
@@ -51,21 +52,30 @@ namespace Musketeers.Presentation
         }
 
         // Cover-fit: the art fills the stage frame, cropping what does not fit.
-        static void Cover(SpriteRenderer r)
+        void Cover(SpriteRenderer r)
         {
             if (r.sprite == null)
                 return;
             var b = r.sprite.bounds.size;
-            float k = Mathf.Max(Width * BackgroundFill / b.x, Height * BackgroundFill / b.y);
+            float k = Mathf.Max(Width * _fill / b.x, Height * _fill / b.y);
             r.transform.localScale = new Vector3(k, k, 1f);
         }
 
         // Swaps the stage background (a map's lobby art). fade > 0 crossfades: the new art fades in over the old.
-        public void SetBackground(Sprite sprite, float fade)
+        // fill 1 shows the whole art (results: podium positions are fitted to it); the lobby overscans a little.
+        public void SetBackground(Sprite sprite, float fade, float fill = BackgroundFill)
         {
             Ensure();
-            if (sprite == null || sprite == _bgSprite)
+            if (sprite == null)
                 return;
+            bool sameFill = Mathf.Approximately(fill, _fill);
+            _fill = fill;
+            if (sprite == _bgSprite)
+            {
+                if (!sameFill)
+                    Cover(_bg);
+                return;
+            }
             _bgSprite = sprite;
             Tween.StopAll(_bgFront);
             if (fade <= 0f || !_root.gameObject.activeInHierarchy)
@@ -105,10 +115,10 @@ namespace Musketeers.Presentation
             Ensure();
             _root.gameObject.SetActive(true);
             _count = count;
-            if (_crown != null)
-                _crown.enabled = false;
             for (int i = 0; i < 4; i++)
             {
+                if (_crowns[i] != null)
+                    _crowns[i].enabled = false;
                 if (_spots[i] != null)
                     Destroy(_spots[i].gameObject);
                 _spots[i] = null;
@@ -190,9 +200,9 @@ namespace Musketeers.Presentation
                 Tween.Scale(t, scale, 0.35f, Ease.OutCubic);
             }
             float top = 1.36f * scale;
-            if (_names[i] != null) _names[i].Offset = new Vector3(0f, top + 0.45f, 0f);
+            if (_names[i] != null) _names[i].Offset = new Vector3(0f, top + 0.72f, 0f);
             if (_tags[i] != null) _tags[i].Offset = new Vector3(0f, top + 0.02f, 0f);
-            if (_status[i] != null) _status[i].Offset = new Vector3(0f, -0.34f, 0f);   // under the feet, on the plain floor
+            if (_status[i] != null) _status[i].Offset = new Vector3(0f, -0.17f, 0f);   // just under the feet, on the plain floor
         }
 
         void SetLabelsVisible(int i, bool on)
@@ -244,46 +254,50 @@ namespace Musketeers.Presentation
             Tween.LocalPositionY(r.transform, 0.18f, 0.12f, Ease.OutQuad, 2, CycleMode.Yoyo);
         }
 
-        // Results: the winner big in the victory pose wearing the Crown; everyone else smaller, wincing.
-        public void ShowPodium(int winner)
+        // World position (stage-local) of a normalized (0..1, y up) point on the background art, whatever the
+        // art's size and cover scale are.
+        Vector3 ArtPoint(Vector2 uv)
         {
-            if (_root == null)
+            var b = _bg.sprite.bounds;
+            var k = _bg.transform.localScale;
+            return new Vector3((b.min.x + uv.x * b.size.x) * k.x, (b.min.y + uv.y * b.size.y) * k.y, 0f) + _bg.transform.localPosition;
+        }
+
+        // Results: the k-th ranked slot (order[k]) stands with its feet on spots[k] of the results art. Place 1 gets
+        // the Victory pose and the Crown, 2nd and 3rd stand idle, 4th is hurt. Everyone faces the screen centre.
+        public void ShowPodium(int[] order, int[] places, Vector2[] spots, float scale)
+        {
+            Ensure();
+            if (_bg.sprite == null || spots == null)
                 return;
-            int side = 0;
-            for (int i = 0; i < _count; i++)
+            for (int k = 0; k < order.Length && k < spots.Length; k++)
             {
-                if (_spots[i] == null) continue;
-                bool win = i == winner;
-                _rigs[i].SetPose(win ? PoseKind.Victory : PoseKind.Hurt);
-                var group = _spots[i].GetComponent<SortingGroup>();
-                group.sortingOrder = win ? 30 : 10 + i;
-                if (win)
-                    Place(i, new Vector3(-3.8f, FloorY - 0.45f, 0f), 2.7f, true);
-                else
+                int i = order[k];
+                if (i >= _count || _spots[i] == null)
+                    continue;
+                int place = places[i];
+                _rigs[i].SetPose(place == 1 ? PoseKind.Victory : place >= 4 ? PoseKind.Hurt : PoseKind.Idle);
+                _spots[i].GetComponent<SortingGroup>().sortingOrder = 10 + k;   // the back podium first
+                Vector3 feet = ArtPoint(spots[k]);
+                float s = Scale * 0.8f * Mathf.Max(0.1f, scale) * (place == 1 ? 1.12f : 1f);
+                Place(i, feet, s, true);
+                _rigs[i].SetFacingRight(feet.x < 0f);
+                if (place == 1)
                 {
-                    // Losers flank the winner, the third one a step behind (the results card covers x > ~1).
-                    float x = side == 0 ? -6.8f : side == 1 ? -0.9f : -5.5f;
-                    float y = side == 2 ? FloorY + 0.9f : FloorY + 0.35f;
-                    Place(i, new Vector3(x, y, 0f), side == 2 ? 1.7f : 2f, true);
-                    _rigs[i].SetFacingRight(x < -3.8f);
-                    if (side == 2) group.sortingOrder = 5;
-                    side++;
+                    var crown = _crowns[i];
+                    if (crown == null)
+                        crown = _crowns[i] = _art.MakeRenderer("Crown", _root, _art.CrownSprite, _art.Has(GameArt.Crown) ? Color.white : new Color(1f, 0.82f, 0.2f), 60);
+                    crown.enabled = true;
+                    crown.transform.SetParent(_spots[i], false);
+                    crown.transform.localPosition = new Vector3(0f, 1.5f, 0f);
+                    crown.transform.localScale = Vector3.one * 0.3f;
+                    Tween.StopAll(crown.transform);
+                    Tween.LocalPositionY(crown.transform, 1.55f, 0.8f, Ease.InOutSine, -1, CycleMode.Yoyo);
                 }
-            }
-            if (winner >= 0 && winner < _count && _spots[winner] != null)
-            {
-                if (_crown == null)
-                    _crown = _art.MakeRenderer("Crown", _root, _art.CrownSprite, _art.Has(GameArt.Crown) ? Color.white : new Color(1f, 0.82f, 0.2f), 60);
-                _crown.enabled = true;
-                _crown.transform.SetParent(_spots[winner], false);
-                _crown.transform.localPosition = new Vector3(0f, 1.5f, 0f);
-                _crown.transform.localScale = Vector3.one * 0.3f;
-                Tween.StopAll(_crown.transform);
-                Tween.LocalPositionY(_crown.transform, 1.55f, 0.8f, Ease.InOutSine, -1, CycleMode.Yoyo);
-                // The winner's name and points float above the Crown.
-                float above = 1.75f * _spots[winner].localScale.y;
-                if (_names[winner] != null) _names[winner].Offset = new Vector3(0f, above + 0.35f, 0f);
-                if (_tags[winner] != null) _tags[winner].Offset = new Vector3(0f, above + 0.02f, 0f);
+                // Points line just over the head (above the Crown for 1st), the name over that.
+                float top = (place == 1 ? 1.9f : 1.58f) * s;
+                if (_tags[i] != null) _tags[i].Offset = new Vector3(0f, top + 0.12f, 0f);
+                if (_names[i] != null) _names[i].Offset = new Vector3(0f, top + 0.42f, 0f);
             }
         }
     }

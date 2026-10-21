@@ -144,8 +144,9 @@ namespace Musketeers.UI
             _planBar.SlotClicked += t => { if (_planning && !_builder.Locked) _builder.SelectSlot(t); };
             _planBar.LockClicked += ToggleLock;
             _scoreboard.ContinueClicked += ContinueAfterRound;
-            _results.AgainClicked += () => StartWithLoading(NewSetup(null));
-            _results.MenuClicked += ShowLobby;
+            _results.AgainClicked += ShowLobby;
+            _results.MenuClicked += ShowMenu;   // Quit
+            // Play again: straight back to the lobby, same players and settings (the lobby restores its art and music).
             _director.Announced += c => _hud.Banner(Callouts.Text(c), new Color(1f, 0.85f, 0.4f), 0.9f);
 
             _input.IsPointerOverUI = OverUI;
@@ -322,7 +323,8 @@ namespace Musketeers.UI
 
         void Teardown()
         {
-            PrimeTween.Tween.StopAll(this);   // delayed results sounds (victory line, award reveal)
+            PrimeTween.Tween.StopAll(this);   // delayed results sounds (victory line)
+            _results.Stop();                  // pending badge reveals
             _planning = false;
             _input.Active = false;
             _director.Stop();
@@ -631,20 +633,30 @@ namespace Musketeers.UI
             _mc.ContinueAfterRound();
         }
 
-        void OnMatchEnded()
+        void OnMatchEnded() => ShowResultsScreen(_mc.Match);
+
+        // The results: the played map's podium art with everyone on their podium by place, the card on the right.
+        void ShowResultsScreen(MatchState m)
         {
-            var m = _mc.Match;
             _planBar.SetVisible(false);
             _hud.SetVisible(false);
             _screen = Screen.Results;
-            Debug.Log($"[AppFlow] Match over after {m.RoundNumber} rounds; winner {_setup.Names[m.MatchWinner]}");
+            int n = _setup.PlayerCount;
+            var places = m.Places ?? Scoring.Rank(m.Points, m.RoundPoints);
+            Debug.Log($"[AppFlow] Match over after {m.RoundNumber} rounds; winner {_setup.Names[m.MatchWinner >= 0 ? m.MatchWinner : 0]}");
 
-            // The results stage: everyone in their outfits, the winner in the victory pose with the Crown.
-            var tags = new string[_setup.PlayerCount];
-            for (int i = 0; i < tags.Length; i++)
-                tags[i] = $"{m.Points[i]} pts";
-            _stage.Show(_setup.PlayerCount, _setup.Characters, _setup.Names, tags, SetupLoadouts());
-            _stage.ShowPodium(m.MatchWinner);
+            var tags = new string[n];
+            for (int i = 0; i < n; i++)
+                tags[i] = $"{ResultsLayout.Ordinal(places[i])} \u00B7 {m.Points[i]} pts";
+            var map = _art.Maps != null ? _art.Maps.Get(_art.Maps.IndexOf(_setup.MapId)) : null;
+            _stage.Show(n, _setup.Characters, _setup.Names, tags, SetupLoadouts());
+            var bg = map != null && map.ResultsBackground != null ? map.ResultsBackground : UiArt.Get(GameArt.LobbyBackground);
+            bool art = map != null && map.ResultsBackground != null;
+            _stage.SetBackground(bg, 0f, art ? 1f : 1.15f);
+            if (art)
+                _stage.ShowPodium(ResultsLayout.Order(places), places, map.PodiumSpots, map.PodiumScale);
+            else
+                _stage.ShowPodium(ResultsLayout.Order(places), places, new[] { new Vector2(0.3f, 0.3f), new Vector2(0.15f, 0.3f), new Vector2(0.45f, 0.3f), new Vector2(0.6f, 0.3f) }, 1f);
             _rig.SetBackground(null, new Color(0.08f, 0.06f, 0.05f));
             _rig.FrameStage(StageView.Center, StageView.Width, StageView.Height);
             _board.Clear();
@@ -652,7 +664,7 @@ namespace Musketeers.UI
             _audio?.Music("Music/results", 0.6f);
             _audio?.Sfx("SFX/match/match_win", 0.8f);
             _audio?.Announce(Callouts.Clip(Callout.LastMusketeer));
-            Tween(1.5f, () => _audio?.Sfx("SFX/match/award_reveal", 0.6f));
+            // No victory voice here (round wins only); the badge sounds come from ResultsUI.
         }
 
         void Tween(float delay, Action a) => PrimeTween.Tween.Delay(this, delay, _ => a());
@@ -815,6 +827,54 @@ namespace Musketeers.UI
         public void DevPressStart() => _lobby.PressStart();
         public void DevChangeMusketeer() => ChangeMusketeer();
         public void DevCloseConfirm() => _confirm.Hide();
+
+        // Screenshots: a fabricated finished match (several badges, a clear 1st..4th, or a shared 1st) on the results screen.
+        public void DevShowResults(int map, int players, bool sharedFirst = false)
+        {
+            _model.Players = Mathf.Clamp(players, 2, 4);
+            _model.Map = Mathf.Clamp(map, 0, _model.MapCount - 1);
+            Teardown();
+            HideAll();
+            _stage.Hide();
+            _setup = NewSetup(null);
+            int n = _setup.PlayerCount;
+            _colors = new Color[n];
+            _portraits = new Sprite[n];
+            for (int i = 0; i < n; i++)
+            {
+                _colors[i] = _art.CharacterColor(_setup.Characters[i]);
+                _portraits[i] = _art.Character(_setup.Characters[i])?.Portrait;
+            }
+            var m = MatchRunner.NewMatch(MapParser.Parse(_setup.MapAscii), _setup.Abilities, _setup.Config, 1u, out _, _setup.Characters);
+            Fill(m.Points, sharedFirst ? new[] { 3, 14, 14, 5 } : new[] { 3, 14, 11, 7 });
+            Fill(m.RoundWins, 0, 2, 1, 1);
+            m.RoundPoints.Clear();
+            m.RoundPoints.Add((int[])m.Points.Clone());   // one round: ties stay ties
+            m.Places = Scoring.Rank(m.Points, m.RoundPoints);
+            m.MatchOver = true;
+            m.MatchWinner = 0;
+            for (int i = 0; i < n; i++)
+            {
+                if (m.Places[i] == 1) { m.MatchWinner = i; break; }
+            }
+            var st = m.Stats;
+            Fill(st.ShotHits, 1, 6, 2, 0);
+            Fill(st.ShotsParried, 2, 0, 3, 1);
+            Fill(st.Bonks, 4, 1, 1, 7);
+            Fill(st.SelfRingOuts, 0, 0, 1, 2);
+            Fill(st.CrownKills, 0, 1, 0, 0);
+            Fill(st.KegDamage, 3, 0, 0, 0);
+            Fill(st.Fizzles, 0, 4, 0, 0);
+            Fill(st.DamageDealt, 5, 9, 4, 0);
+            Fill(st.Kills, 1, 4, 2, 0);
+            ShowResultsScreen(m);
+        }
+
+        static void Fill(int[] dst, params int[] src)
+        {
+            for (int i = 0; i < dst.Length && i < src.Length; i++)
+                dst[i] = src[i];
+        }
 
         public void DevOpenWardrobe(bool open)
         {
