@@ -13,6 +13,8 @@ namespace Musketeers.Presentation
         public const float MinTop = 40f, MaxTop = 70f;
         public const float MinBottom = 60f, MaxBottom = 80f;
         public const float CompactBelow = 160f;
+        // The Fullscreen / Settings / Leave icons sit at the top of the left column; the round label starts right of them.
+        public const float IconsWidth = 170f;
 
         public struct Regions
         {
@@ -41,6 +43,8 @@ namespace Musketeers.Presentation
                 Overlap = leftRoom < MinCol || rightRoom < MinCol,
             };
             r.RoundX = Mathf.Max(arena.xMin, r.Left.xMax + Gap);
+            if (r.RoundX < Pad + IconsWidth + Gap)
+                r.RoundX = Pad + IconsWidth + Gap;
             return r;
         }
 

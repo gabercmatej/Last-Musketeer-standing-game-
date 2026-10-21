@@ -54,7 +54,7 @@ namespace Musketeers.EditorTools
                 go.transform.SetParent(root.transform, false);
                 go.transform.localPosition = new Vector3(pi * DX, -ci * DY, 0f);
                 var rig = go.AddComponent<CharacterRig>();
-                rig.Build(art, def, art.Cosmetics.Sanitize(outfit(def)), def.Color);
+                rig.Build(art, def, art.Cosmetics.Sanitize(outfit(def), allowUnselectable: true), def.Color);
                 rig.ShowWeapons(weapons);
                 rig.SetPose(poses[pi]);
                 setup?.Invoke(rig);

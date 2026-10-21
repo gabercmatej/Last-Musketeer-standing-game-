@@ -33,6 +33,11 @@ namespace Musketeers.UI
         Label[] _points = new Label[0];
         VisualElement[] _crowns = new VisualElement[0];
         VisualElement[] _locks = new VisualElement[0];
+        Label[] _names = new Label[0];
+        Label[] _pops = new Label[0];
+        bool[] _matchPoint = new bool[0];
+        Color[] _nameColors = new Color[0];
+        Tween[] _popTweens = new Tween[0];
         Sequence _bannerTween;
 
         public HudUI(VisualElement hudRoot)
@@ -64,8 +69,8 @@ namespace Musketeers.UI
             log.clicked += () => LogClicked?.Invoke();
             // Matej's icon buttons, same look as the menu's corner buttons.
             var icons = hudRoot.Q("hud-icons");
-            CornerButtons.Add(icons, "settings", "Settings", "Settings", () => SettingsClicked?.Invoke());
-            CornerButtons.Add(icons, "leave-game", "Leave", "Leave the match", () => LeaveClicked?.Invoke());
+            // Same trio, order and size as the lobby (FIXES_4E §4.1): Fullscreen, Settings, Leave.
+            CornerButtons.AddTopLeftSet(icons, () => SettingsClicked?.Invoke(), () => LeaveClicked?.Invoke(), "Leave", "Leave the match");
         }
 
         public void SetVisible(bool visible)
@@ -125,6 +130,11 @@ namespace Musketeers.UI
             _points = new Label[n];
             _crowns = new VisualElement[n];
             _locks = new VisualElement[n];
+            _names = new Label[n];
+            _pops = new Label[n];
+            _matchPoint = new bool[n];
+            _nameColors = new Color[n];
+            _popTweens = new Tween[n];
             for (int i = 0; i < n; i++)
             {
                 var el = new VisualElement { pickingMode = PickingMode.Ignore };
@@ -137,7 +147,8 @@ namespace Musketeers.UI
                 el.Add(portrait);
                 var name = new Label(names[i]);
                 name.AddToClassList("score-name");
-                name.style.color = Color.Lerp(colors[i], Color.white, 0.3f);
+                _nameColors[i] = Color.Lerp(colors[i], Color.white, 0.3f);
+                name.style.color = _nameColors[i];
                 var pts = new Label("0");
                 pts.AddToClassList("score-points");
                 var crownArt = UiArt.Get(Musketeers.Data.GameArt.CrownSmall);
@@ -148,7 +159,12 @@ namespace Musketeers.UI
                 el.Add(pts);
                 el.Add(crown);
                 el.Add(lockIcon);
+                var pop = new Label { pickingMode = PickingMode.Ignore };
+                pop.AddToClassList("score-pop");
+                el.Add(pop);
                 _scores.Add(el);
+                _names[i] = name;
+                _pops[i] = pop;
                 _scoreEls[i] = el;
                 _points[i] = pts;
                 _crowns[i] = crown;
@@ -166,16 +182,47 @@ namespace Musketeers.UI
             return v;
         }
 
-        public void SetScores(int[] points, int crowned, GameState round, int lockMask, bool planning)
+        // matchPoint[i]: that player holds match point (FIXES_4E §8.7): gold border and name.
+        public void SetScores(int[] points, int crowned, GameState round, int lockMask, bool planning, bool[] matchPoint = null)
         {
             for (int i = 0; i < _scoreEls.Length && i < points.Length; i++)
             {
                 _points[i].text = points[i].ToString();
+                bool mp = matchPoint != null && i < matchPoint.Length && matchPoint[i];
+                if (mp != _matchPoint[i])
+                {
+                    _matchPoint[i] = mp;
+                    _scoreEls[i].EnableInClassList("score--match", mp);
+                    _names[i].EnableInClassList("score-name--match", mp);
+                    _names[i].style.color = mp ? new Color(1f, 0.88f, 0.4f) : _nameColors[i];
+                }
                 _crowns[i].style.display = crowned == i ? DisplayStyle.Flex : DisplayStyle.None;
                 bool alive = round != null && i < round.Units.Length && round.Units[i].Alive;
                 _scoreEls[i].EnableInClassList("score--dead", !alive);
                 _locks[i].style.display = planning && alive && (lockMask & (1 << i)) != 0 ? DisplayStyle.Flex : DisplayStyle.None;
             }
+        }
+
+        // "+1" / "+2" pop on a score box the moment a kill is scored (FIXES_4E §8.6); the number itself follows via SetScores.
+        public void PopScore(int slot, int amount)
+        {
+            if (slot < 0 || slot >= _pops.Length)
+                return;
+            _popTweens[slot].Stop();
+            var pop = _pops[slot];
+            pop.text = "+" + amount;
+            var pts = _points[slot];
+            _popTweens[slot] = Tween.Custom(0f, 1f, 0.9f, t =>
+            {
+                pop.style.opacity = t < 0.15f ? t / 0.15f : Mathf.Clamp01(1f - (t - 0.55f) / 0.45f);
+                pop.style.translate = new Translate(0f, -14f * t);
+                float bump = 1f + 0.5f * Mathf.Sin(Mathf.Clamp01(t * 2.2f) * Mathf.PI);
+                pts.style.scale = new Scale(new Vector3(bump, bump, 1f));
+            }, Ease.OutQuad).OnComplete(() =>
+            {
+                pop.style.opacity = 0f;
+                pts.style.scale = new Scale(Vector3.one);
+            });
         }
 
         public void SetRound(int round, int turn)

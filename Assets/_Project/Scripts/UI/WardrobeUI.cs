@@ -35,13 +35,35 @@ namespace Musketeers.UI
             foreach (var slot in Loadout.Slots)
             {
                 var s = slot;
-                var b = new Button(() => SelectTab(s)) { text = slot.ToString(), focusable = false };
+                bool soon = !Loadout.Selectable(slot);
+                var b = new Button(() => { if (!soon) SelectTab(s); }) { text = soon ? "" : slot.ToString(), focusable = false };
                 b.AddToClassList("btn");
                 b.AddToClassList("info-tab");
+                if (soon)
+                {
+                    // FIXES_4E §3.3: greyed out and unselectable; the boot items stay in the game, hidden.
+                    b.AddToClassList("info-tab--soon");
+                    b.SetEnabled(false);
+                    b.tooltip = "Coming soon";
+                    var name = new Label(slot.ToString()) { pickingMode = PickingMode.Ignore };
+                    var note = new Label("Coming soon") { pickingMode = PickingMode.Ignore };
+                    note.AddToClassList("tab-soon-note");
+                    name.AddToClassList("tab-soon-name");
+                    b.Add(name);
+                    b.Add(note);
+                }
                 tabs.Add(b);
                 _tabs.Add(b);
             }
             root.Q<Button>("wardrobe-close").clicked += () => Closed?.Invoke();
+            // Default: Hat, Face and Cape to none (FIXES_4E §3.3).
+            root.Q<Button>("wardrobe-default").clicked += () =>
+            {
+                _model.ClearMyLoadout();
+                UiArt.Sfx("SFX/ui/wardrobe_equip");
+                Rebuild();
+                Equipped?.Invoke();
+            };
             root.Q<Button>("wardrobe-random").clicked += () =>
             {
                 _model.RandomizeMine();
@@ -68,6 +90,8 @@ namespace Musketeers.UI
 
         void Rebuild()
         {
+            if (!Loadout.Selectable(_slot))
+                _slot = CosmeticSlot.Hat;
             for (int i = 0; i < _tabs.Count; i++)
                 _tabs[i].EnableInClassList("info-tab--on", Loadout.Slots[i] == _slot);
             _grid.Clear();

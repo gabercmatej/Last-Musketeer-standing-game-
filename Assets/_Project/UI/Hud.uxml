@@ -12,7 +12,7 @@
             </ui:VisualElement>
         </ui:VisualElement>
 
-        <!-- Left column: Settings/Leave, dev buttons, chat, then the plan panel. -->
+        <!-- Left column: Fullscreen/Settings/Leave, dev buttons, then the plan panel. -->
         <ui:VisualElement name="left-col" class="side-col left-col" picking-mode="Ignore">
             <ui:VisualElement name="hud-icons" class="hud-icons" picking-mode="Ignore" />
             <ui:VisualElement name="dev-buttons" class="corner-buttons" picking-mode="Ignore">
@@ -20,8 +20,6 @@
                 <ui:Button name="log-toggle" text="Log (L)" class="btn btn--small btn--hud" />
             </ui:VisualElement>
             <ui:Label name="dev-badge" text="DEV: CONTROL ALL (F2)  Tab or click a unit to switch" class="badge badge--dev dev-badge" />
-
-            <ui:VisualElement name="chat" class="chat" picking-mode="Ignore" />
 
             <ui:VisualElement name="plan-panel" class="plan-panel">
                 <ui:Label name="planning-for" text="Matej" class="planning-for" />
@@ -31,9 +29,10 @@
             </ui:VisualElement>
         </ui:VisualElement>
 
-        <!-- Right column: the four score boxes, only. -->
+        <!-- Right column: the four score boxes, then the chat below them. -->
         <ui:VisualElement name="right-col" class="side-col right-col" picking-mode="Ignore">
             <ui:VisualElement name="scores" class="scores" picking-mode="Ignore" />
+            <ui:VisualElement name="chat" class="chat" picking-mode="Ignore" />
         </ui:VisualElement>
 
         <ui:VisualElement name="log-panel" class="log-panel">

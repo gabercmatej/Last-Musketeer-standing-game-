@@ -8,8 +8,8 @@ namespace Musketeers.Game
 
     public static class Callouts
     {
-        // Bonk and Signature keep their banner but play no voice line (FIXES_v0.2 §2.6).
-        public static bool Voiced(Callout c) => c != Callout.Bonk && c != Callout.Signature;
+        // Bonk keeps its banner but plays no voice line (FIXES_v0.2 §2.6). "Signature move!" is back with its voice line (FIXES_4E §8.5).
+        public static bool Voiced(Callout c) => c != Callout.Bonk;
 
         // The most important moment in a tick (later enum values win), so one tick gets one line.
         // turnStart: the log is a turn start, where falls are the crumbling arena, not a swan dive.
@@ -25,6 +25,7 @@ namespace Musketeers.Game
                     case SimEventKind.Bonk: best = Max(best, Callout.Bonk); break;
                     case SimEventKind.Reflected: best = Max(best, Callout.Riposte); break;
                     case SimEventKind.GuardBreak: best = Max(best, Callout.GuardBreak); break;
+                    case SimEventKind.SignatureUsed:   // emitted in Phase 0 once the Grit is paid, so even a missed or failed one is announced
                     case SimEventKind.Grappled:
                     case SimEventKind.Swapped:
                     case SimEventKind.BullRushed:
@@ -69,7 +70,7 @@ namespace Musketeers.Game
             switch (c)
             {
                 case Callout.Bonk: return "BONK!";
-                case Callout.Signature: return "SIGNATURE!";
+                case Callout.Signature: return "SIGNATURE MOVE!";
                 case Callout.Riposte: return "RIPOSTE!";
                 case Callout.GuardBreak: return "GUARD BREAK!";
                 case Callout.SwanDive: return "SWAN DIVE!";

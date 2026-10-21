@@ -1,13 +1,15 @@
 <ui:UXML xmlns:ui="UnityEngine.UIElements">
     <ui:VisualElement name="results" class="screen" picking-mode="Ignore">
+        <!-- Top-left: Fullscreen, Settings (built in code). No Leave: Quit does that. -->
+        <ui:VisualElement name="results-corner" class="corner-row corner-row--left" picking-mode="Ignore" />
         <ui:VisualElement class="panel results-card">
             <ui:Label text="The last musketeer standing" class="results-title" />
             <ui:Label name="winner" text="Matej" class="winner" />
             <ui:Label name="winner-line" text="" class="subtitle winner-line" />
             <ui:VisualElement name="standings" class="standings" />
             <ui:VisualElement class="results-buttons">
+                <ui:Button name="again" text="Return to lobby" class="btn btn--big results-btn" />
                 <ui:Button name="menu" text="Quit" class="btn btn--big btn--back results-btn" />
-                <ui:Button name="again" text="Play again" class="btn btn--big btn--start results-btn results-btn--again" />
             </ui:VisualElement>
         </ui:VisualElement>
     </ui:VisualElement>

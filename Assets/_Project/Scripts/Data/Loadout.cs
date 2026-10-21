@@ -50,6 +50,12 @@ namespace Musketeers.Data
             return new Loadout { Hat = parts[0], Face = parts[1], Cape = parts[2], Boots = parts[3] };
         }
 
+        // FIXES_4E §3.3: the Boots tab is "Coming soon". Boot items and code stay in the game, but nobody can pick them,
+        // the Surprise button skips them and everyone wears the body's own boots (Sanitize clears the slot).
+        public const bool BootsSelectable = false;
+
+        public static bool Selectable(CosmeticSlot slot) => slot != CosmeticSlot.Boots || BootsSelectable;
+
         public static readonly CosmeticSlot[] Slots = { CosmeticSlot.Hat, CosmeticSlot.Face, CosmeticSlot.Cape, CosmeticSlot.Boots };
     }
 }

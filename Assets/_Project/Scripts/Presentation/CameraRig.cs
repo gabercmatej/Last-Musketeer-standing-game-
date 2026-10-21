@@ -9,13 +9,6 @@ namespace Musketeers.Presentation
     public sealed class CameraRig : MonoBehaviour
     {
         [SerializeField] private Camera _camera;
-        // Screen space the UI covers, as a fraction of screen height (top bar, plan bar).
-        [SerializeField] private float _topInset = 0.095f;
-        [SerializeField] private float _bottomInset = 0.235f;
-        [SerializeField] private float _sideInset = 0.02f;
-        [SerializeField] private float _margin = 0.45f;      // world units around the board (names, pips)
-        [SerializeField] private float _topMargin = 1.05f;   // the top row's heads and hearts rise above the board
-
         public Camera Camera => _camera;
 
         // The board's rect on screen: normalized viewport (0-1, y up). The HUD lays itself out around it.
@@ -136,38 +129,28 @@ namespace Musketeers.Presentation
             _camera.orthographic = true;
             if (_mode == Mode.Stage)
             {
-                // Cover: the stage rectangle fills the screen, cropping the long side.
-                float size = Mathf.Min(_stageH * 0.5f, _stageW / aspect * 0.5f);
-                _camera.orthographicSize = Mathf.Max(0.5f, size);
+                // The whole stage rectangle always shows (never cropped): the long side gets spare background.
+                _camera.orthographicSize = ViewFit.StageOrtho(_stageW, _stageH, aspect);
                 transform.position = new Vector3(_stageCenter.x, _stageCenter.y, -10f);
                 Cover();
                 return;
             }
-            float needH = _boardH + _margin + _topMargin;
-            float needW = _boardW + _margin * 2f;
-            float usableH = 1f - _topInset - _bottomInset;
-            float usableW = 1f - _sideInset * 2f;
-            // Half-height so the board fits the usable band vertically and horizontally.
-            float sizeV = needH / usableH * 0.5f;
-            float sizeH = needW / (usableW * aspect) * 0.5f;
-            float s = Mathf.Max(sizeV, sizeH);
+            // FIXES_4E §7: the board plus its margins is fitted inside the safe area between the HUD bands, at any
+            // aspect. The art's own cover framing is kept when it already fits; otherwise the camera zooms out and the
+            // mirrored copies of the art fill the rest (letterbox with background, never a crop).
+            var panel = ViewFit.PanelSize(Screen.width, Screen.height);
+            float s;
+            Vector2 c;
             if (_hasArena && _background != null && _background.sprite != null)
             {
-                // Cover-fit: the art (pinned to the board) fills the view exactly; the HUD sits in its margins.
-                BoardLayout.CoverFraming(_arena, _background.sprite.bounds.size, _boardW, _boardH, aspect, out s, out var c, out _);
-                _camera.orthographicSize = s;
-                transform.position = new Vector3(c.x, c.y, -10f);
-                ArenaViewport = BoardLayout.ArenaViewport(c, s, aspect, _boardW, _boardH, Vector2.zero);
-                Cover();
-                ArenaChanged?.Invoke();
-                return;
+                BoardLayout.CoverFraming(_arena, _background.sprite.bounds.size, _boardW, _boardH, aspect, out float s0, out var c0, out _);
+                ViewFit.Fit(panel, _boardW, _boardH, c0, s0, out s, out c);
             }
-            // Shift so the board (plus its top margin) sits in the middle of the usable band.
-            float bandCenter = _bottomInset + usableH * 0.5f;          // 0..1 from the bottom
-            float offset = (0.5f - bandCenter) * s * 2f + (_topMargin - _margin) * 0.5f;
+            else
+                ViewFit.Fit(panel, _boardW, _boardH, Vector2.zero, 0f, out s, out c);
             _camera.orthographicSize = s;
-            transform.position = new Vector3(0f, offset, -10f);
-            ArenaViewport = BoardLayout.ArenaViewport(new Vector2(0f, offset), s, aspect, _boardW, _boardH, Vector2.zero);
+            transform.position = new Vector3(c.x, c.y, -10f);
+            ArenaViewport = BoardLayout.ArenaViewport(c, s, aspect, _boardW, _boardH, Vector2.zero);
             Cover();
             ArenaChanged?.Invoke();
         }

@@ -19,6 +19,16 @@ namespace Musketeers.UI
             return btn;
         }
 
+        // The top-left trio of the lobby, the match HUD and the results screen: Fullscreen, Settings, Leave, same size
+        // (FIXES_4E §3.1, §4.1). onLeave null = no Leave button (the results screen has Quit instead).
+        public static void AddTopLeftSet(VisualElement row, Action onSettings, Action onLeave, string leaveCaption = "Leave", string leaveTooltip = "Leave")
+        {
+            AddFullscreen(row);
+            Add(row, "settings", "Settings", "Volume and credits", onSettings);
+            if (onLeave != null)
+                Add(row, "leave-game", leaveCaption, leaveTooltip, onLeave);
+        }
+
         // Fullscreen toggle. It runs on PointerDown, not click: Unity WebGL defers the fullscreen request to the next
         // user-gesture event (the mouseup of this same click), so one click works in the browser. The icon follows
         // Screen.fullScreen, polled because Esc leaves fullscreen in the browser without telling us.
@@ -29,7 +39,7 @@ namespace Musketeers.UI
             bool first = true;
             void Refresh()
             {
-                bool fs = UnityEngine.Screen.fullScreen;
+                bool fs = WebFullscreen.IsFullscreen;
                 if (!first && fs == shown)
                     return;
                 first = false;
@@ -42,7 +52,7 @@ namespace Musketeers.UI
             {
                 if (e.button != 0)
                     return;
-                UnityEngine.Screen.fullScreen = !UnityEngine.Screen.fullScreen;
+                WebFullscreen.Toggle();
                 btn.schedule.Execute(Refresh).ExecuteLater(250);
             }, TrickleDown.TrickleDown);
             btn.schedule.Execute(Refresh).Every(500);

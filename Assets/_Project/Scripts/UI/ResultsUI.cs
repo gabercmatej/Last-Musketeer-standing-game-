@@ -10,19 +10,27 @@ using UnityEngine.UIElements;
 namespace Musketeers.UI
 {
     // Match over (FIXES_v0.2 §2.5): the card on the right half of the screen (the podium stage is on the left):
-    // the winner, the standings in rank order with every badge each player earned, Play again / Quit.
+    // the winner, the standings in rank order with every badge each player earned, Return to lobby / Quit.
     // Badges start hidden and are revealed one by one (pop, shine sweep, a sound each).
     public sealed class ResultsUI
     {
         public const float RevealStart = 1.2f;
-        public const float RevealGap = 0.35f;
+        public const float RevealGap = 0.42f;      // FIXES_4E §6.1: about 20% slower than the old 0.35
+        public const float RevealSlow = 1.2f;      // the pop / shine animations stretch by the same factor
+        public const float BadgeVolume = 0.5f;     // the badge sound plays at 50% of its old volume
+        const float PopupSeconds = 5f;
 
         public event Action AgainClicked;
         public event Action MenuClicked;
+        public event Action SettingsClicked;
 
         readonly VisualElement _root;
         readonly Label _winner, _line;
         readonly VisualElement _standings;
+        readonly VisualElement _popup, _popupIcon;
+        readonly Label _popupName, _popupDesc, _popupWho;
+        string[] _names = new string[0];
+        Sequence _popupTween;
 
         public ResultsUI(VisualElement root)
         {
@@ -34,8 +42,34 @@ namespace Musketeers.UI
             var quit = root.Q<Button>("menu");
             again.focusable = false;
             quit.focusable = false;
-            again.clicked += () => AgainClicked?.Invoke();
+            again.clicked += () => AgainClicked?.Invoke();   // "Return to lobby"
             quit.clicked += () => MenuClicked?.Invoke();
+            // Top-left: Fullscreen and Settings (no Leave: Quit does that).
+            CornerButtons.AddTopLeftSet(root.Q("results-corner"), () => SettingsClicked?.Invoke(), null);
+
+            // The achievement-style popup a badge click opens.
+            _popup = new VisualElement { name = "ach" };
+            _popup.AddToClassList("ach");
+            _popupIcon = new VisualElement { pickingMode = PickingMode.Ignore };
+            _popupIcon.AddToClassList("ach-icon");
+            var text = new VisualElement { pickingMode = PickingMode.Ignore };
+            text.AddToClassList("ach-text");
+            var kicker = new Label("BADGE EARNED") { pickingMode = PickingMode.Ignore };
+            kicker.AddToClassList("ach-kicker");
+            _popupName = new Label { pickingMode = PickingMode.Ignore };
+            _popupName.AddToClassList("ach-name");
+            _popupDesc = new Label { pickingMode = PickingMode.Ignore };
+            _popupDesc.AddToClassList("ach-desc");
+            _popupWho = new Label { pickingMode = PickingMode.Ignore };
+            _popupWho.AddToClassList("ach-who");
+            text.Add(kicker);
+            text.Add(_popupName);
+            text.Add(_popupDesc);
+            text.Add(_popupWho);
+            _popup.Add(_popupIcon);
+            _popup.Add(text);
+            _popup.RegisterCallback<ClickEvent>(_ => HidePopup());
+            _root.Add(_popup);
             SetVisible(false);
         }
 
@@ -47,11 +81,43 @@ namespace Musketeers.UI
         }
 
         // Cancels the pending badge reveals (leaving the screen).
-        public void Stop() => Tween.StopAll(this);
+        public void Stop()
+        {
+            Tween.StopAll(this);
+            HidePopup();
+        }
+
+        void HidePopup()
+        {
+            _popupTween.Stop();
+            _popup.style.display = DisplayStyle.None;
+            _popup.style.opacity = 0f;
+        }
+
+        // Click on a badge: icon, name and description from Awards (FIXES_4E §6.2), who earned it, then it fades away.
+        void ShowPopup(Award a)
+        {
+            _popupTween.Stop();
+            _popupIcon.Clear();
+            _popupIcon.Add(UiArt.Image("badge-art", UiArt.Get(GameArt.Badge(a.Id)), new Color(1f, 0.8f, 0.3f)));
+            _popupName.text = a.Name;
+            _popupDesc.text = a.Description;
+            _popupWho.text = a.Player >= 0 && a.Player < _names.Length ? "Earned by " + _names[a.Player] : "";
+            _popup.style.display = DisplayStyle.Flex;
+            _popup.style.opacity = 0f;
+            UiArt.Sfx("SFX/ui/wardrobe_equip", 0.5f);
+            _popupTween = Tween.Custom(0f, 1f, 0.18f, v =>
+            {
+                _popup.style.opacity = v;
+                _popup.style.translate = new Translate(0f, (1f - v) * 24f);
+            }, Ease.OutQuad).Chain(Tween.Custom(1f, 0f, 0.5f, v => _popup.style.opacity = v, startDelay: PopupSeconds))
+              .OnComplete(() => _popup.style.display = DisplayStyle.None);
+        }
 
         public void Show(MatchState m, string[] names, Color[] colors, Sprite[] portraits)
         {
             Stop();
+            _names = names;
             int n = m.PlayerCount;
             var places = m.Places ?? Scoring.Rank(m.Points, m.RoundPoints);
             var order = ResultsLayout.Order(places);
@@ -108,6 +174,8 @@ namespace Musketeers.UI
                     if (a.Player != i)
                         continue;
                     var chip = MakeBadge(a);
+                    var award = a;
+                    chip.RegisterCallback<ClickEvent>(_ => ShowPopup(award));
                     badges.Add(chip);
                     chips.Add(chip);
                 }
@@ -129,7 +197,7 @@ namespace Musketeers.UI
 
         static VisualElement MakeBadge(Award a)
         {
-            var chip = new VisualElement { tooltip = a.Description };
+            var chip = new VisualElement { tooltip = a.Description, pickingMode = PickingMode.Ignore };   // clickable once revealed
             chip.AddToClassList("badge-chip");
             var icon = new VisualElement { pickingMode = PickingMode.Ignore };
             icon.AddToClassList("badge-icon");
@@ -149,19 +217,20 @@ namespace Musketeers.UI
         // Pop 0 -> 1.18 -> 1 with a fade in, then one shine sweep across the badge.
         void Reveal(VisualElement chip, int index)
         {
-            UiArt.Sfx("SFX/match/award_reveal", Mathf.Min(1f, 0.45f + 0.07f * index));   // a little louder with each badge
-            Tween.Custom(this, 0f, 1.18f, 0.22f, (_, v) =>
+            chip.pickingMode = PickingMode.Position;
+            UiArt.Sfx("SFX/match/award_reveal", Mathf.Min(1f, 0.45f + 0.07f * index) * BadgeVolume);   // a little louder with each badge, at 50%
+            Tween.Custom(this, 0f, 1.18f, 0.22f * RevealSlow, (_, v) =>
             {
                 chip.style.scale = new Scale(new Vector3(v, v, 1f));
                 chip.style.opacity = Mathf.Clamp01(v / 0.8f);
             }, Ease.OutQuad).OnComplete(() =>
-                Tween.Custom(this, 1.18f, 1f, 0.14f, (_, v) => chip.style.scale = new Scale(new Vector3(v, v, 1f)), Ease.InOutSine));
+                Tween.Custom(this, 1.18f, 1f, 0.14f * RevealSlow, (_, v) => chip.style.scale = new Scale(new Vector3(v, v, 1f)), Ease.InOutSine));
             var shine = chip.Q("shine");
-            Tween.Custom(this, 0f, 1f, 0.4f, (_, t) =>
+            Tween.Custom(this, 0f, 1f, 0.4f * RevealSlow, (_, t) =>
             {
                 shine.style.translate = new Translate(Mathf.Lerp(-30f, 64f, t), 0f);
                 shine.style.opacity = Mathf.Sin(t * Mathf.PI);
-            }, Ease.InOutSine, startDelay: 0.2f);
+            }, Ease.InOutSine, startDelay: 0.2f * RevealSlow);
         }
     }
 }

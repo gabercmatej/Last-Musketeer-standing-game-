@@ -27,43 +27,46 @@
     </ui:VisualElement>
 
     <ui:VisualElement name="charselect" class="screen charselect">
-        <ui:VisualElement name="charselect-bg" class="fill-bg" picking-mode="Ignore" />
+        <!-- No art of its own: the lobby stage (musketeers standing in the tavern) shows through the dimmer. -->
+        <ui:VisualElement name="charselect-bg" class="fill-bg charselect-bg" picking-mode="Ignore" />
         <ui:VisualElement class="charselect-shade" picking-mode="Ignore" />
-        <ui:Label text="Pick your Musketeer" class="title charselect-title" picking-mode="Ignore" />
         <ui:VisualElement class="charselect-body" picking-mode="Ignore">
             <ui:VisualElement name="cs-picker" class="cs-picker" />
-            <ui:VisualElement class="panel cs-bio">
-                <ui:VisualElement class="cs-head">
-                    <ui:VisualElement name="cs-portrait" class="cs-portrait" picking-mode="Ignore" />
-                    <ui:VisualElement class="cs-headtext">
-                        <ui:Label name="cs-name" text="" class="cs-name name-clip" />
-                        <ui:Label name="cs-title" text="" class="cs-title name-clip" />
-                        <ui:VisualElement class="cs-stat">
-                            <ui:Label text="Strength" class="cs-stat-label" />
-                            <ui:Label name="cs-strength" text="" class="cs-stat-value name-clip" />
+            <ui:VisualElement class="cs-main" picking-mode="Ignore">
+                <ui:Label text="Pick your Musketeer" class="title charselect-title" picking-mode="Ignore" />
+                <ui:VisualElement class="panel cs-bio">
+                    <ui:VisualElement class="cs-head">
+                        <ui:VisualElement name="cs-portrait" class="cs-portrait" picking-mode="Ignore" />
+                        <ui:VisualElement class="cs-headtext">
+                            <ui:Label name="cs-name" text="" class="cs-name name-clip" />
+                            <ui:Label name="cs-title" text="" class="cs-title name-clip" />
+                            <ui:VisualElement class="cs-stat">
+                                <ui:Label text="Strength" class="cs-stat-label" />
+                                <ui:Label name="cs-strength" text="" class="cs-stat-value name-clip" />
+                            </ui:VisualElement>
+                            <ui:VisualElement class="cs-stat">
+                                <ui:Label text="Weakness" class="cs-stat-label" />
+                                <ui:Label name="cs-weakness" text="" class="cs-stat-value name-clip" />
+                            </ui:VisualElement>
                         </ui:VisualElement>
-                        <ui:VisualElement class="cs-stat">
-                            <ui:Label text="Weakness" class="cs-stat-label" />
-                            <ui:Label name="cs-weakness" text="" class="cs-stat-value name-clip" />
+                    </ui:VisualElement>
+                    <ui:Label name="cs-bio" text="" class="cs-story" />
+                    <ui:VisualElement class="cs-sig">
+                        <ui:VisualElement name="cs-sig-icon" class="cs-sig-icon" picking-mode="Ignore" />
+                        <ui:VisualElement class="cs-sig-text">
+                            <ui:VisualElement class="cs-sig-head">
+                                <ui:Label name="cs-sig-name" text="" class="cs-sig-name" />
+                                <ui:Label name="cs-sig-cost" text="" class="cs-sig-cost" />
+                            </ui:VisualElement>
+                            <ui:Label name="cs-sig-desc" text="" class="cs-sig-desc" />
                         </ui:VisualElement>
                     </ui:VisualElement>
                 </ui:VisualElement>
-                <ui:Label name="cs-bio" text="" class="cs-story" />
-                <ui:VisualElement class="cs-sig">
-                    <ui:VisualElement name="cs-sig-icon" class="cs-sig-icon" picking-mode="Ignore" />
-                    <ui:VisualElement class="cs-sig-text">
-                        <ui:VisualElement class="cs-sig-head">
-                            <ui:Label name="cs-sig-name" text="" class="cs-sig-name" />
-                            <ui:Label name="cs-sig-cost" text="" class="cs-sig-cost" />
-                        </ui:VisualElement>
-                        <ui:Label name="cs-sig-desc" text="" class="cs-sig-desc" />
-                    </ui:VisualElement>
+                <ui:VisualElement class="charselect-buttons">
+                    <ui:Button name="cs-back" text="Back" class="btn btn--big btn--back cs-back" />
+                    <ui:Button name="cs-select" text="Select" class="btn btn--big btn--primary cs-select" />
                 </ui:VisualElement>
             </ui:VisualElement>
-        </ui:VisualElement>
-        <ui:VisualElement class="charselect-buttons">
-            <ui:Button name="cs-back" text="Back" class="btn btn--back cs-back" />
-            <ui:Button name="cs-select" text="Select" class="btn btn--big btn--primary" />
         </ui:VisualElement>
     </ui:VisualElement>
 </ui:UXML>

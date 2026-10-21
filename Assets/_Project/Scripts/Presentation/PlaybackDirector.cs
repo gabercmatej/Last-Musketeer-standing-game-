@@ -24,6 +24,7 @@ namespace Musketeers.Presentation
         public bool IsPlaying { get; private set; }
         public event Action<int> TickStarted;
         public event Action<Callout> Announced;   // the HUD shows the banner
+        public event Action<int, int, int> PointsScored;   // scorer, victim, amount: the score box updates and pops (FIXES_4E §8.6)
 
         static readonly Color Red = new Color(1f, 0.3f, 0.3f);
         static readonly Color Gold = new Color(1f, 0.85f, 0.3f);
@@ -462,6 +463,12 @@ namespace Musketeers.Presentation
                         _fx.Dust(to, 0f, 0.9f, S(0.45f));
                     });
                     Sfx(delay, "SFX/impacts/crate_break");
+                    // FIXES_4E §5.2: a lucky crate pays its breaker 1 Grit; the sim already rolled it (Amount = Grit gained).
+                    if (e.Amount > 0 && u != null)
+                    {
+                        At(delay + 0.2f, () => _fx.Popup("+" + e.Amount + " Grit", u.transform.localPosition + Vector3.up * 1.1f, Gold, S(1f), "popup-big"));
+                        Sfx(delay + 0.2f, "SFX/ui/plan_add", 0.9f);
+                    }
                     return 0.3f;
                 case SimEventKind.Grappled:
                 {
@@ -569,6 +576,10 @@ namespace Musketeers.Presentation
                     Sfx(delay + 0.1f, "SFX/impacts/death");
                     Line(delay + 0.15f, u, "death");
                     return 0.5f;
+                case SimEventKind.PointsScored:
+                    // Right after the victim's Died event: the live score changes at the moment of the kill.
+                    At(delay + 0.2f, () => PointsScored?.Invoke(e.Unit, e.Other, e.Amount));
+                    return 0.25f;
                 case SimEventKind.RoundEnded:
                     At(delay + 0.2f, () => _fx.Shake(0.15f, S(0.4f)));
                     if (u != null)

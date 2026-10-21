@@ -22,7 +22,7 @@
     <div id="warning"></div>
     <div id="footer">
       <span><b>Keep this tab open and visible while playing.</b> Hidden tabs pause the game.</span>
-      <span>v{{{ PRODUCT_VERSION }}} &nbsp; <button id="fullscreen" type="button">Fullscreen</button></span>
+      <span>v{{{ PRODUCT_VERSION }}}</span>
     </div>
     <script src="Build/{{{ LOADER_FILENAME }}}"></script>
     <script>
@@ -90,9 +90,6 @@
       }).then(function (unityInstance) {
         loader.classList.add("done");
         canvas.focus();
-        document.querySelector("#fullscreen").onclick = function () {
-          unityInstance.SetFullscreen(1);
-        };
       }).catch(function (message) {
         statusEl.textContent = "Couldn't start the game.";
         showBanner(String(message), 'error');

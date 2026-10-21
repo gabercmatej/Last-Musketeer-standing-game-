@@ -34,6 +34,7 @@ namespace Musketeers.Presentation
         readonly bool[] _hasStatus = new bool[4];
         readonly SpriteRenderer[] _crowns = new SpriteRenderer[4];
         float _fill = BackgroundFill;
+        float _extra = 1f;     // >1 in windows narrower than 16:9, where the camera shows the whole stage and more of the room above and below
         int _count;
 
         public bool Visible => _root != null && _root.gameObject.activeSelf;
@@ -58,7 +59,20 @@ namespace Musketeers.Presentation
                 return;
             var b = r.sprite.bounds.size;
             float k = Mathf.Max(Width * _fill / b.x, Height * _fill / b.y);
+            if (_fill > 1.01f)
+                k *= _extra;
             r.transform.localScale = new Vector3(k, k, 1f);
+        }
+
+        // The camera shows the whole stage at any aspect (CameraRig / ViewFit.StageOrtho); in a narrower window the lobby
+        // art grows to keep covering the taller view (the results art stays pinned to its podiums and letterboxes).
+        public void SetViewAspect(float aspect)
+        {
+            _extra = Mathf.Max(1f, Width / Mathf.Max(0.1f, aspect) / Height);
+            if (_root == null)
+                return;
+            Cover(_bg);
+            Cover(_bgFront);
         }
 
         // Swaps the stage background (a map's lobby art). fade > 0 crossfades: the new art fades in over the old.

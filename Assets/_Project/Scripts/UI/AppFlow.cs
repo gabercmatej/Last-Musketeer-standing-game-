@@ -80,6 +80,10 @@ namespace Musketeers.UI
         int _lastTimerSecond = -1;
         float _emoteReady;
         int _dialogClosedFrame = -1;
+        int[] _livePoints;          // points as shown during a turn's playback: PointsBefore plus each kill as it happens (FIXES_4E §8.6)
+        bool[] _matchPointMask = new bool[4];
+        int _lastScreenW, _lastScreenH;
+        float _origMatch = -1f;
 
         public MatchController Controller => _mc;
 
@@ -150,9 +154,11 @@ namespace Musketeers.UI
             _planBar.SlotClicked += t => { if (_planning && !_builder.Locked) _builder.SelectSlot(t); };
             _planBar.LockClicked += ToggleLock;
             _scoreboard.ContinueClicked += ContinueAfterRound;
-            _results.AgainClicked += ShowLobby;
-            _results.MenuClicked += ShowMenu;   // Quit
-            // Play again: straight back to the lobby, same players and settings (the lobby restores its art and music).
+            _results.AgainClicked += ShowLobby;   // Return to lobby
+            _results.MenuClicked += ShowMenu;     // Quit
+            _results.SettingsClicked += () => _info.OpenTab(InfoWindowUI.Tab.Settings);
+            // Return to lobby: straight back to the same lobby, same players, bots and settings (the lobby restores its art and music).
+            _director.PointsScored += OnPointsScored;
             _director.Announced += c => _hud.Banner(Callouts.Text(c), new Color(1f, 0.85f, 0.4f), 0.9f, c == Callout.EnGarde || c == Callout.Draw);
 
             _input.IsPointerOverUI = OverUI;
@@ -264,16 +270,28 @@ namespace Musketeers.UI
             _audio?.Music("Music/menu");
         }
 
-        // Menu (valid name) -> Pick your Musketeer -> Lobby. The lobby's Change Musketeer (chunk 4) calls this too.
+        // Menu (valid name) -> Pick your Musketeer (over the dimmed lobby stage) -> Lobby. The lobby's Change Musketeer (chunk 4) calls this too.
         public void ShowCharacterSelect()
         {
             Teardown();
             HideAll();
-            _stage.Hide();
             _screen = Screen.Menu;
             _charSelectFromLobby = false;
             _model.Name = _menu.PlayerName;
+            ShowStageBackdrop();
             _charSelect.Show(_model.Character);
+        }
+
+        // FIXES_4E §2.1: the picker is drawn over the real lobby (the tavern stage with the musketeers already in it),
+        // dimmed by the overlay, instead of a plain background.
+        void ShowStageBackdrop()
+        {
+            RefreshStage();
+            _rig.SetBackground(null, new Color(0.08f, 0.06f, 0.05f));
+            _rig.FrameStage(StageView.Center, StageView.Width, StageView.Height);
+            var map = CurrentMap;
+            var art = map != null && map.LobbyBackground != null ? map.LobbyBackground : UiArt.Get(GameArt.LobbyBackground);
+            _stage.SetBackground(art, 0f);
         }
 
         // Lobby -> Change Musketeer: the same overlay; Back and Select both return to the lobby.
@@ -281,7 +299,7 @@ namespace Musketeers.UI
         {
             _charSelectFromLobby = true;
             _lobby.SetVisible(false);
-            _stage.Hide();
+            ShowStageBackdrop();
             _charSelect.Show(_model.Character);
         }
 
@@ -482,6 +500,7 @@ namespace Musketeers.UI
         {
             var round = _mc.Match.Round;
             int n = _setup.PlayerCount;
+            _livePoints = null;
             _plans = new TurnPlan[n];
             _locked = new bool[n];
             for (int i = 0; i < n; i++)
@@ -604,6 +623,7 @@ namespace Musketeers.UI
             _input.Active = false;
             _preview.Clear();
             _planBar.HideTooltip();
+            _livePoints = (int[])p.PointsBefore.Clone();
             for (int i = 0; i < _board.UnitCount; i++)
                 _board.Unit(i)?.SetSelected(false);
             _planBar.SetMessage("Resolving...");
@@ -633,6 +653,16 @@ namespace Musketeers.UI
             _audio?.Sfx("SFX/match/points_tick", 0.8f);
             // The round winner's victory voice is played by PlaybackDirector on RoundEnded (FIXES_v0.2 §2.6),
             // never here, so it neither repeats nor spills onto the results screen.
+        }
+
+        // A kill scored during playback: the number goes up now and the score box pops "+1" / "+2".
+        void OnPointsScored(int scorer, int victim, int amount)
+        {
+            if (_livePoints == null || scorer < 0 || scorer >= _livePoints.Length)
+                return;
+            _livePoints[scorer] += amount;
+            _hud.PopScore(scorer, amount);
+            _audio?.Sfx("SFX/match/points_tick", 0.5f);
         }
 
         void ContinueAfterRound()
@@ -731,8 +761,38 @@ namespace Musketeers.UI
             _confirm.Show("Leave this match? You won't be able to rejoin.", "Leave", "Stay", ShowLobby);
         }
 
+        // FIXES_4E §7: the 1280x720 reference panel is scaled to fit inside the window (min of the two ratios), so no
+        // aspect crops or overlaps the HUD; the camera (CameraRig) refits on the same size change.
+        void UpdatePanelScale()
+        {
+            int w = UnityEngine.Screen.width, h = UnityEngine.Screen.height;
+            if (w == _lastScreenW && h == _lastScreenH)
+                return;
+            _lastScreenW = w;
+            _lastScreenH = h;
+            var ps = _document != null ? _document.panelSettings : null;
+            if (ps != null)
+            {
+                if (_origMatch < 0f)
+                    _origMatch = ps.match;
+                ps.scaleMode = PanelScaleMode.ScaleWithScreenSize;
+                ps.referenceResolution = new Vector2Int((int)ViewFit.RefW, (int)ViewFit.RefH);
+                ps.screenMatchMode = PanelScreenMatchMode.MatchWidthOrHeight;
+                ps.match = ViewFit.PanelMatch(w, h);
+            }
+            _stage.SetViewAspect(h > 0 ? (float)w / h : 16f / 9f);
+        }
+
+        void OnDestroy()
+        {
+            // The PanelSettings asset must not keep a runtime-chosen match value in the Editor.
+            if (_origMatch >= 0f && _document != null && _document.panelSettings != null)
+                _document.panelSettings.match = _origMatch;
+        }
+
         void Update()
         {
+            UpdatePanelScale();
             float dt = Time.unscaledDeltaTime;
             _loading.Tick(dt);
             var kb = Keyboard.current;
@@ -777,9 +837,20 @@ namespace Musketeers.UI
             // During playback the live round is already resolved, so show who was alive at its start
             // (and the points/crown from before it, so the HUD doesn't spoil the result).
             if (_mc.Phase == MatchPhase.Playback && _mc.Current != null)
-                _hud.SetScores(_mc.Current.PointsBefore, _mc.Current.CrownedBefore, _mc.Current.Before, 0, false);
+            {
+                var pts = _livePoints ?? _mc.Current.PointsBefore;
+                for (int i = 0; i < _matchPointMask.Length; i++)
+                    _matchPointMask[i] = i < pts.Length && pts[i] >= m.Cfg.PointsToWin;   // the same rule as MatchState.IsMatchPoint, on the live numbers
+                _hud.SetScores(pts, _mc.Current.CrownedBefore, _mc.Current.Before, 0, false, _matchPointMask);
+            }
             else
-                _hud.SetScores(m.Points, m.Crowned, m.Round, _mc.LockMask, planning);
+            {
+                for (int i = 0; i < _matchPointMask.Length; i++)
+                    _matchPointMask[i] = m.IsMatchPoint(i);
+                _hud.SetScores(m.Points, m.Crowned, m.Round, _mc.LockMask, planning, _matchPointMask);
+            }
+            for (int i = 0; i < _board.UnitCount; i++)
+                _board.Unit(i)?.SetMatchPoint(i < _matchPointMask.Length && _matchPointMask[i]);
 
             if (_mc.Phase == MatchPhase.RoundOver)
             {

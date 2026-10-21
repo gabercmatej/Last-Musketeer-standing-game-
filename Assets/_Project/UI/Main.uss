@@ -311,10 +311,16 @@
 
 .corner-row {
     position: absolute;
-    right: 24px;
+    right: 40px;   /* the Fullscreen icon's right edge lines up with the menu panel's right edge (48px padding minus the icon's inset) */
     top: 16px;
     flex-direction: row;
     align-items: flex-start;
+}
+
+/* Lobby, HUD and results: the same icon trio in the top-left corner. */
+.corner-row--left {
+    left: 6px;   /* the first icon has a 14px left margin */
+    right: auto;
 }
 
 .icon-btn {
@@ -388,9 +394,9 @@
 
 .gm-panel {
     position: absolute;
-    left: 14px;
+    right: 14px;
     top: 12px;
-    width: 300px;
+    width: 340px;
     padding: 16px 20px 14px 20px;
     -unity-slice-scale: 0.36px;
 }
@@ -405,73 +411,70 @@
     margin-bottom: 6px;
 }
 
+/* One line = a label column and a control column, every line the same height. */
+.gm-line {
+    flex-direction: row;
+    align-items: center;
+    height: 38px;
+}
+
 .gm-label {
-    font-size: 14px;
+    width: 110px;
+    flex-shrink: 0;
+    font-size: 15px;
     color: var(--ink-dim);
 }
 
-.gm-label--row {
-    flex-grow: 1;
-}
-
-.gm-map {
-    margin-bottom: 6px;
-}
-
-.gm-map-row {
+.gm-control {
     flex-direction: row;
     align-items: center;
+    flex-grow: 1;
+    flex-basis: 0;
 }
 
 .gm-step {
-    width: 34px;
-    min-height: 28px;
-    font-size: 17px;
-    margin: 2px;
+    width: 38px;
+    min-height: 32px;
+    font-size: 18px;
+    margin: 0;
     padding: 0;
-}
-
-.gm-bot {
-    min-height: 28px;
-    margin: 2px;
-    padding: 2px 8px;
-    font-size: 13px;
-}
-
-.gm-row {
-    flex-direction: row;
-    align-items: center;
-    margin-top: 2px;
+    flex-shrink: 0;
 }
 
 .gm-value {
+    flex-grow: 1;
+    flex-basis: 0;
     font-size: 20px;
     color: var(--gold);
-    min-width: 38px;
     -unity-text-align: middle-center;
 }
 
 .gm-value--tight {
+    flex-grow: 0;
     min-width: 30px;
 }
 
 .gm-value-box {
+    flex-grow: 1;
+    flex-basis: 0;
     flex-direction: row;
     align-items: center;
     justify-content: center;
-    min-width: 62px;
 }
 
 .gm-heart {
     width: 20px;
     height: 20px;
+    margin-right: 5px;
     -unity-background-scale-mode: scale-to-fit;
 }
 
 .map-name {
     flex-grow: 1;
+    flex-basis: 0;
     flex-shrink: 1;
-    font-size: 18px;
+    min-width: 0;
+    font-size: 16px;
     color: var(--gold);
     -unity-text-align: middle-center;
 }
@@ -481,12 +484,18 @@
     color: var(--ink-dim);
     white-space: normal;
     -unity-text-align: upper-center;
-    margin: 0 4px 2px 4px;
+    margin: 0 4px 4px 4px;
     min-height: 30px;
 }
 
+.gm-default {
+    align-self: center;
+    width: 130px;
+    margin: 8px 0 0 0;
+}
+
 .gm-panel--readonly .gm-step,
-.gm-panel--readonly .gm-bot {
+.gm-panel--readonly .gm-default {
     display: none;
 }
 
@@ -583,6 +592,41 @@
     min-height: 46px;
     font-size: 20px;
     margin-left: 8px;
+}
+
+.wardrobe-buttons {
+    align-items: center;
+}
+
+.wardrobe .wardrobe-side {
+    width: 112px;
+    min-height: 40px;
+    font-size: 15px;
+    margin: 0 8px;
+}
+
+.info-tab--soon {
+    opacity: 0.4;
+}
+
+.tab-soon-name {
+    font-size: 16px;
+    color: var(--ink);
+    margin: 0;
+    padding: 0;
+    -unity-text-align: middle-center;
+}
+
+.tab-soon-note {
+    font-size: 10px;
+    color: var(--ink-dim);
+    margin: 0;
+    padding: 0;
+    -unity-text-align: middle-center;
+}
+
+.info-tab--soon:hover {
+    scale: 1 1;
 }
 
 .wardrobe .title--panel {
@@ -832,23 +876,32 @@
     background-color: rgba(4, 6, 16, 0.9);
 }
 
+.charselect-bg {
+    display: none;
+}
+
 .charselect-title {
-    position: absolute;
-    left: 0;
-    right: 0;
-    top: 22px;
+    align-self: stretch;
     font-size: 54px;
+    margin-bottom: 8px;
 }
 
 .charselect-body {
     position: absolute;
-    left: 60px;
-    right: 60px;
-    top: 100px;
-    bottom: 110px;
+    left: 40px;
+    right: 40px;
+    top: 0;
+    bottom: 0;
     flex-direction: row;
     align-items: center;
     justify-content: center;
+}
+
+.cs-main {
+    width: 720px;
+    flex-shrink: 1;
+    margin-left: 24px;
+    align-items: stretch;
 }
 
 .cs-picker {
@@ -910,11 +963,7 @@
 }
 
 .cs-bio {
-    width: 720px;
-    flex-shrink: 1;
-    margin-left: 24px;
-    padding: 26px 34px;
-    max-height: 100%;
+    padding: 22px 34px;
 }
 
 .cs-head {
@@ -1011,11 +1060,15 @@
     font-size: 22px;
     color: var(--gold);
     margin-right: 12px;
+    flex-shrink: 0;
+    white-space: nowrap;
 }
 
 .cs-sig-cost {
     font-size: 14px;
     color: var(--ink-dim);
+    flex-shrink: 0;
+    white-space: nowrap;
 }
 
 .cs-sig-desc {
@@ -1025,26 +1078,25 @@
 }
 
 .charselect-buttons {
-    position: absolute;
-    left: 0;
-    right: 0;
-    bottom: 24px;
     flex-direction: row;
     justify-content: center;
     align-items: center;
+    margin-top: 6px;
+}
+
+/* Back and Select: identical box model, so they share one baseline, centred under the character box. */
+.charselect-buttons .btn {
+    min-height: 66px;
+    font-size: 26px;
+    margin: 10px 10px 0 10px;
 }
 
 .charselect-buttons .cs-back {
-    width: 160px;
-    min-height: 66px;
-    font-size: 24px;
+    width: 200px;
 }
 
-.charselect-buttons .btn--big {
-    min-height: 66px;
-    font-size: 28px;
+.charselect-buttons .cs-select {
     width: 300px;
-    margin-left: 20px;
 }
 
 /* ---------- HUD ----------
@@ -1088,7 +1140,7 @@
     align-items: center;
     padding: 2px 22px;
     border-radius: 14px;
-    background-color: rgba(8, 14, 44, 0.55);
+    background-color: rgba(8, 14, 44, 0.9);
 }
 
 .timer {
@@ -1137,13 +1189,37 @@
     padding: 2px 8px 2px 2px;
     margin-bottom: 4px;
     border-radius: 22px;
-    background-color: rgba(8, 14, 44, 0.78);
+    background-color: rgba(8, 14, 44, 0.92);
     border-width: 2px;
     overflow: hidden;
 }
 
+/* Out this round: dimmed, but clearly readable (FIXES_4E §4.3). */
 .score--dead {
-    opacity: 0.45;
+    opacity: 0.7;
+}
+
+/* Match point (FIXES_4E §8.7): points >= points to win. Gold border and a soft glow behind the box. */
+.score--match {
+    border-color: rgb(255, 206, 96);
+    background-color: rgba(60, 44, 10, 0.95);
+}
+
+.score-name--match {
+    color: rgb(255, 224, 140);
+    -unity-font-style: bold;
+}
+
+.score-pop {
+    position: absolute;
+    right: 6px;
+    top: 4px;
+    font-size: 22px;
+    color: rgb(255, 230, 120);
+    -unity-font-style: bold;
+    -unity-text-outline-width: 1.5px;
+    -unity-text-outline-color: rgb(30, 16, 4);
+    opacity: 0;
 }
 
 .score-portrait {
@@ -1185,16 +1261,17 @@
 .hud-icons {
     flex-direction: row;
     margin-bottom: 4px;
+    margin-left: -2px;
 }
 
 .hud-icons .icon-btn {
-    width: 60px;
-    margin: 0 4px 0 0;
+    width: 52px;
+    margin: 0 3px 0 0;
 }
 
 .hud-icons .icon-btn__img {
-    width: 44px;
-    height: 44px;
+    width: 42px;
+    height: 42px;
 }
 
 .hud-icons .icon-btn__caption {
@@ -1202,12 +1279,16 @@
     margin-top: 0;
 }
 
-.hud--compact .hud-icons .icon-btn { width: 56px; margin-right: 4px; }
-.hud--compact .hud-icons .icon-btn__img { width: 40px; height: 40px; }
+.hud--compact .hud-icons .icon-btn { width: 40px; margin-right: 3px; }
+.hud--compact .hud-icons .icon-btn__img { width: 36px; height: 36px; }
+.hud--compact .hud-icons .icon-btn__caption { display: none; }
 
 /* Chat: a short fading log, a text field and the four emote buttons (top of the left column). */
 .chat {
-    margin-bottom: 6px;
+    margin-top: 6px;
+    align-self: flex-end;
+    width: 100%;
+    max-width: 172px;
 }
 
 .chat-log {
@@ -1223,7 +1304,7 @@
     margin-bottom: 1px;
     padding: 1px 4px;
     border-radius: 4px;
-    background-color: rgba(8, 14, 44, 0.55);
+    background-color: rgba(8, 14, 44, 0.9);
 }
 
 .chat-name {
@@ -1269,7 +1350,7 @@
     font-size: 12px;
     padding: 1px 4px;
     min-height: 22px;
-    background-color: rgba(8, 14, 44, 0.8);
+    background-color: rgba(8, 14, 44, 0.94);
     color: var(--ink);
     border-color: var(--line);
 }
@@ -1287,7 +1368,7 @@
     border-radius: 15px;
     border-width: 1px;
     border-color: var(--gold-dark);
-    background-color: rgba(8, 14, 44, 0.78);
+    background-color: rgba(8, 14, 44, 0.92);
     align-items: center;
     justify-content: center;
 }
@@ -1381,7 +1462,7 @@
 .plan-panel {
     padding: 6px;
     border-radius: 10px;
-    background-color: rgba(8, 14, 44, 0.78);
+    background-color: rgba(8, 14, 44, 0.92);
     border-width: 1px;
     border-color: var(--line);
 }
@@ -1408,12 +1489,12 @@
     border-radius: 8px;
     border-width: 2px;
     border-color: rgba(255, 255, 255, 0.12);
-    background-color: rgba(20, 40, 110, 0.75);
+    background-color: rgba(20, 40, 110, 0.94);
     overflow: hidden;
 }
 
 .slot:hover {
-    background-color: rgba(40, 64, 150, 0.85);
+    background-color: rgba(40, 64, 150, 0.96);
 }
 
 .slot--cursor {
@@ -1422,7 +1503,7 @@
 
 .slot--invalid {
     border-color: var(--danger);
-    background-color: rgba(110, 30, 30, 0.8);
+    background-color: rgba(110, 30, 30, 0.94);
 }
 
 .slot--locked {
@@ -1499,7 +1580,7 @@
 /* Bottom bar: the big Grit counter, then the grouped action bar. */
 .bottom-bar {
     position: absolute;
-    background-color: rgba(8, 14, 44, 0.5);
+    background-color: rgba(8, 14, 44, 0.9);
     flex-direction: row;
     align-items: center;
 }
@@ -1511,7 +1592,7 @@
     border-radius: 10px;
     border-width: 2px;
     border-color: var(--gold-dark);
-    background-color: rgba(8, 14, 44, 0.85);
+    background-color: rgba(8, 14, 44, 0.95);
     justify-content: center;
 }
 
@@ -1623,7 +1704,7 @@
     border-radius: 8px;
     border-width: 2px;
     border-color: rgba(255, 214, 120, 0.25);
-    background-color: rgba(20, 40, 110, 0.85);
+    background-color: rgba(20, 40, 110, 0.95);
     align-items: center;
     justify-content: flex-start;
     overflow: hidden;
@@ -1641,13 +1722,24 @@
     border-color: var(--gold);
 }
 
+/* Unavailable (no Grit, unloaded musket...): ~58% opacity and desaturated, still clearly readable (FIXES_4E §4.3). */
 .action--off {
-    opacity: 0.35;
+    opacity: 0.58;
+    background-color: rgba(48, 54, 74, 0.95);
+    border-color: rgba(190, 190, 200, 0.25);
+}
+
+.action--off .action-icon {
+    -unity-background-image-tint-color: rgb(150, 150, 158);
+}
+
+.action--off .action-name {
+    color: rgb(190, 190, 198);
 }
 
 .action--off:hover {
     translate: 0 0;
-    background-color: rgba(20, 40, 110, 0.85);
+    background-color: rgba(48, 54, 74, 0.95);
 }
 
 .action--sig {
@@ -1747,7 +1839,7 @@
 /* Columns that reach onto the board edge get a firmer backing so they stay readable over the art. */
 .hud--overlap .plan-panel,
 .hud--overlap .score {
-    background-color: rgba(8, 14, 44, 0.66);
+    background-color: rgba(8, 14, 44, 0.9);
 }
 
 .tooltip {
@@ -1943,8 +2035,76 @@
     font-size: 28px;
 }
 
-.results-btn--again {
-    flex-grow: 1.4;
+/* Badge chips open the achievement popup on click. */
+.badge-chip:hover {
+    scale: 1.08 1.08;
+}
+
+.ach {
+    position: absolute;
+    left: 24px;
+    bottom: 24px;
+    width: 440px;
+    flex-direction: row;
+    align-items: center;
+    padding: 12px 18px 12px 12px;
+    border-radius: 14px;
+    border-width: 2px;
+    border-color: var(--gold);
+    background-color: rgba(10, 18, 56, 0.97);
+    opacity: 0;
+    display: none;
+}
+
+.ach-icon {
+    width: 72px;
+    height: 72px;
+    flex-shrink: 0;
+    margin-right: 14px;
+    border-radius: 12px;
+    border-width: 2px;
+    border-color: var(--gold-dark);
+    background-color: rgba(255, 206, 96, 0.12);
+    align-items: center;
+    justify-content: center;
+}
+
+.ach-icon > .badge-art {
+    width: 62px;
+    height: 62px;
+}
+
+.ach-text {
+    flex-grow: 1;
+    flex-shrink: 1;
+    min-width: 0;
+}
+
+.ach-kicker {
+    font-size: 11px;
+    color: var(--ink-faint);
+    letter-spacing: 1px;
+}
+
+.ach-name {
+    -unity-font-definition: url("/Assets/_Project/Art/Fonts/PirataOne-Regular.ttf");
+    font-size: 28px;
+    color: var(--gold);
+    -unity-text-outline-width: 1px;
+    -unity-text-outline-color: rgb(30, 16, 4);
+    white-space: nowrap;
+}
+
+.ach-desc {
+    font-size: 14px;
+    color: var(--ink);
+    white-space: normal;
+}
+
+.ach-who {
+    font-size: 12px;
+    color: var(--ink-dim);
+    margin-top: 3px;
 }
 
 .btn--secondary {
@@ -2164,4 +2324,31 @@
 
 .popup-dmg {
     font-size: 26px;
+}
+
+/* ---------- text fields: a clear focus state everywhere (FIXES_4E §1.2) ----------
+   The caret is gold and blinks (the engine's cursor flash); the field gets a bright gold border and a lighter fill. */
+.unity-base-text-field__input {
+    --unity-cursor-color: rgb(255, 214, 120);
+    --unity-selection-color: rgba(255, 206, 96, 0.4);
+    transition-property: border-color, background-color;
+    transition-duration: 0.12s;
+}
+
+.unity-base-text-field__input:focus,
+.field .unity-base-text-field__input:focus,
+.chat-field > .unity-base-text-field__input:focus {
+    border-color: rgb(255, 214, 120);
+    border-width: 2px;
+    background-color: rgba(30, 44, 108, 0.96);
+}
+
+.field--error .unity-base-text-field__input:focus {
+    border-color: rgb(255, 98, 86);
+}
+
+/* Match point: the musketeer's world name label turns gold (FIXES_4E §8.7). */
+.unit-name--match {
+    color: rgb(255, 224, 120);
+    -unity-font-style: bold;
 }

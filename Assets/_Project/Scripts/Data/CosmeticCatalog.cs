@@ -37,24 +37,26 @@ namespace Musketeers.Data
         }
 
         // Drops ids that no longer exist or were disabled, so a stale PlayerPrefs value never breaks the rig.
-        public Loadout Sanitize(Loadout l)
+        public Loadout Sanitize(Loadout l, bool allowUnselectable = false)
         {
             foreach (var slot in Loadout.Slots)
             {
                 var item = Get(l.Get(slot));
-                if (item == null || item.Slot != slot || !item.EnabledInV1)
+                if ((!allowUnselectable && !Loadout.Selectable(slot)) || item == null || item.Slot != slot || !item.EnabledInV1)
                     l = l.With(slot, "");
             }
             return l;
         }
 
         // A random outfit from the enabled items (the wardrobe's dice and the Wardrobe Studio's outfit test):
-        // always a hat and boots, a cape or face item about half the time. Cosmetic only, so Unity's RNG.
+        // always a hat (boots are not selectable yet), a cape or face item about half the time. Cosmetic only, so Unity's RNG.
         public Loadout RandomLoadout(bool enabledOnly = true)
         {
             var l = new Loadout();
             foreach (var slot in Loadout.Slots)
             {
+                if (!Loadout.Selectable(slot))
+                    continue;
                 var items = BySlot(slot, enabledOnly);
                 bool optional = slot == CosmeticSlot.Face || slot == CosmeticSlot.Cape;
                 if (items.Count == 0 || (optional && Random.value < 0.5f))

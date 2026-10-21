@@ -63,6 +63,14 @@ namespace Musketeers.Sim.Tests
         }
 
         [Test]
+        public void Signature_IsAnnouncedFromTheSignatureUsedEvent()
+        {
+            var log = new EventLog();
+            log.Add(SimEventKind.SignatureUsed, unit: 0, amount: (int)Ability.Grappin);
+            Assert.That(Callouts.Top(log, crowned: -1), Is.EqualTo(Callout.Signature));
+        }
+
+        [Test]
         public void CrumbleFalls_AreNotSwanDives_ButTheCrownStillFalls()
         {
             var log = new EventLog();
@@ -81,11 +89,12 @@ namespace Musketeers.Sim.Tests
         }
 
         [Test]
-        public void BonkAndSignature_AreBannerOnly()
+        public void Bonk_IsBannerOnly_SignatureIsVoicedAgain()
         {
             Assert.That(Callouts.Voiced(Callout.Bonk), Is.False);
-            Assert.That(Callouts.Voiced(Callout.Signature), Is.False);
-            foreach (var c in new[] { Callout.Riposte, Callout.GuardBreak, Callout.SwanDive, Callout.Touche, Callout.DoubleKo,
+            Assert.That(Callouts.Text(Callout.Signature), Is.EqualTo("SIGNATURE MOVE!"));
+            Assert.That(Callouts.Clip(Callout.Signature), Is.EqualTo("signature"));
+            foreach (var c in new[] { Callout.Signature, Callout.Riposte, Callout.GuardBreak, Callout.SwanDive, Callout.Touche, Callout.DoubleKo,
                                       Callout.CrownFalls, Callout.EnGarde, Callout.Draw, Callout.LastMusketeer })
                 Assert.That(Callouts.Voiced(c), Is.True, c.ToString());
         }

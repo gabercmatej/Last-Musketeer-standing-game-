@@ -208,6 +208,18 @@ namespace Musketeers.Presentation
             _musketIcon.color = _realMusket ? Color.white : loaded ? new Color(0.95f, 0.92f, 0.85f) : new Color(0.4f, 0.38f, 0.36f, 0.55f);
         }
 
+        bool _matchPoint;
+
+        // Match point (FIXES_4E §8.7): the name under the feet turns gold.
+        public void SetMatchPoint(bool on)
+        {
+            if (on == _matchPoint || _name == null)
+                return;
+            _matchPoint = on;
+            _name.Element.EnableInClassList("unit-name--match", on);
+            _name.Element.style.color = on ? new Color(1f, 0.88f, 0.4f) : Color.Lerp(Color, Color.white, 0.35f);
+        }
+
         public void SetCrowned(bool crowned) => _crown.enabled = crowned && _alive;
 
         public void SyncStats(Unit u, bool crowned)

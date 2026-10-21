@@ -9,7 +9,7 @@ using UnityEngine.UIElements;
 
 namespace Musketeers.UI
 {
-    // "Pick your Musketeer" (FIXES_v0.2 §2.3): four round portraits on the left, the selected musketeer's bio on
+    // "Pick your Musketeer" (FIXES_v0.2 §2.3): four round portraits on the left (over the dimmed lobby stage, see AppFlow), the selected musketeer's bio on
     // the right (name, title, strength, weakness, story, signature), Select and Back. Everything personal comes
     // from CharacterDef. A musketeer someone else holds (Day 5, LobbyModel.TakenBy) can be previewed, not picked.
     public sealed class CharacterSelectUI
@@ -35,7 +35,6 @@ namespace Musketeers.UI
             _model = model;
             _art = art;
             _root = root.Q("charselect");
-            UiArt.Set(_root.Q("charselect-bg"), UiArt.Get(GameArt.MenuBackground), new Color(0.08f, 0.07f, 0.12f));
             _name = root.Q<Label>("cs-name");
             _title = root.Q<Label>("cs-title");
             _strength = root.Q<Label>("cs-strength");

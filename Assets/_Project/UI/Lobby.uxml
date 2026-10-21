@@ -1,42 +1,49 @@
 <ui:UXML xmlns:ui="UnityEngine.UIElements">
     <ui:VisualElement name="lobby" class="screen" picking-mode="Ignore">
-        <!-- Top-left: the game-master panel (read-only for guests). -->
+        <!-- Top-right: the game-master panel (read-only for guests): a label column and a control column, equal rows. -->
         <ui:VisualElement name="gm-panel" class="panel gm-panel">
             <ui:Label name="gm-header" text="Match settings" class="gm-header" />
-            <ui:VisualElement class="gm-map">
+            <ui:VisualElement class="gm-line" picking-mode="Ignore">
                 <ui:Label text="Map" class="gm-label" />
-                <ui:VisualElement class="gm-map-row" picking-mode="Ignore">
+                <ui:VisualElement class="gm-control" picking-mode="Ignore">
                     <ui:Button name="map-prev" text="&lt;" class="btn btn--icon gm-step" />
                     <ui:Label name="map-name" text="The Courtyard" class="map-name name-clip" />
                     <ui:Button name="map-next" text="&gt;" class="btn btn--icon gm-step" />
                 </ui:VisualElement>
-                <ui:Label name="map-desc" text="" class="map-desc" />
             </ui:VisualElement>
-            <ui:VisualElement class="gm-row" picking-mode="Ignore">
-                <ui:Label text="Points to win" class="gm-label gm-label--row" />
-                <ui:Button name="points-minus" text="-" class="btn btn--icon gm-step" />
-                <ui:Label name="points-value" text="12" class="gm-value" />
-                <ui:Button name="points-plus" text="+" class="btn btn--icon gm-step" />
-            </ui:VisualElement>
-            <ui:VisualElement class="gm-row" picking-mode="Ignore">
-                <ui:Label text="Hearts" class="gm-label gm-label--row" />
-                <ui:Button name="hearts-minus" text="-" class="btn btn--icon gm-step" />
-                <ui:VisualElement class="gm-value-box" picking-mode="Ignore">
-                    <ui:VisualElement name="hearts-icon" class="gm-heart" picking-mode="Ignore" />
-                    <ui:Label name="hearts-value" text="3" class="gm-value gm-value--tight" />
+            <ui:Label name="map-desc" text="" class="map-desc" />
+            <ui:VisualElement class="gm-line" picking-mode="Ignore">
+                <ui:Label text="Points to win" class="gm-label" />
+                <ui:VisualElement class="gm-control" picking-mode="Ignore">
+                    <ui:Button name="points-minus" text="-" class="btn btn--icon gm-step" />
+                    <ui:Label name="points-value" text="12" class="gm-value" />
+                    <ui:Button name="points-plus" text="+" class="btn btn--icon gm-step" />
                 </ui:VisualElement>
-                <ui:Button name="hearts-plus" text="+" class="btn btn--icon gm-step" />
             </ui:VisualElement>
-            <ui:VisualElement class="gm-row" picking-mode="Ignore">
-                <ui:Label text="Players" class="gm-label gm-label--row" />
-                <ui:Button name="remove-bot" text="- Bot" class="btn btn--small gm-bot" />
-                <ui:Label name="player-count" text="4" class="gm-value gm-value--tight" />
-                <ui:Button name="add-bot" text="+ Bot" class="btn btn--small gm-bot" />
+            <ui:VisualElement class="gm-line" picking-mode="Ignore">
+                <ui:Label text="Hearts" class="gm-label" />
+                <ui:VisualElement class="gm-control" picking-mode="Ignore">
+                    <ui:Button name="hearts-minus" text="-" class="btn btn--icon gm-step" />
+                    <ui:VisualElement class="gm-value-box" picking-mode="Ignore">
+                        <ui:VisualElement name="hearts-icon" class="gm-heart" picking-mode="Ignore" />
+                        <ui:Label name="hearts-value" text="3" class="gm-value gm-value--tight" />
+                    </ui:VisualElement>
+                    <ui:Button name="hearts-plus" text="+" class="btn btn--icon gm-step" />
+                </ui:VisualElement>
             </ui:VisualElement>
+            <ui:VisualElement class="gm-line" picking-mode="Ignore">
+                <ui:Label text="Players" class="gm-label" />
+                <ui:VisualElement class="gm-control" picking-mode="Ignore">
+                    <ui:Button name="remove-bot" text="-" tooltip="Remove a bot" class="btn btn--icon gm-step gm-bot" />
+                    <ui:Label name="player-count" text="4" class="gm-value" />
+                    <ui:Button name="add-bot" text="+" tooltip="Add a bot" class="btn btn--icon gm-step gm-bot" />
+                </ui:VisualElement>
+            </ui:VisualElement>
+            <ui:Button name="rules-default" text="Default" tooltip="Points to win 12, Hearts 3" class="btn btn--small gm-default" />
         </ui:VisualElement>
 
-        <!-- Top-right: Menu / Settings / Fullscreen (built in code). -->
-        <ui:VisualElement name="lobby-corner" class="corner-row" picking-mode="Ignore" />
+        <!-- Top-left: Fullscreen, Settings, Leave (built in code). -->
+        <ui:VisualElement name="lobby-corner" class="corner-row corner-row--left" picking-mode="Ignore" />
 
         <!-- Bottom-left: Wardrobe and Change Musketeer (built in code). -->
         <ui:VisualElement name="lobby-bl" class="lobby-bl" picking-mode="Ignore" />
@@ -52,9 +59,10 @@
             <ui:VisualElement name="wardrobe-tabs" class="info-tabs" />
             <ui:ScrollView name="wardrobe-grid" class="wardrobe-grid info-scroll" />
             <ui:Label name="wardrobe-item" text="" class="item-name" />
-            <ui:VisualElement class="menu-row menu-row--center">
-                <ui:Button name="wardrobe-random" text="Surprise me" class="btn btn--small btn--quiet" />
+            <ui:VisualElement class="menu-row menu-row--center wardrobe-buttons">
+                <ui:Button name="wardrobe-default" text="Default" tooltip="Hat, Face and Cape to none" class="btn btn--small wardrobe-side" />
                 <ui:Button name="wardrobe-close" text="Done" class="btn info-close" />
+                <ui:Button name="wardrobe-random" text="Surprise" tooltip="A random outfit" class="btn btn--small wardrobe-side" />
             </ui:VisualElement>
         </ui:VisualElement>
     </ui:VisualElement>

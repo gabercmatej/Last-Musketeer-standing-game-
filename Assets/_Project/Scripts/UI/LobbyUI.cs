@@ -6,8 +6,8 @@ using UnityEngine.UIElements;
 
 namespace Musketeers.UI
 {
-    // The lobby overlay on top of the stage (FIXES_v0.2 §2.4): game-master panel top-left (read-only for guests),
-    // Menu / Settings / Fullscreen top-right, Wardrobe + Change Musketeer bottom-left, Start (host) or the
+    // The lobby overlay on top of the stage (FIXES_v0.2 §2.4): game-master panel top-right (read-only for guests),
+    // Fullscreen / Settings / Leave top-left, Wardrobe + Change Musketeer bottom-left, Start (host) or the
     // Ready toggle (guest) bottom-right. The stage itself (StageView) is redrawn by AppFlow when Changed fires.
     public sealed class LobbyUI
     {
@@ -67,12 +67,17 @@ namespace Musketeers.UI
                 ReadyChanged?.Invoke();
             };
 
-            // Top-right: Menu is the biggest, Settings and Fullscreen match the main menu.
-            var menu = CornerButtons.Add(_corner, "leave-game", "Menu", "Leave the lobby", AskLeave);
-            menu.AddToClassList("icon-btn--big");
-            menu.AddToClassList("btn--back");
-            CornerButtons.Add(_corner, "settings", "Settings", "Volume and credits", () => SettingsClicked?.Invoke());
-            CornerButtons.AddFullscreen(_corner);
+            // Top-left: Fullscreen, Settings, Leave (same size, the mirror of the menu).
+            CornerButtons.AddTopLeftSet(_corner, () => SettingsClicked?.Invoke(), AskLeave, "Leave", "Leave the lobby");
+            root.Q<Button>("rules-default").clicked += () =>
+            {
+                if (!_model.IsHost)
+                    return;
+                _model.ResetRules();
+                _model.Save();
+                UiArt.Sfx("SFX/ui/wardrobe_equip", 0.5f);
+                Refresh();
+            };
 
             // Bottom-left.
             var wardrobe = CornerButtons.Add(_bl, "wardrobe", "Wardrobe", "Hats, faces, capes and boots", () => SetWardrobe(true));

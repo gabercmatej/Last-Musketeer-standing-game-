@@ -195,13 +195,13 @@ namespace Musketeers.EditorTools
             var defs = new[]
             {
                 Character("Matej", "Matej", new Color(0.62f, 0.38f, 0.98f), Ability.Grappin, "Grappin",
-                    "Hook the first thing in a line (5). Units get yanked to you; walls pull you in."),
+                    "Throw a hook in a straight line (5 tiles). Hit a musketeer and you drag them toward you: if they're dragged across a pit or water, they fall in. Otherwise they land next to you. Hit a pillar, wall or crate and you pull yourself to it (the crate is not destroyed)."),
                 Character("Matic", "Matic", new Color(0.93f, 0.27f, 0.30f), Ability.Switcheroo, "Switcheroo",
-                    "Swap places with any musketeer you pick, wherever they are. Fails if you stand on a cracked tile."),
+                    "Click any musketeer to swap places with them, wherever they are when the swap happens. Fails if you're standing on a cracked tile."),
                 Character("Aljaz", "Aljaž", new Color(0.27f, 0.55f, 1.00f), Ability.TripleCharge, "Triple Charge",
-                    "Fire 3 shots down a line (range 5). Each hit deals 1 damage and knocks the target back 1 tile. A parry reflects each shot. Needs a loaded musket."),
+                    "Fire 3 shots down one line (5 tiles). Each hit deals 1 damage and knocks back 1 tile, so up to 3 damage and 3 tiles of knockback. A Parry reflects them. Needs a loaded musket."),
                 Character("Nik", "Nik", new Color(0.27f, 0.80f, 0.40f), Ability.BullRush, "Bull Rush",
-                    "Charge up to 3 tiles. A unit you crash into is pushed 4."),
+                    "Charge up to 3 tiles. Whoever you hit takes 1 damage and flies back 5 tiles."),
             };
             var roster = EnsureAsset<CharacterRoster>($"{DataDir}/CharacterRoster.asset");
             if (roster.Characters == null || roster.Characters.Length == 0)

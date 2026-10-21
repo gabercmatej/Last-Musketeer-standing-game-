@@ -195,7 +195,7 @@ namespace Musketeers.Sim.Tests
         public void LobbyRules_ClampToTheirRanges_AndApplyToTheSetup()
         {
             var model = new LobbyModel(null, null, 1);
-            model.PointsToWin = 3; Assert.That(model.PointsToWin, Is.EqualTo(10));
+            model.PointsToWin = 3; Assert.That(model.PointsToWin, Is.EqualTo(6));   // FIXES_4E §3.2: 6-30
             model.PointsToWin = 99; Assert.That(model.PointsToWin, Is.EqualTo(30));
             model.Hearts = 0; Assert.That(model.Hearts, Is.EqualTo(1));
             model.Hearts = 9; Assert.That(model.Hearts, Is.EqualTo(5));

@@ -16,7 +16,7 @@ namespace Musketeers.UI
         public const string HeartsKey = "Musketeers.Hearts";
 
         // FIXES_v0.2 §3.2 rule 8: the match rules a lobby can set.
-        public const int MinPointsToWin = 10, MaxPointsToWin = 30, DefaultPointsToWin = 12;
+        public const int MinPointsToWin = 6, MaxPointsToWin = 30, DefaultPointsToWin = 12;   // FIXES_4E §3.2: 6-30
         public const int MinHearts = 1, MaxHearts = 5, DefaultHearts = 3;
 
         readonly CharacterRoster _roster;
@@ -112,6 +112,16 @@ namespace Musketeers.UI
         }
 
         public bool CanPick(int character) => character >= 0 && character < RosterCount && TakenBy(character) == null;
+
+        // The lobby's Default button (FIXES_4E §3.2): Points 12, Hearts 3.
+        public void ResetRules()
+        {
+            PointsToWin = DefaultPointsToWin;
+            Hearts = DefaultHearts;
+        }
+
+        // The wardrobe's Default button (FIXES_4E §3.3): Hat, Face and Cape to none. Boots are not selectable.
+        public void ClearMyLoadout() => SetMyLoadout(default);
 
         // Copies the lobby's rules into a match setup (hearts per round, points to win).
         public void ApplyTo(MatchSetup setup)
