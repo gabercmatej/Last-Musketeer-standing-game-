@@ -43,5 +43,29 @@ namespace Musketeers.Presentation
             r.RoundX = Mathf.Max(arena.xMin, r.Left.xMax + Gap);
             return r;
         }
+
+        // The announcer banner lives in the top strip, to the right of the timer, and never on the board: its bottom
+        // edge stays at or above the arena's top edge (it shrinks to fit when the margin is small, 16:10 and 4:3).
+        // r = the regions from Compute; height/width are the wanted size; the timer block keeps TimerClear px each side of centre.
+        public const float TimerClear = 78f, BannerMinW = 120f, BannerMinH = 14f;
+
+        public static Rect BannerRect(Rect arena, Regions r, float panelW, float height, float width)
+        {
+            float top = 2f;
+            float room = Mathf.Min(r.Top.height, Mathf.Max(arena.yMin, 0f)) - top - 2f;
+            float h = Mathf.Clamp(Mathf.Min(height, room), BannerMinH, Mathf.Max(BannerMinH, height));
+            if (top + h > arena.yMin)
+                h = Mathf.Max(0f, arena.yMin - top);
+            float left = panelW * 0.5f + TimerClear;
+            float right = Mathf.Min(r.Right.xMin - Gap, panelW - Pad);
+            if (right - left < BannerMinW)
+            {
+                // No room beside the timer: centre it in the strip (the timer is hidden behind a translucent flash).
+                left = Mathf.Max(Pad, panelW * 0.5f - width * 0.5f);
+                right = Mathf.Min(panelW - Pad, left + width);
+            }
+            float w = Mathf.Min(width, right - left);
+            return new Rect(left, top, Mathf.Max(0f, w), h);
+        }
     }
 }

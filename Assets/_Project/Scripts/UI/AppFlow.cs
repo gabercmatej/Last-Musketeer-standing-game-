@@ -49,6 +49,8 @@ namespace Musketeers.UI
         LobbyUI _lobby;
         LoadingUI _loading;
         HudUI _hud;
+        ChatUI _chat;
+        readonly ChatModel _chatModel = new ChatModel();
         PlanBarUI _planBar;
         LogPanelUI _log;
         ScoreboardUI _scoreboard;
@@ -111,6 +113,7 @@ namespace Musketeers.UI
             _loading = new LoadingUI(loading, _tips);
             _hud = new HudUI(hud);
             _hud.BindArena(_rig);
+            _chat = new ChatUI(hud.Q("chat"));
             _planBar = new PlanBarUI(hud);
             _log = new LogPanelUI(hud);
             _scoreboard = new ScoreboardUI(score);
@@ -138,7 +141,9 @@ namespace Musketeers.UI
             _lobby.Wardrobe.Equipped += () => { _stage.SetLoadout(0, _model.MyLoadout); _stage.Bounce(0); };
             _hud.SpeedClicked += CycleSpeed;
             _hud.LogClicked += () => _log.SetOpen(!_log.Open);
-            _hud.QuitClicked += ShowLobby;
+            _hud.LeaveClicked += AskLeaveMatch;
+            _chat.Sent += text => _chatModel.Add(_setup != null ? _setup.LocalSlot : 0, text, Time.unscaledTime);
+            _chat.EmoteClicked += Emote;
             _hud.SettingsClicked += () => _info.OpenTab(InfoWindowUI.Tab.Settings);
             _planBar.ActionClicked += t => _input.ChooseAction(t);
             _planBar.SlotClicked += t => { if (_planning && !_builder.Locked) _builder.SelectSlot(t); };
@@ -147,9 +152,10 @@ namespace Musketeers.UI
             _results.AgainClicked += ShowLobby;
             _results.MenuClicked += ShowMenu;   // Quit
             // Play again: straight back to the lobby, same players and settings (the lobby restores its art and music).
-            _director.Announced += c => _hud.Banner(Callouts.Text(c), new Color(1f, 0.85f, 0.4f), 0.9f);
+            _director.Announced += c => _hud.Banner(Callouts.Text(c), new Color(1f, 0.85f, 0.4f), 0.9f, c == Callout.EnGarde || c == Callout.Draw);
 
             _input.IsPointerOverUI = OverUI;
+            _input.IsTyping = () => _chat.IsTyping || _confirm.Open || _info.Open;   // typing in chat or a dialog: no gameplay hotkeys
             _input.UnitAtTile = p => _mc?.Match?.Round?.UnitAt(p)?.Slot ?? -1;
             _input.LockToggled += ToggleLock;
             _input.CycleUnit += () => SwitchUnit(NextControllable(_activeSlot));
@@ -332,6 +338,7 @@ namespace Musketeers.UI
             _mc?.Stop();
             _mc = null;
             _board.Clear();
+            _chat?.Blur();
         }
 
         MapDef CurrentMap => _art.Maps != null ? _art.Maps.Get(_model.Map) : null;
@@ -413,6 +420,8 @@ namespace Musketeers.UI
             _mc.RoundEnded += OnRoundEnded;
             _mc.MatchEnded += OnMatchEnded;
 
+            _chatModel.Clear();
+            _chat.Bind(_chatModel, setup.Names, _colors);
             _hud.SetVisible(true);
             _hud.BuildScores(setup.Names, _colors, _portraits);
             _planBar.SetPlayerNames(setup.Names);
@@ -458,7 +467,7 @@ namespace Musketeers.UI
                 _log.Line($"{_setup.Names[m.Crowned]} wears the Crown", "log-line--big");
                 _audio?.Sfx("SFX/match/crown_gain", 0.8f);
             }
-            _hud.Banner("EN GARDE!", new Color(1f, 0.85f, 0.4f), 1.2f);
+            _hud.Banner("EN GARDE!", new Color(1f, 0.85f, 0.4f), 1.2f, true);
             _audio?.Sfx("SFX/match/round_start", 0.7f);
             _audio?.Announce(Callouts.Clip(Callout.EnGarde));
             _audio?.Music(MusicPicker.IsFinal(m.Round, m.Cfg) ? "Music/battle_final" : "Music/battle");
@@ -696,7 +705,7 @@ namespace Musketeers.UI
             LoadActive();
         }
 
-        // Z / X / C / V: laugh, angry, salute, cry over your own musketeer, with one of your taunts (§8.7).
+        // The four emote buttons in the chat: laugh, angry, salute, cry over your own musketeer, with one of your taunts (§8.7).
         void Emote(int index)
         {
             if (_mc == null || Time.unscaledTime < _emoteReady)
@@ -709,9 +718,17 @@ namespace Musketeers.UI
             _fx.Emote(u.transform, new Vector3(0.35f, UnitView.FeetY + 1.85f, 0f), UiArt.Get(GameArt.Emotes[index]), 2f);
             _audio?.Sfx("SFX/ui/emote_pop");
             _audio?.Line(u.CharacterId, "taunt", index);
+            _chatModel.Add(_setup.LocalSlot, ChatUI.EmoteLines[Mathf.Clamp(index, 0, ChatUI.EmoteLines.Length - 1)], Time.unscaledTime, true);
         }
 
-        static readonly Key[] EmoteKeys = { Key.Z, Key.X, Key.C, Key.V };
+        // Leave: ask first, then back to the lobby (the old quit behaviour).
+        void AskLeaveMatch()
+        {
+            if (_confirm.Open || _mc == null)
+                return;
+            _chat.Blur();
+            _confirm.Show("Leave this match? You won't be able to rejoin.", "Leave", "Stay", ShowLobby);
+        }
 
         void Update()
         {
@@ -721,15 +738,17 @@ namespace Musketeers.UI
             bool inMatch = _mc != null;
             if (kb != null && inMatch)
             {
-                if (DevFlags.Available && kb.f2Key.wasPressedThisFrame)
+                bool typing = _chat.IsTyping;
+                if (DevFlags.Available && !typing && kb.f2Key.wasPressedThisFrame)
                     ToggleControlAll();
-                if (kb.lKey.wasPressedThisFrame)
+                if (DevFlags.Available && !typing && kb.lKey.wasPressedThisFrame)
                     _log.SetOpen(!_log.Open);
-                for (int i = 0; i < EmoteKeys.Length; i++)
-                {
-                    if (kb[EmoteKeys[i]].wasPressedThisFrame)
-                        Emote(i);
-                }
+                // Enter opens the chat field (Esc / Enter inside it close it again); a click on the board blurs it.
+                if (_screen == Screen.Match && !typing && !_confirm.Open && !_info.Open && (kb.enterKey.wasPressedThisFrame || kb.numpadEnterKey.wasPressedThisFrame))
+                    _chat.Focus();
+                var mouse = Mouse.current;
+                if (_chat.Focused && mouse != null && mouse.leftButton.wasPressedThisFrame && !OverUI(mouse.position.ReadValue()))
+                    _chat.Blur();
             }
             if (kb != null && kb.escapeKey.wasPressedThisFrame && _confirm.Open)
                 _confirm.Cancel();
@@ -827,6 +846,9 @@ namespace Musketeers.UI
         public void DevPressStart() => _lobby.PressStart();
         public void DevChangeMusketeer() => ChangeMusketeer();
         public void DevCloseConfirm() => _confirm.Hide();
+        public void DevAskLeaveMatch() => AskLeaveMatch();
+        public void DevChat(int slot, string text) => _chatModel.Add(slot, text, Time.unscaledTime);
+        public void DevEmote(int index) => Emote(index);
 
         // Screenshots: a fabricated finished match (several badges, a clear 1st..4th, or a shared 1st) on the results screen.
         public void DevShowResults(int map, int players, bool sharedFirst = false)

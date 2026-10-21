@@ -1,4 +1,5 @@
 using System;
+using Musketeers.Game;
 using Musketeers.Presentation;
 using Musketeers.Sim;
 using PrimeTween;
@@ -13,7 +14,7 @@ namespace Musketeers.UI
     {
         public event Action SpeedClicked;
         public event Action LogClicked;
-        public event Action QuitClicked;
+        public event Action LeaveClicked;
         public event Action SettingsClicked;
 
         readonly VisualElement _root;
@@ -24,6 +25,10 @@ namespace Musketeers.UI
         readonly VisualElement _gritBox, _specialSlot;
         readonly VisualElement _topStrip, _topLeft, _leftCol, _rightCol, _bottomBar;
         CameraRig _rig;
+        Rect _arena;
+        HudLayout.Regions _regions;
+        bool _hasRegions;
+        float _panelW;
         VisualElement[] _scoreEls = new VisualElement[0];
         Label[] _points = new Label[0];
         VisualElement[] _crowns = new VisualElement[0];
@@ -49,20 +54,18 @@ namespace Musketeers.UI
             _bottomBar = hudRoot.Q("bottom-bar");
             _gritBox = hudRoot.Q("grit-box");
             _specialSlot = hudRoot.Q("special-slot");
-            // Speed and Log are debugging aids: only in the Editor and development builds (L still opens the log).
-            bool dev = Debug.isDebugBuild || Application.isEditor;
-            hudRoot.Q("dev-buttons").style.display = dev ? DisplayStyle.Flex : DisplayStyle.None;
+            // Speed, Log, the dev badge and the L key are debugging aids: only in the Editor and development builds.
+            hudRoot.Q("dev-buttons").style.display = DevFlags.Available ? DisplayStyle.Flex : DisplayStyle.None;
             _root.RegisterCallback<GeometryChangedEvent>(_ => ApplyLayout());
             var log = hudRoot.Q<Button>("log-toggle");
-            var quit = hudRoot.Q<Button>("quit");
-            var settings = hudRoot.Q<Button>("hud-settings");
-            foreach (var b in new[] { _speed, log, quit, settings })
+            foreach (var b in new[] { _speed, log })
                 b.focusable = false;
-            quit.AddToClassList("btn--back");
             _speed.clicked += () => SpeedClicked?.Invoke();
             log.clicked += () => LogClicked?.Invoke();
-            quit.clicked += () => QuitClicked?.Invoke();
-            settings.clicked += () => SettingsClicked?.Invoke();
+            // Matej's icon buttons, same look as the menu's corner buttons.
+            var icons = hudRoot.Q("hud-icons");
+            CornerButtons.Add(icons, "settings", "Settings", "Settings", () => SettingsClicked?.Invoke());
+            CornerButtons.Add(icons, "leave-game", "Leave", "Leave the match", () => LeaveClicked?.Invoke());
         }
 
         public void SetVisible(bool visible)
@@ -87,7 +90,11 @@ namespace Musketeers.UI
             float w = _root.resolvedStyle.width, h = _root.resolvedStyle.height;
             if (float.IsNaN(w) || float.IsNaN(h) || w < 50f || h < 50f)
                 return;
-            var r = HudLayout.Compute(_rig.ArenaPanelRect(w, h), w, h);
+            _arena = _rig.ArenaPanelRect(w, h);
+            var r = HudLayout.Compute(_arena, w, h);
+            _regions = r;
+            _hasRegions = true;
+            _panelW = w;
             Place(_topStrip, r.Top);
             Place(_bottomBar, r.Bottom);
             Place(_leftCol, r.Left);
@@ -189,17 +196,25 @@ namespace Musketeers.UI
 
         public void SetSpeed(float speed) => _speed.text = $"Speed {speed:0.#}x";
 
-        public void SetDevBadge(bool on) => _devBadge.style.display = on && (Debug.isDebugBuild || Application.isEditor) ? DisplayStyle.Flex : DisplayStyle.None;
+        public void SetDevBadge(bool on) => _devBadge.style.display = on && DevFlags.Available ? DisplayStyle.Flex : DisplayStyle.None;
 
-        // The announcer ribbon: pops in, holds, fades.
-        public void Banner(string text, Color color, float seconds)
+        // The announcer ribbon: small, in the top HUD strip beside the timer, never over the board (HudLayout.BannerRect).
+        // big = the round-start version (EN GARDE!, DRAW!), a little larger. Pops in, holds, fades.
+        public void Banner(string text, Color color, float seconds, bool big = false)
         {
             _bannerTween.Stop();
+            float wantH = big ? 56f : 46f, wantW = big ? 340f : 300f;
+            Rect rect = _hasRegions
+                ? HudLayout.BannerRect(_arena, _regions, _panelW, wantH, wantW)
+                : new Rect(640f + HudLayout.TimerClear, 2f, wantW, wantH);
+            Place(_banner, rect);
+            float font = Mathf.Min(big ? 34f : 28f, rect.height * 0.62f, rect.width * 0.9f / (Mathf.Max(1, text.Length) * 0.5f));
+            _bannerText.style.fontSize = Mathf.Max(10f, font);
             _bannerText.text = text;
             _bannerText.style.color = color;
             _banner.style.opacity = 1f;
-            _banner.style.scale = new Scale(new Vector3(0.6f, 0.6f, 1f));
-            _bannerTween = Tween.Custom(0f, 1f, 0.22f, v => _banner.style.scale = new Scale(Vector3.one * Mathf.LerpUnclamped(0.6f, 1f, v)), Ease.OutBack)
+            _banner.style.scale = new Scale(new Vector3(0.7f, 0.7f, 1f));
+            _bannerTween = Tween.Custom(0f, 1f, 0.2f, v => _banner.style.scale = new Scale(Vector3.one * Mathf.LerpUnclamped(0.7f, 1f, v)), Ease.OutBack)
                 .Chain(Tween.Custom(1f, 0f, 0.45f, v => _banner.style.opacity = v, startDelay: seconds));
         }
     }

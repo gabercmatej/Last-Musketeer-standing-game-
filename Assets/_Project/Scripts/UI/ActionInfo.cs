@@ -186,6 +186,33 @@ namespace Musketeers.UI
             return -BoardMath.DirAngle(a.Dir) - (a.Type == ActionType.Fire ? 90f : 0f);
         }
 
+        public static string Arrow(Dir d)
+        {
+            switch (d)
+            {
+                case Dir.N: return "\u2191";
+                case Dir.E: return "\u2192";
+                case Dir.S: return "\u2193";
+                default: return "\u2190";
+            }
+        }
+
+        // The short plan-slot label (FIXES §2.7, Matej fix 4): "Move \u2192", "Fire \u2190", "Reload", "Keg (3,4)",
+        // "Swap: Nik". At most 15 characters except a musketeer's name; the slot clips a long name with "...".
+        public static string SlotLabel(PlannedAction a, CharacterDef c, string[] playerNames = null)
+        {
+            if (a.Type == ActionType.Idle)
+                return "Idle";
+            if (a.Type == ActionType.Signature && c != null && c.Ability == Ability.Switcheroo)
+                return playerNames != null && a.Unit >= 0 && a.Unit < playerNames.Length ? "Swap: " + playerNames[a.Unit] : "Swap";
+            string n = Name(a.Type, c);
+            if (PlanBuilder.NeedsDirection(a.Type))
+                return $"{n} {Arrow(a.Dir)}";
+            if (a.Type == ActionType.Keg)
+                return $"Keg ({a.Target.X},{a.Target.Y})";
+            return n;
+        }
+
         public static string Short(PlannedAction a, CharacterDef c, string[] playerNames = null)
         {
             if (a.Type == ActionType.Idle)

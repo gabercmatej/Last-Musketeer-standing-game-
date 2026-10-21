@@ -111,5 +111,37 @@ namespace Musketeers.Sim.Tests
             }
             finally { Object.DestroyImmediate(c); }
         }
+
+        [Test]
+        public void Banner_NeverReachesTheBoard_OnAnyAspect()
+        {
+            var cases = new[]
+            {
+                (new Rect(192f, 86f, 896f, 554f), 1280f, 720f),   // 16:9
+                (new Rect(128f, 86f, 896f, 554f), 1152f, 720f),   // 16:10-ish
+                (new Rect(32f, 40f, 960f, 560f), 1024f, 768f),    // 4:3, small top margin
+                (new Rect(0f, 8f, 700f, 600f), 700f, 720f),       // squeezed
+            };
+            foreach (var (arena, w, h) in cases)
+            {
+                var r = HudLayout.Compute(arena, w, h);
+                var b = HudLayout.BannerRect(arena, r, w, 60f, 420f);
+                Assert.That(b.yMax, Is.LessThanOrEqualTo(arena.yMin + 0.01f), $"{w}x{h}");
+                Assert.That(b.yMin, Is.GreaterThanOrEqualTo(0f));
+                Assert.That(b.xMin, Is.GreaterThanOrEqualTo(0f));
+                Assert.That(b.xMax, Is.LessThanOrEqualTo(w + 0.01f));
+            }
+        }
+
+        [Test]
+        public void Banner_SitsBesideTheTimer_WhenThereIsRoom()
+        {
+            var arena = new Rect(192f, 86f, 896f, 554f);
+            var r = HudLayout.Compute(arena, 1280f, 720f);
+            var b = HudLayout.BannerRect(arena, r, 1280f, 56f, 300f);
+            Assert.That(b.xMin, Is.GreaterThanOrEqualTo(640f + HudLayout.TimerClear - 0.01f));
+            Assert.That(b.xMax, Is.LessThanOrEqualTo(r.Right.xMin));
+            Assert.That(b.height, Is.GreaterThan(30f));
+        }
     }
 }

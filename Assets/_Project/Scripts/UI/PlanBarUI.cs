@@ -182,7 +182,7 @@ namespace Musketeers.UI
                 _slots[t].EnableInClassList("slot--cursor", !locked && t == b.Cursor);
                 _slots[t].EnableInClassList("slot--invalid", issue != PlanIssue.None);
                 _slots[t].EnableInClassList("slot--locked", locked);
-                _slotTexts[t].text = a.Type == ActionType.Idle ? (t == b.Cursor && !locked ? "next..." : "idle") : ActionInfo.Short(a, c, _names);
+                _slotTexts[t].text = a.Type == ActionType.Idle ? (t == b.Cursor && !locked ? "Next\u2026" : "Idle") : ActionInfo.SlotLabel(a, c, _names);
                 _slotSubs[t].text = issue != PlanIssue.None ? ShortIssue(issue) : "";
                 var icon = ActionInfo.Icon(a.Type, _ability);
                 _slotIcons[t].style.backgroundImage = icon != null ? new StyleBackground(icon) : new StyleBackground(StyleKeyword.None);
@@ -191,7 +191,9 @@ namespace Musketeers.UI
             }
 
             SetGrit(b.CursorState.Grit, cfg.MaxGrit);
-            _lock.text = locked ? "Locked  (Space to edit)" : "Lock in  (Space)";
+            // Short enough for the 128 px compact column; the tooltip carries the longer hint.
+            _lock.text = locked ? "Locked  (Space)" : "Lock in  (Space)";
+            _lock.tooltip = locked ? "Press Space or click to change your plan" : "Press Space or click when your plan is ready";
             _lock.EnableInClassList("btn--locked", locked);
             _hint.text = Hint(b);
         }

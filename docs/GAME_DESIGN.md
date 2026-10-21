@@ -266,7 +266,7 @@ Ranked by fun-per-hour-of-work. Days 5–6 of the build plan.
    - *Pacifist*: dealt zero damage
    - *Click Click*: most fizzles
 6. **The Crown:** the bounty on the leader, from section 2.
-7. **Emotes:** 4 per character on the **Z / X / C / V** keys during planning. Use them for taunts and inside jokes. (Alt, Ctrl and F-key combos are avoided because browsers grab them.)
+7. **Emotes:** 4 per character (laugh, angry, salute, cry) as **buttons next to the chat** (top of the left HUD column) during planning, by a musketeer who is still standing, 1.2 s cooldown. Each shows a bubble over your musketeer, plays one of your taunts and posts a small "*laughs*" line in the chat. There are no emote keys. Use them for taunts and inside jokes. (Alt, Ctrl and F-key combos are avoided because browsers grab them.)
 8. **Hall of Fame:** every player's browser saves the match results locally (in PlayerPrefs), so you get all-time wins, kills and awards per musketeer.
 
 ---
@@ -283,7 +283,7 @@ Ranked by fun-per-hour-of-work. Days 5–6 of the build plan.
    - **Bottom-left:** **Wardrobe** (Hat / Face / Cape / Boots tabs on the right half, live preview on your musketeer, only enabled items, saved per character, bots wear nothing) and **Change Musketeer** (reopens character select; Back or Select returns to the lobby).
    - **Bottom-right:** the host's **Start** (asks "Not everyone is ready. Start anyway?" if anyone is not ready); a non-host gets a **Ready / Not ready** toggle instead.
 3. **Loading screen:** splash art, a random gameplay tip and a bar, for a few seconds.
-4. **Arena:** the match. Emotes on **Z / X / C / V**.
+4. **Arena:** the match. The HUD sits around the board: left column = **Settings** and **Leave** (Matej's icon buttons; Leave asks "Leave this match? You won't be able to rejoin." and goes to the lobby), the **chat** (short fading log, text field max 80, 4 emote buttons; Enter opens it, Enter sends, Esc leaves it, no gameplay hotkey fires while it has focus; local only offline) and the plan slots (action icon plus a short label such as "Fire ←", "Keg (3,4)", "Swap: Nik"); right column = scores; bottom = action bar; thin top strip with Round/Turn and the timer. Announcer banners are small and sit in the top strip beside the timer, never over the board. Speed, Log and the L key exist only in dev builds.
 5. **Scoreboard** between rounds (points with reasons, portraits).
 6. **Results:** the played map's podium art; musketeers stand on the podiums by final place (1st tallest and a bit bigger in the Victory pose with the Crown, 2nd and 3rd Idle, 4th Hurt on the small block beside them; shared places show the same ordinal, 2-3 players leave podiums empty). A card on the right lists the winner ("Shared victory" on a tied 1st), the standings in rank order with portraits and points, and every badge each player earned, revealed one by one with a pop, a shine sweep and a sound. **Play again** goes back to the **Lobby**, **Quit** to the menu.
 

@@ -19,6 +19,7 @@ namespace Musketeers.Presentation
         public PlanBuilder Builder { get; set; }
         public bool Active { get; set; }
         public Func<Vector2, bool> IsPointerOverUI { get; set; }
+        public Func<bool> IsTyping { get; set; }            // chat field or a dialog has focus: no gameplay hotkeys
         public Func<Int2, int> UnitAtTile { get; set; }    // slot of a living unit on a tile, or -1
 
         public event Action LockToggled;
@@ -53,7 +54,8 @@ namespace Musketeers.Presentation
                 SetHover(null, null);
                 return;
             }
-            HandleKeyboard();
+            if (IsTyping == null || !IsTyping())
+                HandleKeyboard();
             HandleMouse();
         }
 

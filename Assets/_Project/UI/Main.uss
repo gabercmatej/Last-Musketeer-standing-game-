@@ -1125,14 +1125,17 @@
 .scores {
     flex-direction: column;
     align-items: stretch;
+    align-self: flex-end;
+    width: 100%;
+    max-width: 172px;
 }
 
 .score {
     flex-direction: row;
     align-items: center;
-    height: 42px;
-    padding: 3px 8px 3px 3px;
-    margin-bottom: 5px;
+    height: 38px;
+    padding: 2px 8px 2px 2px;
+    margin-bottom: 4px;
     border-radius: 22px;
     background-color: rgba(8, 14, 44, 0.78);
     border-width: 2px;
@@ -1144,10 +1147,10 @@
 }
 
 .score-portrait {
-    width: 32px;
-    height: 32px;
+    width: 28px;
+    height: 28px;
     flex-shrink: 0;
-    border-radius: 16px;
+    border-radius: 14px;
     margin-right: 6px;
     -unity-background-scale-mode: scale-and-crop;
 }
@@ -1165,8 +1168,10 @@
 
 .score-points {
     flex-shrink: 0;
-    font-size: 20px;
+    font-size: 18px;
     color: var(--gold);
+    margin: 0;
+    padding: 0;
 }
 
 .score-icon {
@@ -1176,6 +1181,139 @@
     margin-left: 3px;
     -unity-background-scale-mode: scale-to-fit;
 }
+
+.hud-icons {
+    flex-direction: row;
+    margin-bottom: 4px;
+}
+
+.hud-icons .icon-btn {
+    width: 60px;
+    margin: 0 4px 0 0;
+}
+
+.hud-icons .icon-btn__img {
+    width: 44px;
+    height: 44px;
+}
+
+.hud-icons .icon-btn__caption {
+    font-size: 11px;
+    margin-top: 0;
+}
+
+.hud--compact .hud-icons .icon-btn { width: 56px; margin-right: 4px; }
+.hud--compact .hud-icons .icon-btn__img { width: 40px; height: 40px; }
+
+/* Chat: a short fading log, a text field and the four emote buttons (top of the left column). */
+.chat {
+    margin-bottom: 6px;
+}
+
+.chat-log {
+    margin-bottom: 2px;
+    max-height: 110px;
+    overflow: hidden;
+    justify-content: flex-end;
+}
+
+.chat-line {
+    flex-direction: row;
+    align-items: flex-start;
+    margin-bottom: 1px;
+    padding: 1px 4px;
+    border-radius: 4px;
+    background-color: rgba(8, 14, 44, 0.55);
+}
+
+.chat-name {
+    flex-shrink: 1;
+    min-width: 0;
+    max-width: 62px;
+    font-size: 11px;
+    margin: 0 3px 0 0;
+    padding: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    -unity-text-outline-width: 0.8px;
+    -unity-text-outline-color: rgb(20, 12, 4);
+}
+
+.chat-text {
+    flex-grow: 1;
+    flex-shrink: 1;
+    flex-basis: 0;
+    min-width: 0;
+    max-height: 28px;
+    font-size: 11px;
+    margin: 0;
+    padding: 0;
+    white-space: normal;
+    overflow: hidden;
+    color: var(--ink);
+    -unity-text-align: upper-left;
+}
+
+.chat-text--emote {
+    -unity-font-style: italic;
+    color: var(--ink-dim);
+}
+
+.chat-field {
+    margin: 0 0 3px 0;
+    height: 24px;
+}
+
+.chat-field > .unity-base-text-field__input {
+    font-size: 12px;
+    padding: 1px 4px;
+    min-height: 22px;
+    background-color: rgba(8, 14, 44, 0.8);
+    color: var(--ink);
+    border-color: var(--line);
+}
+
+.chat-emotes {
+    flex-direction: row;
+    justify-content: space-between;
+}
+
+.chat-emote {
+    width: 30px;
+    height: 30px;
+    margin: 0;
+    padding: 0;
+    border-radius: 15px;
+    border-width: 1px;
+    border-color: var(--gold-dark);
+    background-color: rgba(8, 14, 44, 0.78);
+    align-items: center;
+    justify-content: center;
+}
+
+.chat-emote:hover {
+    background-color: rgba(40, 64, 150, 0.9);
+}
+
+.chat-emote__img {
+    width: 22px;
+    height: 22px;
+    -unity-background-scale-mode: scale-to-fit;
+    align-items: center;
+    justify-content: center;
+}
+
+.chat-emote__initial {
+    font-size: 13px;
+    color: var(--gold);
+}
+
+.hud--compact .chat-log { max-height: 58px; }
+.hud--compact .chat-name { max-width: 48px; font-size: 10px; }
+.hud--compact .chat-text { font-size: 10px; max-height: 26px; }
+.hud--compact .chat-emote { width: 26px; height: 26px; border-radius: 13px; }
+.hud--compact .chat-emote__img { width: 19px; height: 19px; }
 
 .corner-buttons {
     flex-direction: row;
@@ -1197,14 +1335,6 @@
     margin-bottom: 6px;
 }
 
-.emote-hint {
-    margin-top: 2px;
-    font-size: 11px;
-    color: rgba(255, 255, 255, 0.7);
-    -unity-text-align: middle-center;
-    -unity-text-outline-width: 1px;
-    -unity-text-outline-color: rgb(20, 12, 4);
-}
 
 .log-panel {
     position: absolute;
@@ -1307,8 +1437,8 @@
 }
 
 .slot-icon {
-    width: 28px;
-    height: 28px;
+    width: 22px;
+    height: 22px;
     flex-shrink: 0;
     margin-right: 6px;
     -unity-background-scale-mode: scale-to-fit;
@@ -1317,15 +1447,20 @@
 .slot-col {
     flex-grow: 1;
     flex-shrink: 1;
+    flex-basis: 0;
     min-width: 0;
+    overflow: hidden;
 }
 
 .slot-text {
     font-size: 13px;
     margin: 0;
     padding: 0;
+    min-width: 0;
+    flex-shrink: 1;
     overflow: hidden;
     text-overflow: ellipsis;
+    -unity-text-overflow-position: end;
     white-space: nowrap;
 }
 
@@ -1344,6 +1479,9 @@
     margin: 4px 0 0 0;
     font-size: 14px;
     padding: 2px 4px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 .btn--locked {
@@ -1586,13 +1724,15 @@
 
 /* Narrow screens: smaller text, tighter pieces. */
 .hud--compact .round-label { font-size: 22px; }
-.hud--compact .score { height: 36px; }
-.hud--compact .score-portrait { width: 28px; height: 28px; border-radius: 14px; }
+.hud--compact .score { height: 34px; }
+.hud--compact .score-portrait { width: 24px; height: 24px; border-radius: 12px; }
 .hud--compact .score-name { font-size: 11px; }
 .hud--compact .score-points { font-size: 17px; }
 .hud--compact .slot { height: 40px; }
-.hud--compact .slot-icon { width: 24px; height: 24px; }
+.hud--compact .slot-icon { width: 20px; height: 20px; margin-right: 4px; }
 .hud--compact .slot-text { font-size: 11px; }
+.hud--compact .slot-num { display: none; }
+.hud--compact .slot { padding: 2px 4px; }
 .hud--compact .hint { font-size: 10px; }
 .hud--compact .grit-box { padding: 2px 6px; }
 .hud--compact .grit-num { font-size: 32px; margin-right: 6px; min-width: 22px; }
@@ -1626,10 +1766,10 @@
 /* Announcer banner: Matej's ribbon, text on top. */
 .banner {
     position: absolute;
-    left: 360px;
-    right: 360px;
-    top: 92px;
-    height: 76px;
+    left: 640px;
+    top: 2px;
+    width: 300px;
+    height: 46px;
     background-image: url("/Assets/_Project/Art/UI/panels/banner.png");
     -unity-slice-left: 200;
     -unity-slice-right: 200;
@@ -1643,12 +1783,15 @@
 
 .banner-text {
     -unity-font-definition: url("/Assets/_Project/Art/Fonts/PirataOne-Regular.ttf");
-    font-size: 34px;
+    font-size: 28px;
     color: var(--gold);
     -unity-text-align: middle-center;
     -unity-text-outline-width: 1.5px;
     -unity-text-outline-color: rgb(30, 16, 4);
-    margin-bottom: 8px;
+    margin: 0 0 3px 0;
+    padding: 0;
+    white-space: nowrap;
+    overflow: hidden;
 }
 
 /* ---------- scoreboard and results ---------- */
