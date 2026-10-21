@@ -79,6 +79,7 @@ namespace Musketeers.UI
         bool _lastLocked;
         int _lastTimerSecond = -1;
         float _emoteReady;
+        int _dialogClosedFrame = -1;
 
         public MatchController Controller => _mc;
 
@@ -155,7 +156,7 @@ namespace Musketeers.UI
             _director.Announced += c => _hud.Banner(Callouts.Text(c), new Color(1f, 0.85f, 0.4f), 0.9f, c == Callout.EnGarde || c == Callout.Draw);
 
             _input.IsPointerOverUI = OverUI;
-            _input.IsTyping = () => _chat.IsTyping || _confirm.Open || _info.Open;   // typing in chat or a dialog: no gameplay hotkeys
+            _input.IsTyping = Typing;   // typing in chat or a dialog: no gameplay hotkeys
             _input.UnitAtTile = p => _mc?.Match?.Round?.UnitAt(p)?.Slot ?? -1;
             _input.LockToggled += ToggleLock;
             _input.CycleUnit += () => SwitchUnit(NextControllable(_activeSlot));
@@ -226,6 +227,10 @@ namespace Musketeers.UI
                     _model.Map = _art.Maps.IndexOf(kv[1]);
             }
         }
+
+        // No gameplay or dev hotkeys while typing in chat or with a dialog/window open, including the frame
+        // whose Esc closed it (so that Esc can't also cancel a pending action in PlanningInput).
+        bool Typing() => _chat.IsTyping || _confirm.Open || _info.Open || Time.frameCount == _dialogClosedFrame;
 
         bool OverUI(Vector2 screen)
         {
@@ -626,12 +631,8 @@ namespace Musketeers.UI
             else
                 _director.Announce(Callout.Draw);
             _audio?.Sfx("SFX/match/points_tick", 0.8f);
-            if (r.Winner >= 0)
-            {
-                // Victory voice belongs to the round win, never to the results screen (FIXES_v0.2 §2.6).
-                var def = _art.Character(_setup.Characters[r.Winner]);
-                Tween(0.6f, () => _audio?.Line(def != null ? def.Id : null, "victory"));
-            }
+            // The round winner's victory voice is played by PlaybackDirector on RoundEnded (FIXES_v0.2 §2.6),
+            // never here, so it neither repeats nor spills onto the results screen.
         }
 
         void ContinueAfterRound()
@@ -738,7 +739,7 @@ namespace Musketeers.UI
             bool inMatch = _mc != null;
             if (kb != null && inMatch)
             {
-                bool typing = _chat.IsTyping;
+                bool typing = Typing();
                 if (DevFlags.Available && !typing && kb.f2Key.wasPressedThisFrame)
                     ToggleControlAll();
                 if (DevFlags.Available && !typing && kb.lKey.wasPressedThisFrame)
@@ -751,9 +752,15 @@ namespace Musketeers.UI
                     _chat.Blur();
             }
             if (kb != null && kb.escapeKey.wasPressedThisFrame && _confirm.Open)
+            {
                 _confirm.Cancel();
+                _dialogClosedFrame = Time.frameCount;
+            }
             else if (kb != null && kb.escapeKey.wasPressedThisFrame && _info.Open)
+            {
                 _info.Close();
+                _dialogClosedFrame = Time.frameCount;
+            }
             else if (_charSelect.Visible && !_info.Open && !_confirm.Open)
                 _charSelect.Tick();
             if (!inMatch || _screen != Screen.Match)

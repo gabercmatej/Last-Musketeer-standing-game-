@@ -255,7 +255,7 @@ Ranked by fun-per-hour-of-work. Days 5–6 of the build plan.
 1. **Reveal phase:** all arrows are shown before playback.
 2. **Announcer banners** for named moments: `BONK!`, `RIPOSTE!`, `GUARD BREAK!`, `SWAN DIVE!` (self ring-out), `DOUBLE KO!`, `TOUCHÉ!` (kill by reflected shot), `THE CROWN FALLS!`, `EN GARDE!` (round start), `THE LAST MUSKETEER STANDING` (match win). `BONK!` and the signature-move banner are banner-only (no voice line). There is no reveal sound; the victory voice plays for the round winner at round end, never on the results screen.
 3. **Kill-cam:** at round end, replay the deciding turn at 0.5× speed with a camera push-in. This is free, because the simulation is deterministic: store the turn's start state and plans, then replay them.
-4. **Quick rematch:** the results screen has **Rematch**, and play restarts when everyone presses it, or after 10 seconds.
+4. **Quick rematch:** the results screen has **Play again**, which takes everyone straight back to the lobby with the same players and settings (Quit goes to the menu).
 5. **Post-match awards** (computed from the event log). Rename them to inside jokes:
    - *Sharpshooter*: most shot hits
    - *Wall of Steel*: most shots parried
