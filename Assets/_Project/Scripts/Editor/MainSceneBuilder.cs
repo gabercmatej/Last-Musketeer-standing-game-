@@ -1,8 +1,11 @@
 using System.IO;
 using Musketeers.Data;
+using Musketeers.Net;
 using Musketeers.Presentation;
 using Musketeers.Sim;
 using Musketeers.UI;
+using Unity.Netcode;
+using Unity.Netcode.Transports.UTP;
 using UnityEditor;
 using UnityEditor.SceneManagement;
 using UnityEngine;
@@ -127,6 +130,24 @@ namespace Musketeers.EditorTools
             Set(flow, "_fx", fx);
             Set(flow, "_audio", audio);
 
+            // Day 5 online play: the NetworkManager (+ relay transport and the session service), and one in-scene
+            // NetworkObject carrying LobbyNet and MatchNet. Scene management is off: there is only Main, and the
+            // clients already have it loaded (a scene sync would reload it and wipe their UI).
+            var nmGo = new GameObject("NetworkManager");
+            var nm = nmGo.AddComponent<NetworkManager>();
+            var utp = nmGo.AddComponent<UnityTransport>();
+            if (nm.NetworkConfig == null)
+                nm.NetworkConfig = new NetworkConfig();
+            nm.NetworkConfig.NetworkTransport = utp;
+            nm.NetworkConfig.EnableSceneManagement = false;
+            nm.NetworkConfig.ConnectionApproval = false;
+            var session = nmGo.AddComponent<NetSession>();
+            Set(flow, "_net", session);
+
+            // LobbyNet + MatchNet live on a prefab the host spawns (in-scene objects are not matched on clients when
+            // scene management is off). Registered in a NetworkPrefabsList on the NetworkManager.
+            Set(session, "_netPrefab", EnsureNetPrefab(nm));
+
             // UI Toolkit reads input through the EventSystem when the project uses the Input System only.
             var es = new GameObject("EventSystem");
             es.AddComponent<EventSystem>();
@@ -138,6 +159,35 @@ namespace Musketeers.EditorTools
             EditorBuildSettings.scenes = new[] { new EditorBuildSettingsScene(ScenePath, true) };
             AssetDatabase.SaveAssets();
             Debug.Log("[MainSceneBuilder] Built " + ScenePath + " and set it as the only build scene.");
+        }
+
+        // Assets/_Project/Prefabs/NetSystems.prefab (rewritten each run, same path so references stay) and the
+        // NetworkPrefabsList asset that registers it with the NetworkManager.
+        static GameObject EnsureNetPrefab(NetworkManager nm)
+        {
+            const string dir = "Assets/_Project/Prefabs";
+            Directory.CreateDirectory(dir);
+            var tmp = new GameObject("NetSystems");
+            tmp.AddComponent<NetworkObject>();
+            tmp.AddComponent<LobbyNet>();
+            tmp.AddComponent<MatchNet>();
+            var prefab = PrefabUtility.SaveAsPrefabAsset(tmp, dir + "/NetSystems.prefab");
+            Object.DestroyImmediate(tmp);
+
+            string listPath = dir + "/NetworkPrefabs.asset";
+            var list = AssetDatabase.LoadAssetAtPath<NetworkPrefabsList>(listPath);
+            if (list == null)
+            {
+                list = ScriptableObject.CreateInstance<NetworkPrefabsList>();
+                AssetDatabase.CreateAsset(list, listPath);
+            }
+            if (!list.Contains(prefab))
+                list.Add(new NetworkPrefab { Prefab = prefab });
+            EditorUtility.SetDirty(list);
+            AssetDatabase.SaveAssets();
+            nm.NetworkConfig.Prefabs.NetworkPrefabsLists.Clear();
+            nm.NetworkConfig.Prefabs.NetworkPrefabsLists.Add(list);
+            return prefab;
         }
 
         static void Set(Object target, string field, Object value)

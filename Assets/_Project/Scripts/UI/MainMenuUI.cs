@@ -16,12 +16,15 @@ namespace Musketeers.UI
         public event Action PlayClicked;     // name is valid and saved
         public event Action LoreClicked;
         public event Action SettingsClicked;
+        public event Action HostClicked;     // name is valid and saved (Day 5)
+        public event Action JoinClicked;     // name is valid and saved
 
         readonly VisualElement _root;
         readonly VisualElement _shakeTarget;
         readonly TextField _name;
         readonly TextField _seed;
         readonly Label _hint;
+        readonly Label _note;
         Tween _shake;
 
         public string PlayerName => NameRules.Clean(_name.value);
@@ -52,9 +55,11 @@ namespace Musketeers.UI
             menuRoot.Q<Button>("play-bots").clicked += Play;
             var host = menuRoot.Q<Button>("host");
             var join = menuRoot.Q<Button>("join");
-            host.SetEnabled(false);
-            join.SetEnabled(false);
-            host.tooltip = join.tooltip = "Online play is coming tomorrow.";
+            host.clicked += () => { if (CommitName()) HostClicked?.Invoke(); };
+            join.clicked += () => { if (CommitName()) JoinClicked?.Invoke(); };
+            host.tooltip = "Create a lobby and invite friends";
+            join.tooltip = "Join a friend's lobby with their code";
+            _note = menuRoot.Q<Label>("online-note");
             menuRoot.Q("dev-row").style.display = DevFlags.Available ? DisplayStyle.Flex : DisplayStyle.None;
             ClearHint();
             foreach (var b in _root.Query<Button>().ToList())
@@ -73,17 +78,40 @@ namespace Musketeers.UI
         // Public so MCP screenshots can trigger the error state.
         public void Play()
         {
+            if (CommitName())
+                PlayClicked?.Invoke();
+        }
+
+        // Validates and saves the name (shared by Play, Host and Join); shows the error state if it is not valid.
+        bool CommitName()
+        {
             string cleaned = PlayerName;
             if (!NameRules.IsValid(cleaned, out string hint))
             {
                 ShowError(hint);
-                return;
+                return false;
             }
             _name.SetValueWithoutNotify(cleaned);
             PlayerPrefs.SetString(NameKey, cleaned);
             PlayerPrefs.Save();
-            PlayClicked?.Invoke();
+            return true;
         }
+
+        // A line under the buttons: errors from online play ("The host left. The match has ended.") or a progress note.
+        public void SetNote(string text)
+        {
+            if (_note != null)
+                _note.text = text ?? "";
+        }
+
+        public void SetOnlineBusy(bool busy)
+        {
+            _root.Q<Button>("host").SetEnabled(!busy);
+            _root.Q<Button>("join").SetEnabled(!busy);
+            _root.Q<Button>("play-bots").SetEnabled(!busy);
+        }
+
+        public bool HasValidName => NameRules.IsValid(PlayerName, out _);
 
         void ShowError(string hint)
         {

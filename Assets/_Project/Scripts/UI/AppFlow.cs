@@ -1,6 +1,8 @@
 using System;
 using Musketeers.Data;
+using System.Text;
 using Musketeers.Game;
+using Musketeers.Net;
 using Musketeers.Presentation;
 using Musketeers.Sim;
 using UnityEngine;
@@ -13,7 +15,7 @@ namespace Musketeers.UI
     //   Menu → Lobby (stage, wardrobe, map) → Loading → Arena ↔ Scoreboard → Results → Lobby.
     // It builds the match (setup, transport, controller), wires views, input, music and UI sounds to it,
     // and owns screen switching. Presentation and UI never touch the live GameState.
-    public sealed class AppFlow : MonoBehaviour
+    public sealed partial class AppFlow : MonoBehaviour
     {
         const string SpeedKey = "Musketeers.Speed";
         const float ScoreboardSeconds = 10f;
@@ -44,6 +46,7 @@ namespace Musketeers.UI
         [SerializeField] private WorldLabels _labels;
         [SerializeField] private Fx _fx;
         [SerializeField] private AudioService _audio;
+        [SerializeField] private NetSession _net;    // Day 5: null in a scene built before online play; Host/Join then do nothing
 
         MainMenuUI _menu;
         LobbyUI _lobby;
@@ -58,13 +61,22 @@ namespace Musketeers.UI
         InfoWindowUI _info;
         CharacterSelectUI _charSelect;
         ConfirmDialog _confirm;
+        JoinDialog _joinDialog;
+        readonly NetLobbyBackend _backend = new NetLobbyBackend();
+        LobbyNet _lobbyNet;               // the LobbyNet whose Changed we listen to while online
+        bool _onlineBusy;
+        string _pendingJoinCode = "";
+        string _stageSig = "";
+        int _themeMap = -1;
         bool _charSelectFromLobby;
         VisualElement _root;
         LobbyModel _model;
         Screen _screen;
 
         MatchController _mc;
-        LocalTransport _transport;
+        LocalTransport _transport;          // offline only; null while an online match runs
+        NetTransport _netTransport;         // online only
+        MatchStartInfo _pendingOnline;      // set by MatchStartRpc, consumed by StartMatch after the loading screen
         MatchSetup _setup;
         Color[] _colors;
         Sprite[] _portraits;
@@ -114,6 +126,7 @@ namespace Musketeers.UI
             var loading = AddScreen(_loadingUxml);
             var settings = AddScreen(_settingsUxml);
             UiArt.WireButtonSounds(_root);
+            _joinDialog = new JoinDialog(_root);
             _confirm = new ConfirmDialog(_root);   // added last: it sits above every screen
 
             _model = new LobbyModel(_art.Roster, _art.Cosmetics, _art.Maps != null ? _art.Maps.Count : 1);
@@ -131,17 +144,33 @@ namespace Musketeers.UI
             _charSelect = new CharacterSelectUI(menu, _model, _art);
 
             _menu.PlayClicked += ShowCharacterSelect;
+            _menu.HostClicked += HostOnline;
+            _menu.JoinClicked += () => _joinDialog.Show(_pendingJoinCode);
+            _joinDialog.JoinRequested += JoinOnline;
+            if (_net != null)
+                _net.Ended += OnNetEnded;
+            MatchNet.MatchStarted += OnMatchStartInfo;
+            MatchNet.ReturnedToLobby += OnReturnedToLobby;
+            MatchNet.ChatReceived += OnChatReceived;
+            LobbyNet.CharacterCount = _model.RosterCount;
+            LobbyNet.MapCount = _model.MapCount;
             _menu.LoreClicked += () => _info.OpenTab(InfoWindowUI.Tab.Lore);
             _menu.SettingsClicked += () => _info.OpenTab(InfoWindowUI.Tab.Settings);
             _charSelect.Selected += c =>
             {
-                _model.Character = c;
+                _model.PickCharacter(c);   // online the host decides; Character follows the snapshot
                 _model.Save();
                 ShowLobby();
             };
-            _charSelect.Back += () => { if (_charSelectFromLobby) ShowLobby(); else ShowMenu(); };
-            _lobby.BackClicked += ShowMenu;
-            _lobby.StartClicked += () => StartWithLoading(NewSetup(null));
+            _charSelect.Back += () => { if (_charSelectFromLobby) ShowLobby(); else LeaveToMenu(); };
+            _lobby.BackClicked += LeaveToMenu;
+            _lobby.StartClicked += () =>
+            {
+                if (_model.Online)
+                    StartOnlineMatch();
+                else
+                    StartWithLoading(NewSetup(null));
+            };
             _lobby.SettingsClicked += () => _info.OpenTab(InfoWindowUI.Tab.Settings);
             _lobby.ChangeMusketeerClicked += ChangeMusketeer;
             _lobby.Changed += () => { RefreshStage(); ApplyLobbyTheme(false); };
@@ -151,15 +180,15 @@ namespace Musketeers.UI
             _hud.SpeedClicked += CycleSpeed;
             _hud.LogClicked += () => _log.SetOpen(!_log.Open);
             _hud.LeaveClicked += AskLeaveMatch;
-            _chat.Sent += text => _chatModel.Add(_setup != null ? _setup.LocalSlot : 0, text, Time.unscaledTime);
+            _chat.Sent += OnChatSent;
             _chat.EmoteClicked += Emote;
             _hud.SettingsClicked += () => _info.OpenTab(InfoWindowUI.Tab.Settings);
             _planBar.ActionClicked += t => _input.ChooseAction(t);
             _planBar.SlotClicked += t => { if (_planning && !_builder.Locked) _builder.SelectSlot(t); };
             _planBar.LockClicked += ToggleLock;
             _scoreboard.ContinueClicked += ContinueAfterRound;
-            _results.AgainClicked += ShowLobby;   // Return to lobby
-            _results.MenuClicked += ShowMenu;     // Quit
+            _results.AgainClicked += ReturnToLobbyClicked;   // Return to lobby
+            _results.MenuClicked += LeaveToMenu;  // Quit
             _results.SettingsClicked += () => _info.OpenTab(InfoWindowUI.Tab.Settings);
             // Return to lobby: straight back to the same lobby, same players, bots and settings (the lobby restores its art and music).
             _director.PointsScored += OnPointsScored;
@@ -180,6 +209,15 @@ namespace Musketeers.UI
 
             ShowMenu();
             ReadUrlFlags();
+            _pendingJoinCode = NetSession.ReadJoinCode();
+            if (_pendingJoinCode.Length > 0 && _net != null)
+            {
+                // Opened from an invite link: straight to the join dialog if we already know the player's name.
+                if (_menu.HasValidName)
+                    _joinDialog.Show(_pendingJoinCode);
+                else
+                    _menu.SetNote("Invite code ready. Type your name, then press Join.");
+            }
 #if UNITY_EDITOR
             // Dev hook (Tools/Musketeers/Dev): start a bot match on a chosen map from Play mode.
             string devMap = UnityEditor.EditorPrefs.GetString("Musketeers.DevAutoplayMap", "");
@@ -200,6 +238,7 @@ namespace Musketeers.UI
                 DevFlags.AutoStartPlayers = 4;
             }
 #endif
+            AutoTestInit();
             if (DevFlags.AutoStartPlayers >= 2)
             {
                 _model.Players = Mathf.Clamp(DevFlags.AutoStartPlayers, 2, 4);
@@ -240,7 +279,7 @@ namespace Musketeers.UI
 
         // No gameplay or dev hotkeys while typing in chat or with a dialog/window open, including the frame
         // whose Esc closed it (so that Esc can't also cancel a pending action in PlanningInput).
-        bool Typing() => _chat.IsTyping || _confirm.Open || _info.Open || Time.frameCount == _dialogClosedFrame;
+        bool Typing() => _chat.IsTyping || _confirm.Open || _joinDialog.Open || _info.Open || Time.frameCount == _dialogClosedFrame;
 
         bool OverUI(Vector2 screen)
         {
@@ -314,15 +353,20 @@ namespace Musketeers.UI
             _screen = Screen.Lobby;
             _charSelectFromLobby = false;
             _model.Name = _menu.PlayerName;
-            bool host = !(DevFlags.Available && DevFlags.LobbyAsGuest);
-            if (host != _model.IsHost)
-                _model.SetHost(host);
+            if (!_model.Online)   // online, host/guest comes from the network
+            {
+                bool host = !(DevFlags.Available && DevFlags.LobbyAsGuest);
+                if (host != _model.IsHost)
+                    _model.SetHost(host);
+            }
+            _lobby.SetInviteCode(_model.Online && _net != null ? _net.Code : "");
             _lobby.Refresh();
             _lobby.SetVisible(true);
             RefreshStage();
             _rig.SetBackground(null, new Color(0.08f, 0.06f, 0.05f));
             _rig.FrameStage(StageView.Center, StageView.Width, StageView.Height);
             ApplyLobbyTheme(true);
+            _themeMap = _model.Map;
         }
 
         // The selected map's lobby art and music (MapDef). A map change fades the background and crossfades the
@@ -346,9 +390,13 @@ namespace Musketeers.UI
         void RefreshStage()
         {
             var chars = _model.Characters();
-            var names = new string[chars.Length];
-            for (int i = 0; i < chars.Length; i++)
-                names[i] = i != 0 ? "Bot" : !string.IsNullOrEmpty(_model.Name) ? _model.Name : _art.CharacterName(chars[i]);
+            var names = _model.SeatNames();   // online: each seat's own name; offline: null
+            if (names == null)
+            {
+                names = new string[chars.Length];
+                for (int i = 0; i < chars.Length; i++)
+                    names[i] = i != 0 ? "Bot" : !string.IsNullOrEmpty(_model.Name) ? _model.Name : _art.CharacterName(chars[i]);
+            }
             _stage.Show(chars.Length, chars, names, null, _model.Loadouts(), _model.Ready());
             if (_lobby.Wardrobe.Open)
                 _stage.Focus(0);
@@ -364,6 +412,9 @@ namespace Musketeers.UI
             _preview.Clear();
             _mc?.Stop();
             _mc = null;
+            _netTransport = null;
+            if (MatchNet.Instance != null)
+                MatchNet.Instance.Transport = null;
             _board.Clear();
             _chat?.Blur();
         }
@@ -434,13 +485,32 @@ namespace Musketeers.UI
             _rig.SetBackground(theme != null ? theme.BackgroundArt : null, theme != null ? theme.Background : new Color(0.09f, 0.08f, 0.11f), theme != null ? theme.ArenaRect : default);
             Debug.Log($"[AppFlow] Match: {n} players on {setup.MapId}, seed {setup.Seed}, you are {setup.Names[0]} ({_art.CharacterName(setup.Characters[0])})");
 
-            _transport = new LocalTransport
+            var online = _pendingOnline;
+            _pendingOnline = null;
+            IMatchTransport transport;
+            if (online != null && MatchNet.Instance != null)
             {
-                ControlAll = DevFlags.Available && DevFlags.ControlAll,
-                AutoPlayHumans = DevFlags.AutoPlay,
-                PlanningSecondsOverride = DevFlags.PlanningSeconds,
-            };
-            _mc = new MatchController(setup, _transport);
+                _transport = null;
+                _netTransport = new NetTransport(MatchNet.Instance, _net != null && _net.IsHost, online.SlotClients());
+                _netTransport.Warn += w => Debug.LogWarning("[Net] " + w);
+                _netTransport.SnapshotReceived += OnSnapshot;
+                if (DevFlags.Available && DevFlags.PlanningSeconds > 0f)
+                    _netTransport.PlanningSecondsOverride = DevFlags.PlanningSeconds;
+                MatchNet.Instance.Transport = _netTransport;
+                transport = _netTransport;
+            }
+            else
+            {
+                _netTransport = null;
+                _transport = new LocalTransport
+                {
+                    ControlAll = DevFlags.Available && DevFlags.ControlAll,
+                    AutoPlayHumans = DevFlags.AutoPlay,
+                    PlanningSecondsOverride = DevFlags.PlanningSeconds,
+                };
+                transport = _transport;
+            }
+            _mc = new MatchController(setup, transport);
             _mc.RoundStarted += OnRoundStarted;
             _mc.PlanningStarted += OnPlanningStarted;
             _mc.TurnReady += OnTurnReady;
@@ -452,7 +522,7 @@ namespace Musketeers.UI
             _hud.SetVisible(true);
             _hud.BuildScores(setup.Names, _colors, _portraits);
             _planBar.SetPlayerNames(setup.Names);
-            _hud.SetDevBadge(_transport.ControlAll);
+            _hud.SetDevBadge(ControlAllOn);
             _log.Clear();
             _audio?.Music("Music/battle");
             _mc.Start();
@@ -512,10 +582,10 @@ namespace Musketeers.UI
             _planning = true;
             _lastTimerSecond = -1;
             _activeSlot = _setup.LocalSlot;
-            if (!round.Units[_activeSlot].Alive && _transport.ControlAll)
+            if (!round.Units[_activeSlot].Alive && ControlAllOn)
                 _activeSlot = NextControllable(_activeSlot);
 
-            bool canPlan = round.Units[_activeSlot].Alive && !_transport.AutoPlayHumans;
+            bool canPlan = round.Units[_activeSlot].Alive && !AutoHumans;
             _input.Active = canPlan;
             _planBar.SetVisible(true);
             _hud.SetRound(_mc.Match.RoundNumber, round.Turn);
@@ -525,8 +595,9 @@ namespace Musketeers.UI
             if (!canPlan)
             {
                 _preview.Clear();
-                _planBar.SetMessage(_transport.AutoPlayHumans ? "Autoplay: bots are planning for you." : "You're out this round. Watch the rest!");
+                _planBar.SetMessage(AutoHumans ? "Autoplay: bots are planning for you." : "You're out this round. Watch the rest!");
             }
+            AutoTestPlan();
         }
 
         void LoadActive()
@@ -535,7 +606,7 @@ namespace Musketeers.UI
             _builder.Load(round, _activeSlot, _mc.Cfg, _plans[_activeSlot], _locked[_activeSlot]);
             _input.Builder = _builder;
             for (int i = 0; i < _board.UnitCount; i++)
-                _board.Unit(i)?.SetSelected(_transport.ControlAll && i == _activeSlot);
+                _board.Unit(i)?.SetSelected(ControlAllOn && i == _activeSlot);
             var def = _art.Character(_setup.Characters[_activeSlot]);
             _planBar.SetCharacter(def, _mc.Cfg, round.Units[_activeSlot].Ability, _setup.Names[_activeSlot], _colors[_activeSlot]);
             _planBar.Refresh(_builder, _mc.Cfg, def);
@@ -557,7 +628,7 @@ namespace Musketeers.UI
 
         void OnPlanChanged()
         {
-            if (!_planning || _mc == null || _transport.AutoPlayHumans)
+            if (!_planning || _mc == null || AutoHumans)
                 return;
             _plans[_activeSlot] = _builder.Plan;
             _locked[_activeSlot] = _builder.Locked;
@@ -590,7 +661,7 @@ namespace Musketeers.UI
             bool lockNow = !_builder.Locked;
             _builder.SetLocked(lockNow);
             // Control-all: locking one unit moves on to the next one that still needs a plan.
-            if (lockNow && _transport.ControlAll)
+            if (lockNow && ControlAllOn)
             {
                 int next = NextControllable(_activeSlot, unlockedOnly: true);
                 if (next != _activeSlot)
@@ -600,7 +671,7 @@ namespace Musketeers.UI
 
         void SwitchUnit(int slot)
         {
-            if (!_planning || !_transport.ControlAll || slot < 0 || slot == _activeSlot)
+            if (!_planning || !ControlAllOn || slot < 0 || slot == _activeSlot)
                 return;
             if (!_mc.Match.Round.Units[slot].Alive)
                 return;
@@ -648,7 +719,7 @@ namespace Musketeers.UI
         {
             var m = _mc.Match;
             _scoreboard.Show(r, m, _setup.Names, _colors, _portraits);
-            _scoreboardLeft = _transport.AutoPlayHumans ? 1.5f : ScoreboardSeconds;
+            _scoreboardLeft = AutoHumans ? 1.5f : ScoreboardSeconds;
             _hud.SetPhase("Round over");
             if (r.Winner >= 0)
                 _log.Line($"{_setup.Names[r.Winner]} wins round {r.RoundNumber}", "log-line--turn");
@@ -687,6 +758,7 @@ namespace Musketeers.UI
             _screen = Screen.Results;
             int n = _setup.PlayerCount;
             var places = m.Places ?? Scoring.Rank(m.Points, m.RoundPoints);
+            AutoTestMatchOver(m);
             Debug.Log($"[AppFlow] Match over after {m.RoundNumber} rounds; winner {_setup.Names[m.MatchWinner >= 0 ? m.MatchWinner : 0]}");
 
             var tags = new string[n];
@@ -736,7 +808,7 @@ namespace Musketeers.UI
                 _activeSlot = _setup.LocalSlot;
             else if (!units[_activeSlot].Alive)
                 _activeSlot = NextControllable(_activeSlot);
-            _input.Active = units[_activeSlot].Alive && !_transport.AutoPlayHumans;
+            _input.Active = units[_activeSlot].Alive && !AutoHumans;
             LoadActive();
         }
 
@@ -750,6 +822,12 @@ namespace Musketeers.UI
             if (u == null || !u.Alive || _mc.Phase != MatchPhase.Planning)
                 return;
             _emoteReady = Time.unscaledTime + EmoteCooldown;
+            if (_netTransport != null)
+            {
+                // Online the host relays it (rate limited) and every machine, this one included, plays it on arrival.
+                MatchNet.Instance?.SendEmote(index);
+                return;
+            }
             _fx.Emote(u.transform, new Vector3(0.35f, UnitView.FeetY + 1.85f, 0f), UiArt.Get(GameArt.Emotes[index]), 2f);
             _audio?.Sfx("SFX/ui/emote_pop");
             _audio?.Line(u.CharacterId, "taunt", index);
@@ -762,7 +840,7 @@ namespace Musketeers.UI
             if (_confirm.Open || _mc == null)
                 return;
             _chat.Blur();
-            _confirm.Show("Leave this match? You won't be able to rejoin.", "Leave", "Stay", ShowLobby);
+            _confirm.Show("Leave this match? You won't be able to rejoin.", "Leave", "Stay", _netTransport != null ? LeaveToMenu : (Action)ShowLobby);
         }
 
         // FIXES_4E §7: the 1280x720 reference panel is scaled to fit inside the window (min of the two ratios), so no
@@ -789,6 +867,9 @@ namespace Musketeers.UI
 
         void OnDestroy()
         {
+            MatchNet.MatchStarted -= OnMatchStartInfo;
+            MatchNet.ReturnedToLobby -= OnReturnedToLobby;
+            MatchNet.ChatReceived -= OnChatReceived;
             // The PanelSettings asset must not keep a runtime-chosen match value in the Editor.
             if (_origMatch >= 0f && _document != null && _document.panelSettings != null)
                 _document.panelSettings.match = _origMatch;
@@ -797,6 +878,7 @@ namespace Musketeers.UI
         void Update()
         {
             UpdatePanelScale();
+            AutoTestTick();
             float dt = Time.unscaledDeltaTime;
             _loading.Tick(dt);
             var kb = Keyboard.current;
@@ -820,12 +902,17 @@ namespace Musketeers.UI
                 _confirm.Cancel();
                 _dialogClosedFrame = Time.frameCount;
             }
+            else if (kb != null && kb.escapeKey.wasPressedThisFrame && _joinDialog.Open)
+            {
+                _joinDialog.Cancel();
+                _dialogClosedFrame = Time.frameCount;
+            }
             else if (kb != null && kb.escapeKey.wasPressedThisFrame && _info.Open)
             {
                 _info.Close();
                 _dialogClosedFrame = Time.frameCount;
             }
-            else if (_charSelect.Visible && !_info.Open && !_confirm.Open)
+            else if (_charSelect.Visible && !_info.Open && !_confirm.Open && !_joinDialog.Open)
                 _charSelect.Tick();
             if (!inMatch || _screen != Screen.Match)
                 return;
@@ -876,6 +963,172 @@ namespace Musketeers.UI
                 return;
             if (s <= 5 && s >= 1)
                 _audio?.Sfx("SFX/match/timer_tick", 0.6f);
+        }
+
+        // ---------- online (Day 5, chunk A: session + lobby) ----------
+        // Offline play never touches any of this. Online, the LobbyModel is switched to online mode and fed from
+        // LobbyNet snapshots; every lobby action goes to the host through NetLobbyBackend. Chunk B starts the match
+        // from StartOnlineMatch (MatchStartRpc on MatchNet) and calls LobbyNet.SetMatchInProgress.
+
+        sealed class NetLobbyBackend : ILobbyBackend
+        {
+            static LobbyNet L => LobbyNet.Instance;
+            public void Pick(int character) => L?.RequestPick(character);
+            public void SetReady(bool ready) => L?.RequestReady(ready);
+            public void SetLoadout(string serialized) => L?.RequestLoadout(serialized);
+            public void SetSettings(int map, int pointsToWin, int hearts) =>
+                L?.RequestSettings(new LobbySettingsData { Map = map, PointsToWin = pointsToWin, Hearts = hearts });
+            public void DefaultSettings() => L?.RequestDefaultSettings();
+            public void AddBot() => L?.RequestAddBot();
+            public void RemoveBot() => L?.RequestRemoveBot();
+        }
+
+        async void HostOnline()
+        {
+            if (_net == null || _onlineBusy)
+                return;
+            _onlineBusy = true;
+            _menu.SetOnlineBusy(true);
+            _menu.SetNote("Creating lobby...");
+            try
+            {
+                await _net.HostAsync(_menu.PlayerName);
+                _menu.SetNote("");
+                EnterOnline();
+                ShowCharacterSelect();
+            }
+            catch (NetJoinException e)
+            {
+                Debug.Log("[NetSession] Host failed: " + e.Message);
+                _menu.SetNote(e.Message);
+            }
+            finally
+            {
+                _onlineBusy = false;
+                _menu.SetOnlineBusy(false);
+            }
+        }
+
+        async void JoinOnline(string code)
+        {
+            if (_net == null || _onlineBusy)
+                return;
+            _onlineBusy = true;
+            _joinDialog.SetBusy(true);
+            _joinDialog.SetStatus("Joining...", false);
+            try
+            {
+                await _net.JoinAsync(code, _menu.PlayerName);
+                _joinDialog.Hide();
+                _pendingJoinCode = "";
+                _menu.SetNote("");
+                EnterOnline();
+                ShowCharacterSelect();
+            }
+            catch (NetJoinException e)
+            {
+                Debug.Log("[NetSession] Join failed: " + e.Message);
+                _joinDialog.SetBusy(false);
+                _joinDialog.SetStatus(e.Message, true);
+            }
+            finally
+            {
+                _onlineBusy = false;
+            }
+        }
+
+        void EnterOnline()
+        {
+            _model.EnterOnline(_backend);
+            _stageSig = "";
+            _themeMap = -1;
+            _lobbyNet = LobbyNet.Instance;
+            if (_lobbyNet != null)
+            {
+                _lobbyNet.Changed += OnLobbyNetChanged;
+                _lobbyNet.ClientLeft += OnClientLeft;
+            }
+            if (ApplyLobbySnapshot())
+                _backend.SetLoadout(_model.MyLoadout.Serialize());   // wear what you saved for the musketeer you were given
+        }
+
+        bool ApplyLobbySnapshot()
+        {
+            var ln = _lobbyNet;
+            return ln != null && ln.IsSpawned && _model.ApplyOnline(ln.Entries(), ln.LocalClientId, ln.Settings, ln.IsServer);
+        }
+
+        // Seats, ready flags, outfits or rules changed (anywhere): reload the model and redraw what is on screen.
+        void OnLobbyNetChanged()
+        {
+            if (!_model.Online || !ApplyLobbySnapshot())
+                return;
+            bool picker = _charSelect.Visible;
+            if (_screen == Screen.Lobby || picker)
+            {
+                if (picker)
+                    _charSelect.Refresh();
+                string sig = StageSignature();
+                if (sig != _stageSig)
+                {
+                    _stageSig = sig;
+                    RefreshStage();
+                }
+                else
+                    _stage.SetReady(_model.Ready());
+                if (_screen == Screen.Lobby)
+                {
+                    _lobby.Refresh();
+                    if (_themeMap != _model.Map)
+                    {
+                        _themeMap = _model.Map;
+                        ApplyLobbyTheme(false);   // the host changed the map: its art and music switch on every machine
+                    }
+                }
+            }
+        }
+
+        // Everything that needs the stage rebuilt (ready flags alone do not).
+        string StageSignature()
+        {
+            var sb = new StringBuilder();
+            var chars = _model.Characters();
+            var names = _model.SeatNames();
+            var loadouts = _model.Loadouts();
+            for (int i = 0; i < chars.Length; i++)
+                sb.Append(chars[i]).Append(':').Append(names != null ? names[i] : "").Append(':').Append(loadouts[i].Serialize()).Append(';');
+            return sb.ToString();
+        }
+
+        // Menu from a lobby / picker / results: online that also leaves the session.
+        void LeaveToMenu()
+        {
+            if (_model.Online)
+                ExitOnline(null, true);
+            else
+                ShowMenu();
+        }
+
+        void OnNetEnded(string reason) => ExitOnline(reason, false);
+
+        void ExitOnline(string message, bool leaveSession)
+        {
+            if (leaveSession && _net != null)
+                _ = _net.LeaveAsync();
+            if (_lobbyNet != null)
+            {
+                _lobbyNet.Changed -= OnLobbyNetChanged;
+                _lobbyNet.ClientLeft -= OnClientLeft;
+            }
+            _lobbyNet = null;
+            _pendingOnline = null;
+            if (_model.Online)
+                _model.ExitOnline();
+            _lobby.SetInviteCode("");
+            _joinDialog.Hide();
+            ShowMenu();
+            if (!string.IsNullOrEmpty(message))
+                _confirm.ShowNotice(message);
         }
 
         // ---------- dev/MCP helpers (screens without clicking) ----------

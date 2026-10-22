@@ -1,7 +1,7 @@
 {
     "name": "Musketeers.EditorTools",
     "rootNamespace": "Musketeers.EditorTools",
-    "references": ["Musketeers.Sim", "Musketeers.Game", "Musketeers.Data", "Musketeers.Presentation", "Musketeers.UI", "Unity.InputSystem", "UnityEngine.UI"],
+    "references": ["Musketeers.Sim", "Musketeers.Game", "Musketeers.Data", "Musketeers.Presentation", "Musketeers.UI", "Musketeers.Net", "Unity.Netcode.Runtime", "Unity.Collections", "Unity.InputSystem", "UnityEngine.UI"],
     "includePlatforms": ["Editor"],
     "excludePlatforms": [],
     "allowUnsafeCode": false,

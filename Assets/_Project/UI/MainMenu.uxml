@@ -14,7 +14,7 @@
                     <ui:Button name="host" text="Host" class="btn btn--half" />
                     <ui:Button name="join" text="Join" class="btn btn--half" />
                 </ui:VisualElement>
-                <ui:Label text="Online play is coming tomorrow." class="note" />
+                <ui:Label name="online-note" text="Host a lobby, or join a friend with their code." class="note" />
                 <ui:VisualElement name="dev-row" class="menu-row dev-row">
                     <ui:Label text="DEV" class="badge badge--dev" />
                     <ui:Label text="Seed" class="dev-label" />

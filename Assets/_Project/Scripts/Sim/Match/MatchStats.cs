@@ -36,7 +36,7 @@ namespace Musketeers.Sim
             Deaths = new int[players];
         }
 
-        int[][] All => new[] { ShotsFired, ShotHits, Ripostes, ShotsParried, Bonks, SelfRingOuts, CrownKills, KegDamage, DamageDealt, Fizzles, Kills, Deaths };
+        internal int[][] All => new[] { ShotsFired, ShotHits, Ripostes, ShotsParried, Bonks, SelfRingOuts, CrownKills, KegDamage, DamageDealt, Fizzles, Kills, Deaths };
 
         // Unit slots are player slots (every player has a unit every round, sitting out = dead).
         public void Record(EventLog log, int crowned)

@@ -67,6 +67,13 @@ namespace Musketeers.Game
                 _transport.SubmitPlan(TurnSeq, plan, locked);
         }
 
+        // Online resync (TECH_DESIGN §2): the host sent the full state after a hash mismatch. Replaces ours and carries on.
+        public void ApplySnapshot(MatchState state)
+        {
+            if (state != null)
+                Match = state;
+        }
+
         public bool IsLocked(int slot) => (LockMask & (1 << slot)) != 0;
 
         // The presentation finished playing Current.

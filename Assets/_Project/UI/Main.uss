@@ -2404,3 +2404,64 @@
     color: rgb(255, 224, 120);
     -unity-font-style: bold;
 }
+
+/* ---------- online lobby: code + invite (Day 5) ---------- */
+
+.invite-panel {
+    position: absolute;
+    left: 50%;
+    top: 12px;
+    width: 300px;
+    margin-left: -150px;
+    padding: 8px 14px 10px 14px;
+    align-items: center;
+}
+
+.invite-caption {
+    font-size: 15px;
+    color: var(--gold);
+    -unity-text-align: middle-center;
+}
+
+.invite-code {
+    font-size: 36px;
+    letter-spacing: 6px;
+    color: rgb(255, 244, 214);
+    -unity-font-style: bold;
+    -unity-text-align: middle-center;
+    margin-bottom: 4px;
+}
+
+.invite-row {
+    flex-direction: row;
+    justify-content: center;
+}
+
+.invite-row > .btn {
+    margin: 0 4px;
+}
+
+/* ---------- join dialog (Day 5) ---------- */
+
+.join-panel {
+    width: 520px;
+    padding: 28px 36px 24px 36px;
+    align-items: stretch;
+}
+
+.join-code-field {
+    margin: 6px 0 4px 0;
+}
+
+.join-status {
+    min-height: 24px;
+    font-size: 18px;
+    color: rgb(255, 214, 120);
+    -unity-text-align: middle-center;
+    white-space: normal;
+    margin-bottom: 10px;
+}
+
+.join-status--error {
+    color: rgb(255, 130, 120);
+}

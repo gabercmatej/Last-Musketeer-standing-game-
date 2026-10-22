@@ -1,7 +1,7 @@
 {
     "name": "Musketeers.UI",
     "rootNamespace": "Musketeers.UI",
-    "references": ["Musketeers.Sim", "Musketeers.Game", "Musketeers.Data", "Musketeers.Presentation", "PrimeTween.Runtime", "Unity.InputSystem"],
+    "references": ["Musketeers.Sim", "Musketeers.Game", "Musketeers.Data", "Musketeers.Presentation", "Musketeers.Net", "PrimeTween.Runtime", "Unity.InputSystem", "Unity.Netcode.Runtime"],
     "includePlatforms": [],
     "excludePlatforms": [],
     "allowUnsafeCode": false,

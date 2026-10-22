@@ -66,6 +66,10 @@ namespace Musketeers.Sim
         // §3 Cardinal's Guard: the outer ring is 0 and the index grows toward the center.
         public int RingIndex(Int2 p) => Math.Min(Math.Min(p.X, p.Y), Math.Min(Width - 1 - p.X, Height - 1 - p.Y));
 
+        // Raw tile data for MatchStateSerializer (a removed tile reads as Floor, its flag says it is void).
+        internal TileType RawTile(int index) => _tiles[index];
+        internal bool RawRemoved(int index) => _removed[index];
+
         public Board Clone() => new Board(Width, Height, (TileType[])_tiles.Clone(), (bool[])_removed.Clone(), EdgeWalls);
 
         internal void AddToHash(ref Fnv1a h)

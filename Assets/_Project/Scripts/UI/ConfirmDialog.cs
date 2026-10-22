@@ -48,6 +48,7 @@ namespace Musketeers.UI
 
         public void Show(string message, string primaryText, string secondaryText, Action onPrimary, Action onSecondary = null)
         {
+            _secondary.style.display = DisplayStyle.Flex;
             _message.text = message;
             _primary.text = primaryText;
             _secondary.text = secondaryText;
@@ -56,6 +57,13 @@ namespace Musketeers.UI
             Open = true;
             _root.style.display = DisplayStyle.Flex;
             _root.BringToFront();
+        }
+
+        // A message with one button (kick reasons, "The host left."). Esc, a click outside and the button all just close it.
+        public void ShowNotice(string message, string buttonText = "OK", Action onClose = null)
+        {
+            Show(message, buttonText, buttonText, onClose, onClose);
+            _secondary.style.display = DisplayStyle.None;
         }
 
         // Esc: same as the secondary button.

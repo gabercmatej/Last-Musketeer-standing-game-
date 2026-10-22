@@ -134,7 +134,7 @@ namespace Musketeers.UI
                 Back?.Invoke();
         }
 
-        void Refresh()
+        public void Refresh()
         {
             for (int i = 0; i < _picks.Count; i++)
             {

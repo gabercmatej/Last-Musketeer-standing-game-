@@ -1,5 +1,6 @@
 using System;
 using Musketeers.Data;
+using Musketeers.Net;
 using Musketeers.Presentation;
 using UnityEngine;
 using UnityEngine.UIElements;
@@ -26,7 +27,54 @@ namespace Musketeers.UI
         readonly ArtLibrary _art;
         readonly ConfirmDialog _confirm;
 
+        VisualElement _invite;
+        Label _inviteLabel;
+        string _inviteCode = "";
+
         public WardrobeUI Wardrobe { get; }
+
+        // Online lobbies show their code with Copy code / Copy invite link (top centre). "" hides it (offline).
+        public void SetInviteCode(string code)
+        {
+            _inviteCode = code ?? "";
+            _inviteLabel.text = _inviteCode;
+            _invite.style.display = _inviteCode.Length > 0 ? DisplayStyle.Flex : DisplayStyle.None;
+        }
+
+        void BuildInvite(VisualElement root)
+        {
+            _invite = new VisualElement { name = "invite" };
+            _invite.AddToClassList("panel");
+            _invite.AddToClassList("invite-panel");
+            var caption = new Label("Lobby code");
+            caption.AddToClassList("invite-caption");
+            _inviteLabel = new Label();
+            _inviteLabel.AddToClassList("invite-code");
+            var row = new VisualElement();
+            row.AddToClassList("invite-row");
+            row.Add(CopyButton("Copy code", () => _inviteCode));
+            row.Add(CopyButton("Copy invite link", () => NetSession.InviteLink(_inviteCode)));
+            _invite.Add(caption);
+            _invite.Add(_inviteLabel);
+            _invite.Add(row);
+            _invite.style.display = DisplayStyle.None;
+            _root.Add(_invite);
+        }
+
+        static Button CopyButton(string text, Func<string> payload)
+        {
+            Button b = null;
+            b = new Button { text = text, focusable = false };
+            b.AddToClassList("btn");
+            b.AddToClassList("btn--small");
+            b.clicked += () =>
+            {
+                Clipboard.Copy(payload());
+                b.text = "Copied";
+                b.schedule.Execute(() => b.text = text).StartingIn(1500);
+            };
+            return b;
+        }
 
         public LobbyUI(VisualElement root, LobbyModel model, ArtLibrary art, ConfirmDialog confirm)
         {
@@ -58,6 +106,7 @@ namespace Musketeers.UI
             root.Q<Button>("hearts-plus").clicked += () => StepRules(0, 1);
             _add.clicked += () => SetPlayers(_model.Players + 1);
             _remove.clicked += () => SetPlayers(_model.Players - 1);
+            BuildInvite(root);
             _start.clicked += PressStart;
             _ready.clicked += () =>
             {
@@ -126,6 +175,13 @@ namespace Musketeers.UI
         {
             if (!_model.IsHost)
                 return;
+            if (_model.Players < 2)
+            {
+                // Online, the host can be alone in the lobby: a match needs at least two musketeers.
+                UiArt.Sfx("SFX/ui/ui_error");
+                _confirm.ShowNotice("Add a bot or wait for a friend first.");
+                return;
+            }
             if (_model.AllReady())
             {
                 UiArt.Sfx("SFX/ui/ready");
@@ -143,6 +199,18 @@ namespace Musketeers.UI
         {
             if (!_model.IsHost)
                 return;
+            if (_model.Online)
+            {
+                // Online the host adds/removes bots and the seats come back in the snapshot (4 seats at most, humans included).
+                if (n > _model.Players && _model.Players < Mathf.Min(4, _model.RosterCount))
+                    _model.AddBot();
+                else if (n < _model.Players && _model.BotCount > 0)
+                    _model.RemoveBot();
+                else
+                    return;
+                UiArt.Sfx(n > _model.Players ? "SFX/ui/player_join" : "SFX/ui/player_leave");
+                return;
+            }
             n = Mathf.Clamp(n, 2, Mathf.Min(4, _model.RosterCount));
             if (n == _model.Players)
                 return;
@@ -165,6 +233,7 @@ namespace Musketeers.UI
                 return;
             _model.Map = (_model.Map + d + _model.MapCount) % _model.MapCount;
             _model.Save();
+            _model.PushSettings();
             Refresh();
             Changed?.Invoke();
         }
@@ -176,6 +245,7 @@ namespace Musketeers.UI
             _model.PointsToWin += points;
             _model.Hearts += hearts;
             _model.Save();
+            _model.PushSettings();
             UiArt.Sfx("SFX/ui/wardrobe_equip", 0.5f);
             Refresh();
         }
@@ -200,7 +270,8 @@ namespace Musketeers.UI
             _mapDesc.text = map != null ? map.Description : "";
             _count.text = _model.Players.ToString();
             _add.SetEnabled(_model.Players < Mathf.Min(4, _model.RosterCount));
-            _remove.SetEnabled(_model.Players > 2);
+            _remove.SetEnabled(_model.Online ? _model.BotCount > 0 : _model.Players > 2);
+            _invite.style.display = _inviteCode.Length > 0 ? DisplayStyle.Flex : DisplayStyle.None;
         }
     }
 }
