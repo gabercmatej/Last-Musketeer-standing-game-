@@ -68,10 +68,10 @@ Multiplayer Services 2.4.1, MPPM 3.0.0. Check APIs against these versions.
       disconnect → Catch Breath plans; chat rate limit / length.
 
 ## Finish (Haiku subagents)
-- [ ] F1 EditMode tests all green, 0 console errors
-- [ ] F2 MPPM autotest: host + 2 virtual players, both maps, return to lobby, 2nd match, one leaves mid-match
-- [ ] F3 Web build, 3 local tabs via invite link (autotest)
-- [ ] F4 Version 0.3.0, DECISIONS.md lines, deploy, commit, push
+- [x] F1 EditMode tests all green (539/539), 0 console errors (2026-10-22)
+- [ ] F2 MPPM autotest: host + 2 virtual players, both maps, return to lobby, 2nd match, one leaves mid-match — NOT RUN: MPPM 3.0 has no public API to activate virtual players; needs manual activation
+- [ ] F3 Web build, 3 local tabs via invite link (autotest) — FAILED on first build (in-scene Net object not spawnable on clients; fixed via NetSystems prefab, a70f408). Re-test pending
+- [ ] F4 Version 0.3.0, DECISIONS.md lines, deploy, commit, push — version is 0.3.0; NOT deployed
 
 ## Non-goals
 - Reconnecting a dropped player into a running match; host migration; spectators beyond 4.

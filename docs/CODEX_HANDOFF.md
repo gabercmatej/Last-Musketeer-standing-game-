@@ -72,3 +72,27 @@ The focus is **making online play solid and fun for 4 friends.** Do these in pri
 - **Deploy:** bump Player Settings → Version, build Web to `Builds/Web`, run `tools/deploy-web.sh`. Netlify is already linked.
 - Log every decision in `docs/DECISIONS.md` (one line each, dated).
 - **End every task with:** what changed, test counts, how Matej can test it (max 8 lines), and the commit hash.
+
+## Day 5 online (v0.3.0) — status 2026-10-22
+
+Verified:
+- EditMode 539/539 green, 0 console errors (incl. LobbyRulesTests, NetMatchTests: in-process host + 2 clients full match on both maps, snapshot resync, disconnect -> Catch Breath, chat limits).
+- Editor Play mode: NetSession.HostAsync creates a Relay session (code returned), NetSystems prefab spawns, no errors.
+- Version bumped to 0.3.0. Offline vs bots path untouched (LocalTransport unchanged).
+
+Not verified:
+- Any real client join after the fix. First browser test failed: joiners could not spawn the in-scene Net object
+  ("NetworkPrefab could not be found", hash 3536938858) because NGO scene management is off. Fixed by making Net a
+  registered prefab (Assets/_Project/Prefabs/NetSystems.prefab) that the host spawns in NetSession.HostAsync. Untested.
+- Join retries: max 3, 3/6 s backoff, "already a member" leaves stale sessions first (NetSession.JoinAsync). Untested.
+- Full online match, Return to lobby + 2nd match, mid-match leave, chat sync, invite link, Copy buttons. MPPM not run.
+- Not deployed. Builds/Web may contain a fresh v0.3.0 build started at the end of the session (check it finished).
+
+Next steps:
+1. Build Web (Tools/Musketeers/Build Web). Serve Builds/Web (python3 -m http.server 8765).
+2. Run 3 SEPARATE visible windows (hidden tabs freeze Unity and drop Relay): node script in Claude's scratchpad
+   `tabs3.js` pattern = chromium headed, 3 browser contexts, flags --disable-background-timer-throttling
+   --disable-renderer-backgrounding --disable-backgrounding-occluded-windows; host ?autotest=1, joiners
+   ?autotest=1&join=CODE and ?autotest=leave&join=CODE. Expect "AUTOTEST match over map=.. hash=.." equal per machine,
+   no DESYNC, "AUTOTEST done".
+3. If green: tools/deploy-web.sh, commit, push.
