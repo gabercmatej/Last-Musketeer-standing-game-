@@ -68,10 +68,10 @@ Multiplayer Services 2.4.1, MPPM 3.0.0. Check APIs against these versions.
       disconnect → Catch Breath plans; chat rate limit / length.
 
 ## Finish (Haiku subagents)
-- [x] F1 EditMode tests all green (539/539), 0 console errors (2026-10-22)
-- [ ] F2 MPPM autotest: host + 2 virtual players, both maps, return to lobby, 2nd match, one leaves mid-match — NOT RUN: MPPM 3.0 has no public API to activate virtual players; needs manual activation
-- [ ] F3 Web build, 3 local tabs via invite link (autotest) — FAILED on first build (in-scene Net object not spawnable on clients; fixed via NetSystems prefab, a70f408). Re-test pending
-- [ ] F4 Version 0.3.0, DECISIONS.md lines, deploy, commit, push — version is 0.3.0; NOT deployed
+- [x] F1 EditMode tests all green (539 passed, 0 failed/skipped), 0 compile errors; pre-MPPM console query 0 errors (fresh MCP run 2026-10-23; MPPM runtime diagnostics noted below)
+- [x] F2 MPPM host + 2 virtual players: full Courtyard match, identical hash `f8087ca3` on all three (2026-10-23). Extended MPPM second-map/leave sequence not run: stopped after first full match because virtual editors spam URP resource errors. Current requested MPPM gate satisfied; original extended MPPM checks remain unrun. Both maps/rematch/leave verified in F3 browsers; see verification report.
+- [x] F3 v0.3.0 Web build, 3 separate visible Chrome windows via invite link: Courtyard hash `b4b6dba0` on all 3; Return to lobby + Bridge hash `c55facd7` on both remaining players after slot 2 left mid-match. Both remaining players logged AUTOTEST done; 0 browser errors/DESYNC (2026-10-23).
+- [x] F4 Version 0.3.0 deployed to https://last-musketeer.netlify.app (deploy `6adb6f4c413752df7fe9f565`); live menu loaded without browser errors. Verification recorded in DECISIONS.md and docs/playtest/DAY5_VERIFICATION.md; documentation committed/pushed at session end (2026-10-23).
 
 ## Non-goals
 - Reconnecting a dropped player into a running match; host migration; spectators beyond 4.

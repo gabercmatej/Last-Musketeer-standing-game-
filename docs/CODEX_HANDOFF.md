@@ -2,6 +2,19 @@
 
 You (Codex) are taking over from Claude Code. Read this file first, then `AGENTS.md`. **Goal: finish Day 5 (online), then Day 6 and Day 7, within 2 days, so 4 friends can play in their browsers this weekend.**
 
+## Current status — 2026-10-23 (supersedes historical status below)
+
+- **Live v0.3.0:** https://last-musketeer.netlify.app; deployed successfully with `tools/deploy-web.sh`, production menu loaded in Chrome with no browser errors. Deploy `6adb6f4c413752df7fe9f565`.
+- **Fresh EditMode:** 539 passed, 0 failed/skipped via Unity MCP (38.98 s); no compile errors. No gameplay, networking, cosmetic or fit code/data changes were needed.
+- **Browser Relay/WSS verified in three separate visible windows:** host + 2 invite-link joiners completed Courtyard with identical hash `b4b6dba0`; returned to lobby; Bridge completed with identical hash `c55facd7` on the host and remaining joiner after slot 2 left mid-match. Both remaining players logged `AUTOTEST done`; zero browser errors/DESYNC. Copy code/invite clipboard and removal of the departed lobby slot also verified.
+- **MPPM verified:** host + Player 2 + Player 3 completed Courtyard, final hash `f8087ca3` identical on all three. Player 4 was unchecked by Matej for this run. Four-player support is unchanged; it can be re-enabled in the MPPM window.
+- **MPPM limitation:** virtual editors emitted repeated URP package resource errors (`Host type is not matching any asset type ...FallbackError.shader`), generating large logs. Play was stopped after the first full match; the extended second-map/leave sequence was verified in browsers, not MPPM. An Editor Wire WebSocket error occurred on intentional Play-mode shutdown. No package or protected asset changes were made to suppress these diagnostics.
+- Test flag/code files were removed and Play mode stopped. Temporary browser test windows were closed; the production page remains open.
+- Full evidence: `docs/playtest/DAY5_VERIFICATION.md`.
+- **Next: Matej + a friend on another network finish a full match on the live site**, including chat/emotes and a 20 s tab switch. Fix any resulting issue before Day 6. No Day 6 work has begun. Lobby chat remains Day 6.
+
+The sections below retain Claude's 2026-10-22 handoff history; their “not verified/not deployed” statements describe the earlier state.
+
 ## 1. Where things stand (2026-10-22)
 - **Live:** https://last-musketeer.netlify.app runs **v0.2.5**: offline vs bots, fully polished (Days 0–4F).
 - **Repo:** github.com/gabercmatej/Last-Musketeer-standing-game- (branch `main`). The last commit on main is `f583499` (v0.2.5).
