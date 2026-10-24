@@ -12,13 +12,13 @@ namespace Musketeers.Net
         void ResetReplay() { _replay.Reset(); LastReplayFinished = -1; }
 
         // Called after authoritative resolution, before any client requests playback.
-        public void PrepareReplay(int turn)
+        public void PrepareReplay(int turn, bool isFinal = false)
         {
             if (!IsServer || _replay.Turn == turn) return;
             var ids = new List<ulong>();
             foreach (var e in LobbyNet.Instance.Entries())
                 if (!e.IsBot && NetworkManager.ConnectedClients.ContainsKey(e.ClientId)) ids.Add(e.ClientId);
-            _replay.Begin(turn, ids);
+            _replay.Begin(turn, ids, isFinal);
         }
         public void ReadyForReplay(int turn) => ReplayReadyRpc(turn);
         public void SkipReplay(int turn) => ReplaySkipRpc(turn);

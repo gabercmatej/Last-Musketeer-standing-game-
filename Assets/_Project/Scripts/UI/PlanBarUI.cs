@@ -32,6 +32,7 @@ namespace Musketeers.UI
         readonly List<Label> _actionCosts = new List<Label>();
         readonly List<VisualElement> _actionIcons = new List<VisualElement>();
         Ability _ability;
+        readonly VisualElement _opponents;
         readonly VisualElement[] _slots = new VisualElement[TurnPlan.Length];
         readonly VisualElement[] _slotIcons = new VisualElement[TurnPlan.Length];
         readonly Label[] _slotTexts = new Label[TurnPlan.Length];
@@ -43,6 +44,12 @@ namespace Musketeers.UI
         {
             _root = hudRoot;
             _planPanel = hudRoot.Q("plan-panel");
+            _opponents = new VisualElement { name = "opponent-plans", pickingMode = PickingMode.Ignore };
+            _opponents.AddToClassList("plan-panel");
+            _opponents.style.marginTop = 8; _opponents.style.paddingTop = _opponents.style.paddingBottom = 3;
+            _opponents.style.paddingLeft = _opponents.style.paddingRight = 3;
+            hudRoot.Q("left-col").Add(_opponents);
+            HideOpponents();
             _bottomBar = hudRoot.Q("bottom-bar");
             _gritNum = hudRoot.Q<Label>("grit-num");
             _gritPips = hudRoot.Q("grit-pips");
@@ -256,6 +263,52 @@ namespace Musketeers.UI
             if (b.IsFull)
                 return "Plan full.  Space locks in, Backspace undoes, click a slot to change it.";
             return $"{status}.  Pick an action (1-8, Q), or press a direction to move.";
+        }
+
+        // Only receives resolved plans. Never populated while players are still planning.
+        public void ShowOpponents(TurnPlayback playback, int localSlot, int[] characters)
+        {
+            _opponents.Clear();
+            for (int slot = 0; slot < playback.Before.Units.Length; slot++)
+            {
+                if (slot == localSlot) continue;
+                var plan = new TurnPlan(slot);
+                foreach (var submitted in playback.Plans)
+                    if (submitted.Slot == slot) { plan = submitted; break; }
+                var character = UiArt.Art?.Character(characters[slot]);
+                var ability = character != null ? character.Ability : Ability.Grappin;
+                var row = new VisualElement { name = "opponent-" + slot, pickingMode = PickingMode.Ignore };
+                row.style.flexDirection = FlexDirection.Row; row.style.alignItems = Align.Center; row.style.height = 28;
+                row.style.opacity = playback.Before.Units[slot].Alive ? 1f : 0.5f;
+                row.tooltip = playback.Names != null ? playback.Names[slot] : character?.DisplayName;
+                var portrait = new Image { sprite = UiArt.Portrait(characters[slot]), scaleMode = ScaleMode.ScaleToFit };
+                portrait.style.width = portrait.style.height = 22; portrait.style.marginRight = 3; row.Add(portrait);
+                for (int tick = 0; tick < TurnPlan.Length; tick++)
+                {
+                    var action = plan[tick];
+                    var cell = new VisualElement { name = "move-" + tick, pickingMode = PickingMode.Ignore };
+                    cell.style.flexDirection = FlexDirection.Row; cell.style.alignItems = Align.Center; cell.style.flexGrow = 1;
+                    cell.tooltip = ActionInfo.Name(action.Type, character);
+                    var icon = new Image { sprite = ActionInfo.Icon(action.Type, ability), scaleMode = ScaleMode.ScaleToFit };
+                    icon.style.width = icon.style.height = 18; cell.Add(icon);
+                    bool directional = PlanBuilder.NeedsDirection(action.Type) &&
+                        !(action.Type == ActionType.Signature && ability == Ability.Switcheroo);
+                    if (directional)
+                    {
+                        var arrow = new Image { sprite = PlaceholderArt.Arrow, scaleMode = ScaleMode.ScaleToFit };
+                        arrow.style.width = 8; arrow.style.height = 12;
+                        arrow.style.rotate = new Rotate(ActionInfo.DirArrowAngle(action.Dir)); cell.Add(arrow);
+                    }
+                    row.Add(cell);
+                }
+                _opponents.Add(row);
+            }
+            _opponents.style.display = _opponents.childCount > 0 ? DisplayStyle.Flex : DisplayStyle.None;
+        }
+
+        public void HideOpponents()
+        {
+            _opponents.Clear(); _opponents.style.display = DisplayStyle.None;
         }
 
         public void SetMessage(string message) => _hint.text = message;

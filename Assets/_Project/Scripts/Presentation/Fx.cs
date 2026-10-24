@@ -173,7 +173,23 @@ namespace Musketeers.Presentation
         public void Popup(string text, Vector3 pos, Color c, float duration, string cssClass = "popup") =>
             _labels.Popup(text, pos, c, duration, cssClass);
 
-        public void Shake(float strength, float duration) => _camera?.Shake(strength, duration);
+        public bool SuppressShake { get; set; }
+        public void Shake(float strength, float duration)
+        {
+            if (!SuppressShake) _camera?.Shake(strength, duration);
+        }
+
+        public void ClearTransient()
+        {
+            foreach (Transform child in transform)
+            {
+                Tween.StopAll(child);
+                var sprite = child.GetComponent<SpriteRenderer>();
+                if (sprite != null) Tween.StopAll(sprite);
+                child.gameObject.SetActive(false);
+                Destroy(child.gameObject);
+            }
+        }
 
         static void FadeOut(SpriteRenderer sr, float duration, float delay)
         {

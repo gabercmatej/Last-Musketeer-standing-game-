@@ -2,6 +2,15 @@
 
 You (Codex) are taking over from Claude Code. Read this file first, then `AGENTS.md`. **Goal: finish Day 5 (online), then Day 6 and Day 7, within 2 days, so 4 friends can play in their browsers this weekend.**
 
+## Final presentation corrections — 2026-10-25 (current)
+
+- Latest user requires Sol only, no delegates; freeze features after these corrections. Production remains v0.3.0 until new smoke tests pass.
+- Previous candidate `e17911b` pushed, v0.4.0 built: 3 visible Chrome windows completed Courtyard with identical `d5d88967`; staggered results returns at 21:46:48/53/56 UTC and second Bridge match started in the same session. Old test tabs closed at interruption; **second-match final hashes were not recovered** and completion is not claimed.
+- New requested changes integrated: inset replay render target over frozen arena backdrop; original-aspect Killcam badge/red frame/approximately ten-second chronological montage. Between rounds Skip stays global; final See Results and natural completion are local. Authoritative completion opens independent returns while InResults gates prevent next start. Global final replay skip is rejected by the host barrier.
+- Lobby chat UI removed; match chat/emotes retained. Opponents' resolved plans show as compact portrait/action/direction rows below planner; cleared for planning, no opponents' map-wide arrows. Own preview remains.
+- Play Mode: inset rendering and compact panel observed, zero errors. **589/589 EditMode passed, zero skipped** (16.38s, job `7c257334d9634f9c9991e781627c06bb`). Tests cover panel resolved plans/default Idle/clearing and final replay skip policy.
+- v0.4.1 Web build requested; Unity MCP temporarily disconnects during blocking build as before. Pending: successful build console, visible Chrome full match + global guest skip + local final See Results + independent returns/second match, final commit/push/deploy. Do not claim Day 6 release acceptance yet.
+
 ## Day 6 integration checkpoint — 2026-10-24 (current)
 
 Day 6 is in progress; do not restart completed implementation. Day 5 production remains v0.3.0.

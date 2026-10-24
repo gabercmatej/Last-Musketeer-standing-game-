@@ -580,6 +580,7 @@ namespace Musketeers.UI
 
         void OnPlanningStarted(int turnSeq, float seconds)
         {
+            _planBar.HideOpponents();
             var round = _mc.Match.Round;
             int n = _setup.PlayerCount;
             _livePoints = null;
@@ -704,7 +705,10 @@ namespace Musketeers.UI
         {
             _roundReplay.Add(p);
             if (p.Outcome.RoundResult != null && _netTransport != null)
-                MatchNet.Instance?.PrepareReplay(p.TurnSeq);
+                MatchNet.Instance?.PrepareReplay(p.TurnSeq, _mc.Match.MatchOver);
+            // Match completion is authoritative now, independent of each player's final replay.
+            if (_mc.Match.MatchOver && _net != null && _net.IsHost && _model.Online)
+                _lobbyNet?.SetMatchInProgress(false);
             _planning = false;
             _input.Active = false;
             _preview.Clear();
@@ -714,7 +718,14 @@ namespace Musketeers.UI
                 _board.Unit(i)?.SetSelected(false);
             _planBar.SetMessage("Plans revealed");
             _hud.SetPhase("Reveal");
-            _preview.DrawAll(p.Before, p.Plans, _mc.Cfg, _colors);
+            _planBar.ShowOpponents(p, _setup.LocalSlot, _setup.Characters);
+            var ownPlan = new PlanBuilder();
+            foreach (var plan in p.Plans)
+                if (plan.Slot == _setup.LocalSlot && p.Before.Units[plan.Slot].Alive)
+                {
+                    ownPlan.Load(p.Before, plan.Slot, _mc.Cfg, plan, true);
+                    _preview.Draw(ownPlan, _colors[plan.Slot], null);
+                }
             _log.Turn(p);
             Tween(_mc.Cfg.RevealMs / 1000f, () => BeginTurnPlayback(p));
         }

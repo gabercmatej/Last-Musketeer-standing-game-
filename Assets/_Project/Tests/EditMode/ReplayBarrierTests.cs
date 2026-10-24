@@ -23,5 +23,17 @@ namespace Musketeers.Sim.Tests
             b.Ready(0); b.Ready(4); b.Disconnect(5); Assert.IsTrue(b.TryStart());
             b.Done(0); b.Disconnect(4); Assert.IsTrue(b.TryFinish());
         }
+        [NUnit.Framework.Test]
+        public void FinalReplay_CannotBeSkippedGlobally_AndNextRoundResetsPolicy()
+        {
+            var barrier = new Musketeers.Net.ReplayBarrier();
+            barrier.Begin(7, new ulong[] { 1, 2 }, true);
+            Assert.That(barrier.Skip(1), Is.False);
+            Assert.That(barrier.Skip(2), Is.False);
+            Assert.That(barrier.Finished, Is.False);
+            barrier.Begin(8, new ulong[] { 1, 2 });
+            Assert.That(barrier.Skip(2), Is.True);
+            Assert.That(barrier.Skip(1), Is.False);
+        }
     }
 }
