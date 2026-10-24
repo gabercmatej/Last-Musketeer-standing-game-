@@ -14,6 +14,7 @@ namespace Musketeers.UI
 
         readonly VisualElement _root;
         readonly Slider _music, _sfx, _voice;
+        readonly Button _mute;
         readonly VisualElement[] _pages = new VisualElement[3];
         readonly Button[] _tabs = new Button[3];
 
@@ -25,6 +26,14 @@ namespace Musketeers.UI
             _music = root.Q<Slider>("music-volume");
             _sfx = root.Q<Slider>("sfx-volume");
             _voice = root.Q<Slider>("voice-volume");
+            _mute = root.Q<Button>("audio-mute");
+            _mute.clicked += () =>
+            {
+                var audio = AudioService.Instance;
+                if (audio == null) return;
+                audio.SetMuted(!audio.Muted);
+                _mute.text = audio.Muted ? "Unmute" : "Mute";
+            };
             root.Q<Label>("credits").text = credits != null ? credits.text : "";
             root.Q<Label>("lore-text").text = lore != null ? lore.text.Trim() : "";
             root.Q<Label>("howto-text").text = howToPlay != null ? howToPlay.text.Trim() : "";
@@ -68,6 +77,7 @@ namespace Musketeers.UI
             _root.style.display = visible ? DisplayStyle.Flex : DisplayStyle.None;
             if (visible && a != null)
             {
+                _mute.text = a.Muted ? "Unmute" : "Mute";
                 _music.SetValueWithoutNotify(a.MusicVolume);
                 _sfx.SetValueWithoutNotify(a.SfxVolume);
                 _voice.SetValueWithoutNotify(a.VoiceVolume);

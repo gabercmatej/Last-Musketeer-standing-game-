@@ -28,11 +28,23 @@ namespace Musketeers.Presentation
             Finish();
         }
 
-        // hover: the pending action with the direction/target under the mouse, previewed in the cursor slot.
-        public void Draw(PlanBuilder b, Color unitColor, PlannedAction? hover)
+        // Reveal uses the same projection as planning, accumulating every living player's plan.
+        public void DrawAll(GameState state, TurnPlan[] plans, GameConfig config, Color[] colors)
         {
-            _used = 0;
-            _labelsUsed = 0;
+            Clear();
+            var builder = new PlanBuilder();
+            foreach (var plan in plans)
+            {
+                if (plan.Slot >= state.Units.Length || !state.Units[plan.Slot].Alive) continue;
+                builder.Load(state, plan.Slot, config, plan, true);
+                Draw(builder, colors[plan.Slot], null, true);
+            }
+        }
+
+        // hover: the pending action with the direction/target under the mouse, previewed in the cursor slot.
+        public void Draw(PlanBuilder b, Color unitColor, PlannedAction? hover, bool append = false)
+        {
+            if (!append) { _used = 0; _labelsUsed = 0; }
             var s = b.State;
             var cfg = b.Config;
             var plan = hover.HasValue ? b.PreviewWith(hover.Value) : b.Plan;

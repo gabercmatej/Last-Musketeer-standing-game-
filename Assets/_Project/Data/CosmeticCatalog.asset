@@ -12,6 +12,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: fff2aeb1c4d1a46c6a8cb91dd4c214fe, type: 3}
   m_Name: CosmeticCatalog
   m_EditorClassIdentifier: Musketeers.Data::Musketeers.Data.CosmeticCatalog
+  EnabledOverrides:
+  - hat_bat_mask
   Items:
   - {fileID: 11400000, guid: 59279c398779e43b59fd469750fec82c, type: 2}
   - {fileID: 11400000, guid: 3f6b6ceb177b44e1299dffdcc530bad2, type: 2}

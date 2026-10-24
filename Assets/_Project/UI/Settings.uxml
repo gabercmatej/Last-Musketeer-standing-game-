@@ -20,6 +20,7 @@
             </ui:VisualElement>
             <ui:VisualElement name="page-settings" class="info-page">
                 <ui:Label text="Settings" class="title info-title" />
+                <ui:Button name="audio-mute" text="Mute" class="btn" />
                 <ui:Slider name="music-volume" label="Music" low-value="0" high-value="1" class="volume" />
                 <ui:Slider name="sfx-volume" label="Sound effects" low-value="0" high-value="1" class="volume" />
                 <ui:Slider name="voice-volume" label="Voices" low-value="0" high-value="1" class="volume" />

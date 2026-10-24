@@ -13,7 +13,7 @@ namespace Musketeers.UI
     //   The main editor hosts; virtual players join with the code the host writes to code.txt in the same folder.
     //   Web: ?autotest=1 (or =leave) on every tab; tabs without &join=CODE host, the others join.
     // Each machine auto-names, picks a musketeer, readies and plans its own slot with a BotPlanner. The host starts when
-    // 3 humans are ready, then returns to the lobby, switches map and plays a 2nd match. Logs are "AUTOTEST ..." lines.
+    // 3 humans are ready, then each returns independently, the host switches map and starts a 2nd match. Logs are "AUTOTEST ..." lines.
     public sealed partial class AppFlow
     {
         enum AutoTestMode { Off, On, Leave }
@@ -120,7 +120,8 @@ namespace Musketeers.UI
                 return;
             _atMatches++;
             Debug.Log($"AUTOTEST match over map={_setup.MapId} hash={m.ComputeHash():x8}");
-            _atResultsAt = Time.unscaledTime + 3f;
+            // Host returns first; guests deliberately remain on results to exercise independent return.
+            _atResultsAt = Time.unscaledTime + (_atHost ? 3f : 6f + 2f * _setup.LocalSlot);
             if (_atMatches >= 2)
             {
                 Debug.Log("AUTOTEST done");
@@ -225,8 +226,10 @@ namespace Musketeers.UI
                 return;
             }
 
-            if (_screen == Screen.Results && _atHost && _atMatches == 1 && _atResultsAt > 0f && now >= _atResultsAt)
+            if (_screen == Screen.Results && _atMatches == 1 && _atResultsAt > 0f && now >= _atResultsAt &&
+                _lobbyNet != null && !_lobbyNet.MatchInProgress)
             {
+                Debug.Log($"AUTOTEST independent return slot={_setup.LocalSlot} role={(_atHost ? "host" : "joiner")}");
                 _atResultsAt = -1f;
                 ReturnToLobbyClicked();
             }

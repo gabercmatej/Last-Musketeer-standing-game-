@@ -13,6 +13,7 @@ namespace Musketeers.Net
         public int Character;
         public bool Ready;
         public bool IsBot;
+        public bool InResults;
         public FixedString128Bytes Loadout;
 
         public void NetworkSerialize<T>(BufferSerializer<T> serializer) where T : IReaderWriter
@@ -22,12 +23,13 @@ namespace Musketeers.Net
             serializer.SerializeValue(ref Character);
             serializer.SerializeValue(ref Ready);
             serializer.SerializeValue(ref IsBot);
+            serializer.SerializeValue(ref InResults);
             serializer.SerializeValue(ref Loadout);
         }
 
         public bool Equals(LobbySlot o) =>
             ClientId == o.ClientId && Name.Equals(o.Name) && Character == o.Character && Ready == o.Ready &&
-            IsBot == o.IsBot && Loadout.Equals(o.Loadout);
+            IsBot == o.IsBot && InResults == o.InResults && Loadout.Equals(o.Loadout);
 
         public static LobbySlot From(LobbyEntry e) => new LobbySlot
         {
@@ -36,6 +38,7 @@ namespace Musketeers.Net
             Character = e.Character,
             Ready = e.Ready,
             IsBot = e.IsBot,
+            InResults = e.InResults,
             Loadout = new FixedString128Bytes(e.Loadout ?? ""),
         };
 
@@ -46,6 +49,7 @@ namespace Musketeers.Net
             Character = Character,
             Ready = Ready,
             IsBot = IsBot,
+            InResults = InResults,
             Loadout = Loadout.ToString(),
         };
     }

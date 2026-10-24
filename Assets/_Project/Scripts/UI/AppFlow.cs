@@ -142,6 +142,9 @@ namespace Musketeers.UI
             _results = new ResultsUI(results);
             _info = new InfoWindowUI(settings, _credits, _lore, _howToPlay);
             _charSelect = new CharacterSelectUI(menu, _model, _art);
+            InitDay6Lobby();
+            InitReplay();
+            InitHistory();
 
             _menu.PlayClicked += ShowCharacterSelect;
             _menu.HostClicked += HostOnline;
@@ -279,7 +282,7 @@ namespace Musketeers.UI
 
         // No gameplay or dev hotkeys while typing in chat or with a dialog/window open, including the frame
         // whose Esc closed it (so that Esc can't also cancel a pending action in PlanningInput).
-        bool Typing() => _chat.IsTyping || _confirm.Open || _joinDialog.Open || _info.Open || Time.frameCount == _dialogClosedFrame;
+        bool Typing() => HistoryOpen || LobbyTyping || _chat.IsTyping || _confirm.Open || _joinDialog.Open || _info.Open || Time.frameCount == _dialogClosedFrame;
 
         bool OverUI(Vector2 screen)
         {
@@ -294,6 +297,8 @@ namespace Musketeers.UI
 
         void HideAll()
         {
+            CloseLobbyDialogs();
+            CloseHistory();
             _menu.SetVisible(false);
             _charSelect.Hide();
             _lobby.SetVisible(false);
@@ -404,6 +409,7 @@ namespace Musketeers.UI
 
         void Teardown()
         {
+            CancelReplay();
             PrimeTween.Tween.StopAll(this);   // delayed results sounds (victory line)
             _results.Stop();                  // pending badge reveals
             _planning = false;
@@ -486,6 +492,7 @@ namespace Musketeers.UI
             Debug.Log($"[AppFlow] Match: {n} players on {setup.MapId}, seed {setup.Seed}, you are {setup.Names[0]} ({_art.CharacterName(setup.Characters[0])})");
 
             var online = _pendingOnline;
+            BeginHistory(setup, online);
             _pendingOnline = null;
             IMatchTransport transport;
             if (online != null && MatchNet.Instance != null)
@@ -538,14 +545,15 @@ namespace Musketeers.UI
             catch (System.FormatException) { return null; }
         }
 
-        // Bots never wear cosmetics (FIXES_v0.2 §1.3), whatever the setup carries.
+        // Bots use character-colored defaults; human outfits retain explicit saved choices.
         Loadout[] SetupLoadouts()
         {
             var l = new Loadout[_setup.PlayerCount];
             for (int i = 0; i < l.Length; i++)
             {
                 bool bot = _setup.IsBot != null && i < _setup.IsBot.Length && _setup.IsBot[i];
-                l[i] = !bot && _setup.Loadouts != null && i < _setup.Loadouts.Length ? Loadout.Parse(_setup.Loadouts[i], default) : default;
+                l[i] = bot ? _art.Character(_setup.Characters[i])?.DefaultLoadout ?? default
+                    : _setup.Loadouts != null && i < _setup.Loadouts.Length ? Loadout.Parse(_setup.Loadouts[i], default) : default;
                 if (_art.Cosmetics != null)
                     l[i] = _art.Cosmetics.Sanitize(l[i]);
             }
@@ -694,6 +702,9 @@ namespace Musketeers.UI
 
         void OnTurnReady(TurnPlayback p)
         {
+            _roundReplay.Add(p);
+            if (p.Outcome.RoundResult != null && _netTransport != null)
+                MatchNet.Instance?.PrepareReplay(p.TurnSeq);
             _planning = false;
             _input.Active = false;
             _preview.Clear();
@@ -701,9 +712,19 @@ namespace Musketeers.UI
             _livePoints = (int[])p.PointsBefore.Clone();
             for (int i = 0; i < _board.UnitCount; i++)
                 _board.Unit(i)?.SetSelected(false);
+            _planBar.SetMessage("Plans revealed");
+            _hud.SetPhase("Reveal");
+            _preview.DrawAll(p.Before, p.Plans, _mc.Cfg, _colors);
+            _log.Turn(p);
+            Tween(_mc.Cfg.RevealMs / 1000f, () => BeginTurnPlayback(p));
+        }
+
+        void BeginTurnPlayback(TurnPlayback p)
+        {
+            if (_mc == null || _screen != Screen.Match) return;
+            _preview.Clear();
             _planBar.SetMessage("Resolving...");
             _hud.SetPhase("Resolving");
-            _log.Turn(p);
             _director.Play(p, p.CrownedBefore, () =>
             {
                 if (_mc == null)
@@ -715,7 +736,9 @@ namespace Musketeers.UI
             });
         }
 
-        void OnRoundEnded(RoundResult r)
+        void OnRoundEnded(RoundResult r) => BeginRoundReplay(r);
+
+        void ShowRoundScoreboard(RoundResult r)
         {
             var m = _mc.Match;
             _scoreboard.Show(r, m, _setup.Names, _colors, _portraits);
@@ -742,13 +765,18 @@ namespace Musketeers.UI
 
         void ContinueAfterRound()
         {
-            if (_mc == null || _mc.Phase != MatchPhase.RoundOver)
+            if (_replayResult != null || _mc == null || _mc.Phase != MatchPhase.RoundOver)
                 return;
             _scoreboard.SetVisible(false);
             _mc.ContinueAfterRound();
         }
 
-        void OnMatchEnded() => ShowResultsScreen(_mc.Match);
+        void OnMatchEnded()
+        {
+            CompleteHistory();
+            if (_net != null && _net.IsHost && _model.Online) _lobbyNet?.SetMatchInProgress(false);
+            ShowResultsScreen(_mc.Match);
+        }
 
         // The results: the played map's podium art with everyone on their podium by place, the card on the right.
         void ShowResultsScreen(MatchState m)
@@ -777,6 +805,7 @@ namespace Musketeers.UI
             _rig.FrameStage(StageView.Center, StageView.Width, StageView.Height);
             _board.Clear();
             _results.Show(m, _setup.Names, _colors, _portraits);
+            _stage.RevealPodium(ResultsLayout.Order(places), ResultsUI.PlacementStart, ResultsUI.PlacementGap);
             _audio?.Music("Music/results", 0.6f);
             _audio?.Sfx("SFX/match/match_win", 0.8f);
             _audio?.Announce(Callouts.Clip(Callout.LastMusketeer));
@@ -867,6 +896,9 @@ namespace Musketeers.UI
 
         void OnDestroy()
         {
+            DisposeDay6Lobby();
+            MatchNet.ReplayStarted -= StartReplay;
+            MatchNet.ReplayFinished -= FinishReplay;
             MatchNet.MatchStarted -= OnMatchStartInfo;
             MatchNet.ReturnedToLobby -= OnReturnedToLobby;
             MatchNet.ChatReceived -= OnChatReceived;
@@ -897,7 +929,9 @@ namespace Musketeers.UI
                 if (_chat.Focused && mouse != null && mouse.leftButton.wasPressedThisFrame && !OverUI(mouse.position.ReadValue()))
                     _chat.Blur();
             }
-            if (kb != null && kb.escapeKey.wasPressedThisFrame && _confirm.Open)
+            if (kb != null && kb.escapeKey.wasPressedThisFrame && HistoryOpen)
+                CloseHistory();
+            else if (kb != null && kb.escapeKey.wasPressedThisFrame && _confirm.Open)
             {
                 _confirm.Cancel();
                 _dialogClosedFrame = Time.frameCount;
@@ -918,7 +952,7 @@ namespace Musketeers.UI
                 return;
 
             _mc.Update(dt);
-            if (_mc == null)
+            if (_mc == null || _replayResult != null)
                 return;
             var m = _mc.Match;
             bool planning = _mc.Phase == MatchPhase.Planning;
@@ -941,7 +975,10 @@ namespace Musketeers.UI
                 _hud.SetScores(m.Points, m.Crowned, m.Round, _mc.LockMask, planning, _matchPointMask);
             }
             for (int i = 0; i < _board.UnitCount; i++)
+            {
                 _board.Unit(i)?.SetMatchPoint(i < _matchPointMask.Length && _matchPointMask[i]);
+                _board.Unit(i)?.SetPlanningReady(planning && _mc.IsLocked(i));
+            }
 
             if (_mc.Phase == MatchPhase.RoundOver)
             {
@@ -974,6 +1011,7 @@ namespace Musketeers.UI
         {
             static LobbyNet L => LobbyNet.Instance;
             public void Pick(int character) => L?.RequestPick(character);
+            public void SetName(string name) => L?.RequestName(name);
             public void SetReady(bool ready) => L?.RequestReady(ready);
             public void SetLoadout(string serialized) => L?.RequestLoadout(serialized);
             public void SetSettings(int map, int pointsToWin, int hearts) =>
@@ -1039,6 +1077,7 @@ namespace Musketeers.UI
 
         void EnterOnline()
         {
+            ResetLobbyChat();
             _model.EnterOnline(_backend);
             _stageSig = "";
             _themeMap = -1;

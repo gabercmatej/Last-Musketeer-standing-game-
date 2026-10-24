@@ -32,10 +32,10 @@
                 </ui:VisualElement>
             </ui:VisualElement>
             <ui:VisualElement class="gm-line" picking-mode="Ignore">
-                <ui:Label text="Players" class="gm-label" />
+                <ui:Label text="Bots:" class="gm-label" />
                 <ui:VisualElement class="gm-control" picking-mode="Ignore">
                     <ui:Button name="remove-bot" text="-" tooltip="Remove a bot" class="btn btn--icon gm-step gm-bot" />
-                    <ui:Label name="player-count" text="4" class="gm-value" />
+                    <ui:Label name="player-count" text="3" class="gm-value" />
                     <ui:Button name="add-bot" text="+" tooltip="Add a bot" class="btn btn--icon gm-step gm-bot" />
                 </ui:VisualElement>
             </ui:VisualElement>

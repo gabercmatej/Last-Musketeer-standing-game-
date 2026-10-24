@@ -20,6 +20,8 @@ namespace Musketeers.UI
         readonly VisualElement _root, _log;
         readonly TextField _field;
         ChatModel _model;
+        readonly System.Collections.Generic.List<string> _messageNames = new System.Collections.Generic.List<string>();
+        readonly System.Collections.Generic.List<Color> _messageColors = new System.Collections.Generic.List<Color>();
         string[] _names = new string[0];
         Color[] _colors = new Color[0];
         int _focusFrame = -1, _blurFrame = -1;
@@ -84,6 +86,30 @@ namespace Musketeers.UI
             Rebuild();
         }
 
+        // Lobby identities are captured per message so later joins, departures and renames never
+        // relabel older messages. Keep only the same bounded tail as ChatModel.
+        public void AddLobbyMessage(string name, Color color, string text, bool emote)
+        {
+            if (_model == null || string.IsNullOrWhiteSpace(text))
+                return;
+            _messageNames.Add(name);
+            _messageColors.Add(color);
+            while (_messageNames.Count > ChatModel.Keep)
+            {
+                _messageNames.RemoveAt(0);
+                _messageColors.RemoveAt(0);
+            }
+            _model.Add(-1, text, Time.unscaledTime, emote);
+        }
+
+        public void Clear()
+        {
+            _messageNames.Clear();
+            _messageColors.Clear();
+            _model?.Clear();
+            Rebuild();
+        }
+
         public void Focus()
         {
             _focusFrame = Time.frameCount;
@@ -128,20 +154,25 @@ namespace Musketeers.UI
             var list = _model.Messages;
             int from = Mathf.Max(0, list.Count - VisibleLines);
             for (int i = from; i < list.Count; i++)
-                _log.Add(Line(list[i]));
+                _log.Add(Line(list[i], i));
             Refresh();
         }
 
-        VisualElement Line(ChatModel.Message m)
+        VisualElement Line(ChatModel.Message m, int index)
         {
             var line = new VisualElement { pickingMode = PickingMode.Ignore, userData = m.Time };
             line.AddToClassList("chat-line");
             string who = m.Slot >= 0 && m.Slot < _names.Length ? _names[m.Slot] : "?";
             var color = m.Slot >= 0 && m.Slot < _colors.Length ? Color.Lerp(_colors[m.Slot], Color.white, 0.5f) : Color.white;
+            if (m.Slot < 0 && index < _messageNames.Count)
+            {
+                who = _messageNames[index];
+                color = Color.Lerp(_messageColors[index], Color.white, 0.5f);
+            }
             var name = new Label(who + ":") { pickingMode = PickingMode.Ignore };
             name.AddToClassList("chat-name");
             name.style.color = color;
-            var text = new Label(m.Text) { pickingMode = PickingMode.Ignore };
+            var text = new Label(m.Text) { pickingMode = PickingMode.Ignore, enableRichText = false };
             text.AddToClassList("chat-text");
             if (m.Emote)
                 text.AddToClassList("chat-text--emote");

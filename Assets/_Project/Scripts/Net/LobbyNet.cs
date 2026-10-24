@@ -14,7 +14,7 @@ namespace Musketeers.Net
     {
         public const string MsgVersion = "New version is out. Refresh (Cmd/Ctrl+Shift+R)";
         public const string MsgFull = "Lobby is full";
-        public const string MsgInProgress = "Match in progress, try again after";
+        public const string MsgInProgress = "This match is already running. Refreshing ends your seat; rejoining a running match is not supported. Ask the host to return to the lobby after the match, then join again.";
         public const string MsgTimeout = "Could not join the lobby. Try again.";
         const float JoinInfoTimeout = 10f;
 
@@ -150,8 +150,10 @@ namespace Musketeers.Net
         {
             if (!IsServer)
                 return;
-            _state.MatchInProgress = running;
+            if (running) { if (!_state.BeginMatch()) return; }
+            else _state.CompleteMatch();
             _matchInProgress.Value = running;
+            Sync();
             if (!running)
                 PurgeDisconnected();
         }
@@ -238,6 +240,13 @@ namespace Musketeers.Net
         }
 
         [Rpc(SendTo.Server)]
+        void SetNameRpc(FixedString64Bytes name, RpcParams rpcParams = default)
+        {
+            if (_state.TrySetName(rpcParams.Receive.SenderClientId, name.ToString()))
+                Sync();
+        }
+
+        [Rpc(SendTo.Server)]
         void SetReadyRpc(bool ready, RpcParams rpcParams = default)
         {
             if (_state.TrySetReady(rpcParams.Receive.SenderClientId, ready))
@@ -290,6 +299,14 @@ namespace Musketeers.Net
             JoinInfoRpc(new FixedString64Bytes(LobbyRules.SanitizeName(name)), new FixedString32Bytes(Application.version ?? ""));
 
         public void RequestPick(int character) => PickCharacterRpc(character);
+        public void RequestName(string name) => SetNameRpc(new FixedString64Bytes(LobbyRules.SanitizeName(name)));
+        public void RequestReturnToLobby() => ReturnToLobbyRpc();
+        [Rpc(SendTo.Server)]
+        void ReturnToLobbyRpc(RpcParams rpc = default)
+        {
+            if (_state.ReturnToLobby(rpc.Receive.SenderClientId)) Sync();
+        }
+
         public void RequestReady(bool ready) => SetReadyRpc(ready);
 
         public void RequestLoadout(string serialized)

@@ -153,3 +153,11 @@ MonoBehaviour:
     Sprite: {fileID: 21300000, guid: ce6e5e09d8c7348ed9cc550935d5dcc6, type: 3}
   - Key: UI/panels/panel
     Sprite: {fileID: 21300000, guid: f426785e56a9d47e186f0e1906670e36, type: 3}
+  - Key: UI/buttons/change-name
+    Sprite: {fileID: 21300000, guid: 5afcb913bc9604f789f62f2d1c04e31b, type: 3}
+  - Key: UI/buttons/leaderboard-history
+    Sprite: {fileID: 21300000, guid: 4fab53352bcc346c0bb210b73f353607, type: 3}
+  - Key: UI/badges/killcam
+    Sprite: {fileID: 21300000, guid: 7a7f44208fa2e4d0b9dca2c387f290c8, type: 3}
+  - Key: UI/buttons/skip-replay
+    Sprite: {fileID: 21300000, guid: d1ce6e39d7f574ce681d28bf76b0fe15, type: 3}

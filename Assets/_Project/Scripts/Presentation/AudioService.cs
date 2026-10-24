@@ -10,6 +10,9 @@ namespace Musketeers.Presentation
     // game works without any audio. Volumes (Music / SFX / Voice) live in PlayerPrefs.
     public sealed class AudioService : MonoBehaviour
     {
+        public const string MuteKey = "Musketeers.Volume.Muted";
+        public bool Muted { get; private set; }
+
         public const string MusicKey = "Musketeers.Volume.Music";
         public const string SfxKey = "Musketeers.Volume.Sfx";
         public const string VoiceKey = "Musketeers.Volume.Voice";
@@ -55,6 +58,7 @@ namespace Musketeers.Presentation
             _musicApplied = MusicVolume;
             _sfxApplied = SfxVolume;
             _voiceApplied = VoiceVolume;
+            SetMuted(PlayerPrefs.GetInt(MuteKey, 0) != 0, false);
         }
 
         void OnDestroy()
@@ -93,8 +97,21 @@ namespace Musketeers.Presentation
                 SaveVolumes();
         }
 
+        // Muting sources preserves the three independently saved slider levels.
+        public void SetMuted(bool muted, bool save = true)
+        {
+            Muted = muted;
+            if (_sfx != null) foreach (var source in _sfx) source.mute = muted;
+            if (_musicA != null) _musicA.mute = muted;
+            if (_musicB != null) _musicB.mute = muted;
+            if (_announcer != null) _announcer.mute = muted;
+            if (_character != null) _character.mute = muted;
+            if (save) SaveVolumes();
+        }
+
         public void SaveVolumes()
         {
+            PlayerPrefs.SetInt(MuteKey, Muted ? 1 : 0);
             PlayerPrefs.SetFloat(MusicKey, MusicVolume);
             PlayerPrefs.SetFloat(SfxKey, SfxVolume);
             PlayerPrefs.SetFloat(VoiceKey, VoiceVolume);

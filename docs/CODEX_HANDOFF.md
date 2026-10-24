@@ -2,6 +2,19 @@
 
 You (Codex) are taking over from Claude Code. Read this file first, then `AGENTS.md`. **Goal: finish Day 5 (online), then Day 6 and Day 7, within 2 days, so 4 friends can play in their browsers this weekend.**
 
+## Day 6 integration checkpoint — 2026-10-24 (current)
+
+Day 6 is in progress; do not restart completed implementation. Day 5 production remains v0.3.0.
+
+- Committed/pushed `dc59052`: deterministic environmental −1 scoring, Matej special blocked by Parry, fixed four-round spawn rotation, symmetrical Bridge pillars. 562 EditMode tests passed at that milestone.
+- Current working tree integrates lobby name/bot controls and chat; independent Return to Lobby with returning-player gates (no voting); reveal/checkmarks/timer; chronological snapshot replay and host-authoritative any-human skip; results entrances/stats/badges; mute; Batman catalog availability and character cape defaults; local eligible match history and character standings.
+- Final integration suite: **587 passed, 0 failed/skipped** (19.41 s, Unity MCP job `a0b5152f4f4e48858ea04d64343afc88`). Final wardrobe correction also passed all 13 focused cosmetic tests. The isolated new preference regression initially exposed null-versus-empty field comparison in the test and now compares serialized outfits.
+- Unity MCP connected; latest compilation had no errors. Bridge camera capture confirmed symmetrical pillars and action preview (`docs/playtest/day6/bridge-play.png`). This was **not** a complete match or full UI verification.
+- Final Skip button source: `Art/UI/buttons/skip-replay.png`; narrow Day 6 UI importer now includes it. Reuse existing icon-button presentation; preserve red border, Killcam badge and synchronized skip protocol.
+- Shared persistence is **deferred to v1.1**, as permitted: current deployment is static, with no configured result-verification backend. History explicitly says “This browser only”; no unrestricted public submissions or fake shared standings.
+- Pending release gate: refresh/import/console; full EditMode suite; Play Mode/UI review; new Web build; separate visible browser-window full match, guest Skip and independent Return to Lobby/new match; fix regressions; commit/push verified milestone; update checklist and deploy only after local checks. Genuine two-network testing remains a human check.
+- Protected fits remain untouched. Preexisting untracked root `Art/`, `Audio/`, `.codex/`, `AGENTS.md` must not be bulk-staged. Day 7 has not started. Latest user froze features and requested Sol only/no delegates; Astra account limit halted its final review after existing bot-default edits were saved.
+
 ## Current status — 2026-10-23 (supersedes historical status below)
 
 - **Live v0.3.0:** https://last-musketeer.netlify.app; deployed successfully with `tools/deploy-web.sh`, production menu loaded in Chrome with no browser errors. Deploy `6adb6f4c413752df7fe9f565`.

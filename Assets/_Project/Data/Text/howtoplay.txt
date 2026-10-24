@@ -4,6 +4,6 @@ Last musketeer standing wins the round. Points decide the match, and whoever wea
 
 Nobody can walk off the map. On the Bridge, a push over an edge or into a missing corner is a deadly fall. On the Courtyard, the edges are walls. Crates break when shot, shoved or blown up, and may give +1 Grit. Kill points count the moment they happen, and a gold border means match point: if nobody overtakes you by the end of the round, you win.
 
-Grappin (Matej, 5 Grit): hook a musketeer and drag them toward you. If they're dragged across a pit or water, they fall in. Hit a pillar, wall or crate and you pull yourself to it. Bull Rush (Nik, 5 Grit): charge up to 3 tiles. Whoever you hit takes 1 damage and flies back 5 tiles.
+Scoring: +3 for winning a round, +1 per kill, or +2 for killing the Crowned musketeer. Every fall into a pit, water or over an edge costs the victim 1 point, even when someone pushes or pulls them in; the attacker still earns kill points. Scores can go below zero. The match ends at round end when the leading score reaches the target. Ties compare the latest round, then earlier rounds; an exact tie shares the place.
 
 <color=#FFCE60><b>Fire beats standing still. Parry beats Fire. Shove beats Parry. Moving beats everything, if you guess right.</b></color>

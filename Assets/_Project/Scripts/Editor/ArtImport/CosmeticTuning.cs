@@ -199,7 +199,7 @@ namespace Musketeers.EditorTools.ArtImport
                 case "nik": color = "green"; break;
                 default: color = "white"; break;
             }
-            return new Loadout { Hat = "hat_plumed_" + color, Face = "", Cape = "", Boots = "boots_brown" };
+            return new Loadout { Hat = "hat_plumed_" + color, Face = "", Cape = "cape_" + color, Boots = "boots_brown" };
         }
 
         static readonly Dictionary<string, string> Names = new Dictionary<string, string>

@@ -14,7 +14,9 @@ namespace Musketeers.UI
     // Badges start hidden and are revealed one by one (pop, shine sweep, a sound each).
     public sealed class ResultsUI
     {
-        public const float RevealStart = 1.2f;
+        public const float PlacementStart = 0.35f;
+        public const float PlacementGap = 0.65f;
+        public const float RevealStart = 0.6f;
         public const float RevealGap = 0.42f;      // FIXES_4E §6.1: about 20% slower than the old 0.35
         public const float RevealSlow = 1.2f;      // the pop / shine animations stretch by the same factor
         public const float BadgeVolume = 0.5f;     // the badge sound plays at 50% of its old volume
@@ -23,6 +25,7 @@ namespace Musketeers.UI
         public event Action AgainClicked;
         public event Action MenuClicked;
         public event Action SettingsClicked;
+        public event Action MatchLogsClicked;
 
         readonly VisualElement _root;
         readonly Label _winner, _line;
@@ -46,6 +49,7 @@ namespace Musketeers.UI
             quit.clicked += () => MenuClicked?.Invoke();
             // Top-left: Fullscreen and Settings (no Leave: Quit does that).
             CornerButtons.AddTopLeftSet(root.Q("results-corner"), () => SettingsClicked?.Invoke(), null);
+            CornerButtons.Add(root.Q("results-corner"), "leaderboard-history", "Match Logs", "Match history and character leaderboard", () => MatchLogsClicked?.Invoke());
 
             // The achievement-style popup a badge click opens.
             _popup = new VisualElement { name = "ach" };
@@ -68,6 +72,14 @@ namespace Musketeers.UI
             text.Add(_popupWho);
             _popup.Add(_popupIcon);
             _popup.Add(text);
+            var close = new Button(HidePopup) { text = "×", tooltip = "Close badge", focusable = false };
+            close.AddToClassList("btn");
+            close.style.position = Position.Absolute;
+            close.style.right = 4;
+            close.style.top = 4;
+            close.style.width = 28;
+            close.style.height = 28;
+            _popup.Add(close);
             _popup.RegisterCallback<ClickEvent>(_ => HidePopup());
             _root.Add(_popup);
             SetVisible(false);
@@ -163,8 +175,10 @@ namespace Musketeers.UI
                 var name = new Label(names[i]);
                 name.AddToClassList("standing-name");
                 name.style.color = Color.Lerp(colors[i], Color.white, 0.3f);
-                var pts = new Label($"{m.Points[i]} pts");
+                var pts = new Label($"{m.Points[i]} pts · {m.RoundWins[i]} round wins\n{m.Stats.Kills[i]} kills · {m.Stats.Deaths[i]} deaths");
                 pts.AddToClassList("standing-points");
+                pts.style.whiteSpace = WhiteSpace.Normal;
+                pts.style.fontSize = 13;
                 info.Add(name);
                 info.Add(pts);
                 var badges = new VisualElement();
@@ -184,13 +198,21 @@ namespace Musketeers.UI
                 row.Add(info);
                 row.Add(badges);
                 _standings.Add(row);
+                row.style.opacity = 0f;
+                int rankIndex = Array.IndexOf(order, i);
+                Tween.Delay(this, PlacementStart + PlacementGap * (n - 1 - rankIndex), _ =>
+                    Tween.Custom(this, 0f, 1f, 0.45f, (_, t) =>
+                    {
+                        row.style.opacity = t;
+                        row.style.translate = new Translate((1f - t) * 30f, 0f);
+                    }, Ease.OutCubic));
             }
 
             for (int k = 0; k < chips.Count; k++)
             {
                 var chip = chips[k];
                 int index = k;
-                Tween.Delay(this, RevealStart + RevealGap * k, _ => Reveal(chip, index));
+                Tween.Delay(this, PlacementStart + PlacementGap * n + RevealStart + RevealGap * k, _ => Reveal(chip, index));
             }
             SetVisible(true);
         }

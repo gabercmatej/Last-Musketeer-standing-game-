@@ -219,7 +219,7 @@ namespace Musketeers.UI
                 return;
             _popTweens[slot].Stop();
             var pop = _pops[slot];
-            pop.text = "+" + amount;
+            pop.text = (amount > 0 ? "+" : "") + amount;
             var pts = _points[slot];
             _popTweens[slot] = Tween.Custom(0f, 1f, 0.9f, t =>
             {
@@ -243,6 +243,10 @@ namespace Musketeers.UI
         public void SetTimer(float seconds, bool show)
         {
             _timer.style.visibility = show ? Visibility.Visible : Visibility.Hidden;
+            bool urgent = show && seconds > 0f && seconds <= 5f;
+            float pulse = urgent ? 0.5f + 0.5f * Mathf.Sin(Time.unscaledTime * 8f) : 0f;
+            _timer.style.scale = new Scale(Vector3.one * (1f + pulse * 0.07f));
+            _timer.style.color = urgent ? Color.Lerp(new Color(1f, 0.22f, 0.2f), Color.white, pulse * 0.35f) : StyleKeyword.Null;
             int s = Mathf.CeilToInt(seconds);
             if (s == _shownTimer)
                 return;

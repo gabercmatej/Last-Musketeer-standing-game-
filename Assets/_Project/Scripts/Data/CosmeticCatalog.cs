@@ -9,6 +9,9 @@ namespace Musketeers.Data
     public sealed class CosmeticCatalog : ScriptableObject
     {
         public List<CosmeticDef> Items = new List<CosmeticDef>();
+        // Availability can be fixed without rewriting the item's protected fitted transforms.
+        public List<string> EnabledOverrides = new List<string>();
+        public bool IsEnabled(CosmeticDef item) => item != null && (item.EnabledInV1 || EnabledOverrides.Contains(item.Id));
         public WeaponDef Musket;   // the weapons live here so the runtime rig and the editor find the same assets
         public WeaponDef Rapier;
 
@@ -30,7 +33,7 @@ namespace Musketeers.Data
             var list = new List<CosmeticDef>();
             foreach (var c in Items)
             {
-                if (c != null && c.Slot == slot && (!enabledOnly || c.EnabledInV1))
+                if (c != null && c.Slot == slot && (!enabledOnly || IsEnabled(c)))
                     list.Add(c);
             }
             return list;
@@ -42,7 +45,7 @@ namespace Musketeers.Data
             foreach (var slot in Loadout.Slots)
             {
                 var item = Get(l.Get(slot));
-                if ((!allowUnselectable && !Loadout.Selectable(slot)) || item == null || item.Slot != slot || !item.EnabledInV1)
+                if ((!allowUnselectable && !Loadout.Selectable(slot)) || item == null || item.Slot != slot || !IsEnabled(item))
                     l = l.With(slot, "");
             }
             return l;

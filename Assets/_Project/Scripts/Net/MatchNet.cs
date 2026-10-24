@@ -10,6 +10,7 @@ namespace Musketeers.Net
     // Everything the host decides when a match starts; identical on every machine (only LocalSlot differs, derived from Roster).
     public sealed class MatchStartInfo
     {
+        public string MatchId;
         public uint Seed;
         public LobbySettingsData Settings;
         public List<LobbyEntry> Roster = new List<LobbyEntry>();
@@ -37,7 +38,7 @@ namespace Musketeers.Net
     // The one NetworkBehaviour for the running match (TECH_DESIGN §5): a thin RPC layer. Protocol decisions live in
     // NetTransport (plans, timer, hashes) and ChatRelay (chat rules); this class only serializes and forwards.
     // It lives on the same in-scene NetworkObject as LobbyNet (built by MainSceneBuilder).
-    public sealed class MatchNet : NetworkBehaviour, INetLink
+    public sealed partial class MatchNet : NetworkBehaviour, INetLink
     {
         public static MatchNet Instance { get; private set; }
 
@@ -47,6 +48,8 @@ namespace Musketeers.Net
         public static event Action ReturnedToLobby;
         /// <summary>Every machine: slot, cleaned text (empty for an emote), emote index (-1 for a text message).</summary>
         public static event Action<int, string, int> ChatReceived;
+        /// <summary>Lobby-only message with the sender identity captured before any later seat changes.</summary>
+        public static event Action<string, int, string, int> LobbyChatReceived;
 
         /// <summary>The running match's protocol object; AppFlow sets it when the match starts and clears it on teardown.</summary>
         public NetTransport Transport { get; set; }
@@ -67,13 +70,31 @@ namespace Musketeers.Net
         /// <summary>Host only: everyone builds the same MatchSetup from this and starts.</summary>
         public void HostStartMatch(uint seed, LobbySettingsData settings, IReadOnlyList<LobbyEntry> roster)
         {
-            if (!IsServer)
+            var lobby = LobbyNet.Instance;
+            // BeginMatch must already have succeeded. Compare the stable roster fields because
+            // that transition intentionally resets Ready and marks participants InResults.
+            if (!IsServer || lobby == null || lobby.HostState == null || !lobby.HostState.MatchInProgress ||
+                roster == null || roster.Count < 2 || roster.Count != lobby.HostState.Count)
+                return;
+            var authoritative = lobby.HostState.Entries;
+            for (int i = 0; i < roster.Count; i++)
+            {
+                var requested = roster[i];
+                var actual = authoritative[i];
+                if (requested.ClientId != actual.ClientId || requested.IsBot != actual.IsBot ||
+                    requested.Character != actual.Character || requested.Name != actual.Name ||
+                    requested.Loadout != actual.Loadout)
+                    return;
+            }
+            var currentSettings = lobby.HostState.Settings;
+            if (settings.Map != currentSettings.Map || settings.PointsToWin != currentSettings.PointsToWin ||
+                settings.Hearts != currentSettings.Hearts)
                 return;
             var slots = new LobbySlot[roster.Count];
             for (int i = 0; i < slots.Length; i++)
                 slots[i] = LobbySlot.From(roster[i]);
             _chat.Reset();
-            MatchStartRpc(seed, LobbySettings.From(settings), slots);
+            MatchStartRpc(new FixedString64Bytes(Guid.NewGuid().ToString("N")), seed, LobbySettings.From(settings), slots);
         }
 
         /// <summary>Host only: the results screen's Return to lobby, for everyone.</summary>
@@ -83,7 +104,7 @@ namespace Musketeers.Net
                 ReturnToLobbyRpc();
         }
 
-        public void SendChat(string text) => ChatRpc(new FixedString128Bytes(ChatRelay.Clean(text)), -1);
+        public void SendChat(string text) => ChatRpc(new FixedString512Bytes(ChatRelay.Clean(text)), -1);
         public void SendEmote(int index) => ChatRpc(default, index);
 
         // ---------- INetLink (this machine -> others) ----------
@@ -120,15 +141,20 @@ namespace Musketeers.Net
 
         // text: cleaned by the sender and again by the host; emote -1 = text message
         [Rpc(SendTo.Server)]
-        void ChatRpc(FixedString128Bytes text, int emote, RpcParams rpcParams = default)
+        void ChatRpc(FixedString512Bytes text, int emote, RpcParams rpcParams = default)
         {
             ulong sender = rpcParams.Receive.SenderClientId;
-            if (!_chat.Accept(sender, text.ToString(), emote, Time.unscaledTime, out string clean))
+            var lobby = LobbyNet.Instance;
+            int slot = lobby != null ? lobby.IndexOf(sender) : -1;
+            if (slot < 0 || !_chat.Accept(sender, text.ToString(), emote, Time.unscaledTime, out string clean))
                 return;
-            int slot = LobbyNet.Instance != null ? LobbyNet.Instance.IndexOf(sender) : -1;
-            if (slot < 0)
-                return;
-            ChatBroadcastRpc(slot, new FixedString128Bytes(clean), emote);
+            if (lobby.MatchInProgress)
+                ChatBroadcastRpc(slot, new FixedString512Bytes(clean), emote);
+            else
+            {
+                var entry = lobby.Entries()[slot];
+                LobbyChatBroadcastRpc(new FixedString64Bytes(entry.Name), entry.Character, new FixedString512Bytes(clean), emote);
+            }
         }
 
         // ---------- host -> clients ----------
@@ -156,9 +182,10 @@ namespace Musketeers.Net
         // ---------- host -> everyone (the host runs them too) ----------
 
         [Rpc(SendTo.ClientsAndHost, InvokePermission = RpcInvokePermission.Server)]
-        void MatchStartRpc(uint seed, LobbySettings settings, LobbySlot[] roster)
+        void MatchStartRpc(FixedString64Bytes matchId, uint seed, LobbySettings settings, LobbySlot[] roster)
         {
-            var info = new MatchStartInfo { Seed = seed, Settings = settings.ToData() };
+            ResetReplay();
+            var info = new MatchStartInfo { MatchId = matchId.ToString(), Seed = seed, Settings = settings.ToData() };
             foreach (var s in roster)
                 info.Roster.Add(s.ToEntry());
             MatchStarted?.Invoke(info);
@@ -168,6 +195,10 @@ namespace Musketeers.Net
         void ReturnToLobbyRpc() => ReturnedToLobby?.Invoke();
 
         [Rpc(SendTo.ClientsAndHost, InvokePermission = RpcInvokePermission.Server)]
-        void ChatBroadcastRpc(int slot, FixedString128Bytes text, int emote) => ChatReceived?.Invoke(slot, text.ToString(), emote);
+        void ChatBroadcastRpc(int slot, FixedString512Bytes text, int emote) => ChatReceived?.Invoke(slot, text.ToString(), emote);
+
+        [Rpc(SendTo.ClientsAndHost, InvokePermission = RpcInvokePermission.Server)]
+        void LobbyChatBroadcastRpc(FixedString64Bytes name, int character, FixedString512Bytes text, int emote) =>
+            LobbyChatReceived?.Invoke(name.ToString(), character, text.ToString(), emote);
     }
 }

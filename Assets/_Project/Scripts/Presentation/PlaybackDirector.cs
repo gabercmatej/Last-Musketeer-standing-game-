@@ -13,7 +13,7 @@ namespace Musketeers.Presentation
     // with Matej's FX sprites, poses, sounds and voice lines. After every tick the views snap to the sim's
     // state for that tick, so even an imperfect animation never leaves the board wrong. Read-only: it never
     // touches the live GameState.
-    public sealed class PlaybackDirector : MonoBehaviour
+    public sealed partial class PlaybackDirector : MonoBehaviour
     {
         [SerializeField] private BoardView _board;
         [SerializeField] private Fx _fx;
@@ -50,6 +50,7 @@ namespace Musketeers.Presentation
             _running = null;
             Tween.StopAll(this);   // delayed At() callbacks would otherwise hit the next board
             IsPlaying = false;
+            _replaying = false;
         }
 
         // A round's opening (turn 1 TurnStart): nothing to animate except warned tiles.
@@ -577,10 +578,12 @@ namespace Musketeers.Presentation
                     Line(delay + 0.15f, u, "death");
                     return 0.5f;
                 case SimEventKind.PointsScored:
+                    if (_replaying) return 0f;
                     // Right after the victim's Died event: the live score changes at the moment of the kill.
                     At(delay + 0.2f, () => PointsScored?.Invoke(e.Unit, e.Other, e.Amount));
                     return 0.25f;
                 case SimEventKind.RoundEnded:
+                    if (_replaying) return 0f;
                     At(delay + 0.2f, () => _fx.Shake(0.15f, S(0.4f)));
                     if (u != null)
                     {

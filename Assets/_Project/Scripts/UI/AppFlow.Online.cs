@@ -22,6 +22,11 @@ namespace Musketeers.UI
         {
             if (_net == null || !_net.IsHost || _lobbyNet == null || MatchNet.Instance == null)
                 return;
+            if (!_lobbyNet.HostState.CanStart)
+            {
+                _confirm.ShowNotice("Wait for everyone to return to the lobby before starting.");
+                return;
+            }
             var entries = _lobbyNet.Entries();
             if (entries.Count < 2)
             {
@@ -80,26 +85,22 @@ namespace Musketeers.UI
             return setup;
         }
 
-        // Results: the host's Return to lobby brings everybody back to the same lobby (same players, bots and settings).
-        // A guest's click just takes that guest back to the lobby view; the host decides when the next match starts.
+        // Returning is local UI navigation; only the sender's lobby presence/ready flag changes.
         void ReturnToLobbyClicked()
         {
-            if (_model.Online && _net != null && _net.IsHost && _lobbyNet != null && MatchNet.Instance != null)
+            if (_model.Online)
             {
-                _lobbyNet.SetMatchInProgress(false);
-                MatchNet.Instance.HostReturnToLobby();   // loops back to OnReturnedToLobby on the host too
+                if (_lobbyNet == null || _lobbyNet.MatchInProgress)
+                {
+                    _confirm.ShowNotice("The host is finishing the match. Try Return to Lobby in a moment.");
+                    return;
+                }
+                _lobbyNet.RequestReturnToLobby();
             }
-            else
-                ShowLobby();
-        }
-
-        void OnReturnedToLobby()
-        {
-            if (!_model.Online)
-                return;
-            _stageSig = "";
             ShowLobby();
         }
+
+        void OnReturnedToLobby() { } // Legacy RPC no longer forces anyone out of results.
 
         void OnChatSent(string text)
         {
@@ -134,6 +135,7 @@ namespace Musketeers.UI
         // Host only: a human's connection dropped mid-match.
         void OnClientLeft(ulong clientId)
         {
+            MatchNet.Instance?.ReplayDisconnected(clientId);
             if (_netTransport == null || _setup == null)
                 return;
             int slot = _netTransport.SlotOf(clientId);

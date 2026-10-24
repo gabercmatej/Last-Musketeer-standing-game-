@@ -159,19 +159,79 @@ namespace Musketeers.Sim.Tests
         }
 
         [Test]
-        public void Bots_NeverWearCosmetics()
+        public void WardrobeDefault_RestoresCharacterColors_OnlyWhenRequested()
         {
-            var sprite = TestSprite(out var tex);
-            var catalog = ScriptableObject.CreateInstance<CosmeticCatalog>();
-            var hat = Item(CosmeticSlot.Hat, sprite); hat.Id = "hat_x";
-            catalog.Items.Add(hat);
-            var model = new LobbyModel(null, catalog, 1);
-            for (int slot = 1; slot < 4; slot++)
+            const string id = "day6-default-regression";
+            const string key = "Musketeers.Loadout." + id;
+            bool existed = PlayerPrefs.HasKey(key);
+            string previous = PlayerPrefs.GetString(key);
+            var character = ScriptableObject.CreateInstance<CharacterDef>();
+            var roster = ScriptableObject.CreateInstance<CharacterRoster>();
+            try
             {
-                model.RerollBot(slot);
-                Assert.That(model.LoadoutFor(slot), Is.EqualTo(default(Loadout)), "bot " + slot);
+                character.Id = id;
+                character.DefaultLoadout = new Loadout { Hat = "feather_green", Cape = "cape_green" };
+                roster.Characters = new[] { character };
+                PlayerPrefs.DeleteKey(key);
+                var model = new LobbyModel(roster, null, 1) { Character = 0 };
+                Assert.That(model.MyLoadout, Is.EqualTo(character.DefaultLoadout));
+                var custom = new Loadout { Hat = "hat_custom", Cape = "cape_custom" };
+                model.SetMyLoadout(custom);
+                Assert.That(new LobbyModel(roster, null, 1) { Character = 0 }.MyLoadout.Serialize(), Is.EqualTo(custom.Serialize()));
+                model.ClearMyLoadout();
+                Assert.That(model.MyLoadout.Serialize(), Is.EqualTo(character.DefaultLoadout.Serialize()));
             }
-            Object.DestroyImmediate(hat); Object.DestroyImmediate(catalog); Object.DestroyImmediate(tex);
+            finally
+            {
+                if (existed) PlayerPrefs.SetString(key, previous); else PlayerPrefs.DeleteKey(key);
+                PlayerPrefs.Save();
+                Object.DestroyImmediate(roster);
+                Object.DestroyImmediate(character);
+            }
+        }
+
+        [Test]
+        public void Bots_UseAssignedCharacterDefaults_NotSavedCustomOutfits()
+        {
+            var roster = ScriptableObject.CreateInstance<CharacterRoster>();
+            var characters = new CharacterDef[4];
+            var saved = new string[4];
+            var existed = new bool[4];
+            try
+            {
+                for (int i = 0; i < 4; i++)
+                {
+                    characters[i] = ScriptableObject.CreateInstance<CharacterDef>();
+                    characters[i].Id = "day6-bot-default-" + i;
+                    characters[i].DefaultLoadout = new Loadout { Hat = "feather_" + i, Cape = "cape_" + i };
+                    string key = "Musketeers.Loadout." + characters[i].Id;
+                    existed[i] = PlayerPrefs.HasKey(key); saved[i] = PlayerPrefs.GetString(key);
+                    PlayerPrefs.SetString(key, "custom|face|customcape|");
+                }
+                roster.Characters = characters;
+                for (int human = 0; human < 4; human++)
+                {
+                    var model = new LobbyModel(roster, null, 1) { Character = human, Players = 4 };
+                    var mapping = model.Characters();
+                    for (int slot = 1; slot < 4; slot++)
+                    {
+                        model.RerollBot(slot);
+                        Assert.That(model.LoadoutFor(slot).Serialize(), Is.EqualTo(characters[mapping[slot]].DefaultLoadout.Serialize()));
+                    }
+                    Assert.That(model.MyLoadout.Hat, Is.EqualTo("custom"));
+                }
+            }
+            finally
+            {
+                for (int i = 0; i < 4; i++)
+                {
+                    string key = "Musketeers.Loadout.day6-bot-default-" + i;
+                    if (existed[i]) PlayerPrefs.SetString(key, saved[i]); else PlayerPrefs.DeleteKey(key);
+                    Object.DestroyImmediate(characters[i]);
+                }
+                PlayerPrefs.Save();
+                Object.DestroyImmediate(roster);
+            }
         }
 
         [Test]

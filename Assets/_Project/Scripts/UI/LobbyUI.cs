@@ -16,6 +16,7 @@ namespace Musketeers.UI
         public event Action BackClicked;           // Leave lobby confirmed
         public event Action SettingsClicked;
         public event Action ChangeMusketeerClicked;
+        public event Action ChangeNameClicked;
         public event Action Changed;               // character, players or map changed: rebuild the stage
         public event Action ReadyChanged;          // only the Ready toggle changed: refresh the status lines
         public event Action<bool> WardrobeToggled;
@@ -32,6 +33,7 @@ namespace Musketeers.UI
         string _inviteCode = "";
 
         public WardrobeUI Wardrobe { get; }
+        public VisualElement ChatRoot { get; private set; }
 
         // Online lobbies show their code with Copy code / Copy invite link (top centre). "" hides it (offline).
         public void SetInviteCode(string code)
@@ -133,6 +135,20 @@ namespace Musketeers.UI
             wardrobe.AddToClassList("icon-btn--big");
             var change = CornerButtons.Add(_bl, "change-player", "Change Musketeer", "Pick another musketeer", () => ChangeMusketeerClicked?.Invoke());
             change.AddToClassList("icon-btn--big");
+            var rename = CornerButtons.Add(_bl, "change-name", "Change Name", "Edit your player name", () => ChangeNameClicked?.Invoke());
+            rename.AddToClassList("icon-btn--big");
+
+            ChatRoot = new VisualElement { name = "lobby-chat" };
+            ChatRoot.AddToClassList("panel");
+            ChatRoot.style.position = Position.Absolute;
+            ChatRoot.style.left = 24;
+            ChatRoot.style.top = 125;
+            ChatRoot.style.width = 320;
+            ChatRoot.style.paddingLeft = 12;
+            ChatRoot.style.paddingRight = 12;
+            ChatRoot.style.paddingTop = 8;
+            ChatRoot.style.paddingBottom = 8;
+            _root.Add(ChatRoot);
 
             Wardrobe = new WardrobeUI(root, model, art);
             Wardrobe.Closed += () => SetWardrobe(false);
@@ -180,6 +196,11 @@ namespace Musketeers.UI
                 // Online, the host can be alone in the lobby: a match needs at least two musketeers.
                 UiArt.Sfx("SFX/ui/ui_error");
                 _confirm.ShowNotice("Add a bot or wait for a friend first.");
+                return;
+            }
+            if (_model.WaitingForResults)
+            {
+                _confirm.ShowNotice("Waiting for players to return from results.");
                 return;
             }
             if (_model.AllReady())
@@ -268,9 +289,10 @@ namespace Musketeers.UI
             var map = _art.Maps != null ? _art.Maps.Get(_model.Map) : null;
             _mapName.text = map != null ? map.DisplayName : "The Courtyard";
             _mapDesc.text = map != null ? map.Description : "";
-            _count.text = _model.Players.ToString();
-            _add.SetEnabled(_model.Players < Mathf.Min(4, _model.RosterCount));
-            _remove.SetEnabled(_model.Online ? _model.BotCount > 0 : _model.Players > 2);
+            _count.text = _model.BotCount.ToString();
+            ChatRoot.style.display = _model.Online ? DisplayStyle.Flex : DisplayStyle.None;
+            _add.SetEnabled(host && _model.BotCount < _model.MaxBots);
+            _remove.SetEnabled(host && _model.BotCount > _model.MinBots);
             _invite.style.display = _inviteCode.Length > 0 ? DisplayStyle.Flex : DisplayStyle.None;
         }
     }

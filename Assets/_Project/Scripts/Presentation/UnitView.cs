@@ -37,7 +37,7 @@ namespace Musketeers.Presentation
         SpriteRenderer[] _hearts;
         SpriteRenderer[] _pips;
         SortingGroup _group;
-        WorldLabel _name;
+        WorldLabel _name, _ready;
         Sprite _heartFull, _heartEmpty, _loaded, _empty;
         bool _realHearts, _realMusket;
         bool _alive = true;
@@ -106,10 +106,15 @@ namespace Musketeers.Presentation
                 _pips[i].transform.localPosition = new Vector3((i - (MaxPips - 1) * 0.5f) * 0.14f, FeetY - 0.13f, 0f);
             }
             _crown = art.MakeRenderer("Crown", _bodyRoot, art.CrownSprite, art.Has(GameArt.Crown) ? Color.white : new Color(1f, 0.82f, 0.2f), 50);
-            _crown.transform.localScale = Vector3.one * (art.Has(GameArt.Crown) ? 0.28f : 0.3f);
-            _crown.transform.localPosition = new Vector3(0f, headY + 0.2f, 0f);
+            _crown.transform.localScale = Vector3.one * (art.Has(GameArt.Crown) ? 0.35f : 0.37f);
+            _crown.transform.localPosition = new Vector3(-MusketSlot * 0.5f, headY + 0.35f, 0f);
             _crown.enabled = false;
 
+            _ready = labels.Create("✓", "unit-name");
+            _ready.Follow = transform;
+            _ready.Offset = new Vector3(0.62f, headY + 0.35f, 0f);
+            _ready.Element.style.color = new Color(0.5f, 1f, 0.55f);
+            _ready.SetVisible(false);
             _name = labels.Create(displayName, "unit-name");
             _name.Follow = transform;
             _name.Offset = new Vector3(0f, FeetY - 0.3f, 0f);
@@ -121,6 +126,7 @@ namespace Musketeers.Presentation
         void OnDestroy()
         {
             _name?.Destroy();
+            _ready?.Destroy();
             _shieldTween.Stop();
             Tween.StopAll(transform);
             if (_bodyRoot != null)
@@ -220,6 +226,8 @@ namespace Musketeers.Presentation
             _name.Element.style.color = on ? new Color(1f, 0.88f, 0.4f) : Color.Lerp(Color, Color.white, 0.35f);
         }
 
+        public void SetPlanningReady(bool ready) => _ready?.SetVisible(ready && _alive);
+
         public void SetCrowned(bool crowned) => _crown.enabled = crowned && _alive;
 
         public void SyncStats(Unit u, bool crowned)
@@ -283,6 +291,12 @@ namespace Musketeers.Presentation
         {
             gameObject.SetActive(on);
             _name?.SetVisible(on);
+        }
+
+        public void CancelPlayback()
+        {
+            Tween.StopAll(this); Tween.StopAll(transform); Tween.StopAll(_bodyRoot); Tween.StopAll(_rig.transform);
+            _dying = false;
         }
 
         public bool Alive => _alive;

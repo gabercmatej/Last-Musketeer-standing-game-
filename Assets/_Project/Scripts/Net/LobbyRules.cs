@@ -11,6 +11,7 @@ namespace Musketeers.Net
         public int Character;
         public bool Ready;
         public bool IsBot;
+        public bool InResults;
         public string Loadout;   // Loadout.Serialize() text, "" = nothing
     }
 
@@ -159,6 +160,24 @@ namespace Musketeers.Net
                 return JoinResult.AlreadyJoined;
             if (MatchInProgress)
                 return JoinResult.MatchInProgress;
+            // Humans have priority: replace the last bot in place so every existing human
+            // keeps their seat and character, even when the lobby is full.
+            if (_entries.Count >= LobbyRules.MaxPlayers || FirstFreeCharacter() < 0)
+            {
+                for (int b = _entries.Count - 1; b >= 0; b--)
+                {
+                    if (!_entries[b].IsBot)
+                        continue;
+                    string replacementName = LobbyRules.SanitizeName(name);
+                    _entries[b] = new LobbyEntry
+                    {
+                        ClientId = clientId, Name = replacementName.Length > 0 ? replacementName : LobbyRules.FallbackName,
+                        Character = _entries[b].Character, Ready = clientId == _hostId, Loadout = "",
+                    };
+                    index = b;
+                    return JoinResult.Ok;
+                }
+            }
             int character = _entries.Count >= LobbyRules.MaxPlayers ? -1 : FirstFreeCharacter();
             if (character < 0)
                 return JoinResult.Full;
@@ -188,10 +207,22 @@ namespace Musketeers.Net
             return true;
         }
 
+        public bool TrySetName(ulong clientId, string name)
+        {
+            int i = IndexOf(clientId);
+            string clean = LobbyRules.SanitizeName(name);
+            if (MatchInProgress || i < 0 || clean.Length == 0)
+                return false;
+            var entry = _entries[i];
+            entry.Name = clean;
+            _entries[i] = entry;
+            return true;
+        }
+
         public bool TrySetReady(ulong clientId, bool ready)
         {
             int i = IndexOf(clientId);
-            if (i < 0)
+            if (i < 0 || MatchInProgress || _entries[i].InResults)
                 return false;
             var e = _entries[i];
             e.Ready = clientId == _hostId || ready;
@@ -271,6 +302,29 @@ namespace Musketeers.Net
         }
 
         // A match needs at least two seats.
-        public bool CanStart => _entries.Count >= 2;
+        public bool WaitingForResults
+        {
+            get { foreach (var e in _entries) if (!e.IsBot && e.InResults) return true; return false; }
+        }
+        public bool CanStart => !MatchInProgress && !WaitingForResults && _entries.Count >= 2;
+        public bool BeginMatch()
+        {
+            if (!CanStart) return false;
+            MatchInProgress = true;
+            for (int i = 0; i < _entries.Count; i++)
+            {
+                var e = _entries[i]; e.InResults = !e.IsBot; e.Ready = e.IsBot;
+                _entries[i] = e;
+            }
+            return true;
+        }
+        public void CompleteMatch() => MatchInProgress = false;
+        public bool ReturnToLobby(ulong clientId)
+        {
+            int i = IndexOf(clientId);
+            if (MatchInProgress || i < 0 || !_entries[i].InResults) return false;
+            var e = _entries[i]; e.InResults = false; e.Ready = clientId == _hostId;
+            _entries[i] = e; return true;
+        }
     }
 }

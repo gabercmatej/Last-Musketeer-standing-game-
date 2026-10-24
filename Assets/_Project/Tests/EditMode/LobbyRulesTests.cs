@@ -38,7 +38,7 @@ namespace Musketeers.Sim.Tests
         }
 
         [Test]
-        public void FifthSeat_IsRefused_BotsCountTowardTheCap()
+        public void JoiningHumans_ReplaceBots_UntilFourHumansAreSeated()
         {
             var s = Make();
             s.TryAddHuman(0, "A", out _);
@@ -46,7 +46,9 @@ namespace Musketeers.Sim.Tests
             Assert.That(s.TryAddBot(), Is.True);
             Assert.That(s.TryAddHuman(5, "B", out _), Is.EqualTo(JoinResult.Ok));
             Assert.That(s.Count, Is.EqualTo(4));
-            Assert.That(s.TryAddHuman(6, "C", out _), Is.EqualTo(JoinResult.Full));
+            Assert.That(s.TryAddHuman(6, "C", out _), Is.EqualTo(JoinResult.Ok));
+            Assert.That(s.TryAddHuman(7, "D", out _), Is.EqualTo(JoinResult.Ok));
+            Assert.That(s.TryAddHuman(8, "E", out _), Is.EqualTo(JoinResult.Full));
             Assert.That(s.TryAddBot(), Is.False);
         }
 
@@ -311,6 +313,7 @@ namespace Musketeers.Sim.Tests
         {
             public readonly List<string> Calls = new List<string>();
             public void Pick(int character) => Calls.Add("pick" + character);
+            public void SetName(string name) => Calls.Add("name" + name);
             public void SetReady(bool ready) => Calls.Add("ready" + ready);
             public void SetLoadout(string s) => Calls.Add("loadout");
             public void SetSettings(int map, int p, int h) => Calls.Add($"settings{map},{p},{h}");

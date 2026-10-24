@@ -15,6 +15,7 @@ namespace Musketeers.UI
 
         public event Action PlayClicked;     // name is valid and saved
         public event Action LoreClicked;
+        public event Action MatchLogsClicked;
         public event Action SettingsClicked;
         public event Action HostClicked;     // name is valid and saved (Day 5)
         public event Action JoinClicked;     // name is valid and saved
@@ -49,6 +50,7 @@ namespace Musketeers.UI
 
             var corner = menuRoot.Q("menu-corner");
             CornerButtons.Add(corner, "lore", "Lore", "The story and how to play", () => LoreClicked?.Invoke());
+            CornerButtons.Add(corner, "leaderboard-history", "Match Logs", "Completed match results", () => MatchLogsClicked?.Invoke());
             CornerButtons.Add(corner, "settings", "Settings", "Volume and credits", () => SettingsClicked?.Invoke());
             CornerButtons.AddFullscreen(corner);
 

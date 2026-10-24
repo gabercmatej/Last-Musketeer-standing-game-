@@ -115,6 +115,7 @@ namespace Musketeers.Presentation
 
         public void Hide()
         {
+            Tween.StopAll(this);
             if (_root != null)
                 _root.gameObject.SetActive(false);
             for (int i = 0; i < 4; i++)
@@ -129,6 +130,7 @@ namespace Musketeers.Presentation
         // status line (ready[] given: "Ready" green / "Not ready" red, the lobby) or tags[i] (results points).
         public void Show(int count, int[] characters, string[] names, string[] tags, Loadout[] loadouts, bool[] ready = null)
         {
+            Tween.StopAll(this);
             Ensure();
             _root.gameObject.SetActive(true);
             _count = count;
@@ -282,6 +284,30 @@ namespace Musketeers.Presentation
             var b = _bg.sprite.bounds;
             var k = _bg.transform.localScale;
             return new Vector3((b.min.x + uv.x * b.size.x) * k.x, (b.min.y + uv.y * b.size.y) * k.y, 0f) + _bg.transform.localPosition;
+        }
+
+        public void RevealPodium(int[] order, float start, float gap)
+        {
+            Tween.StopAll(this);
+            for (int k = 0; k < order.Length; k++)
+            {
+                int slot = order[k];
+                var spot = _spots[slot];
+                if (spot == null) continue;
+                var scale = spot.localScale;
+                spot.gameObject.SetActive(false);
+                SetLabelsVisible(slot, false);
+                Tween.Delay(this, start + gap * (order.Length - 1 - k), _ =>
+                {
+                    if (spot == null) return;
+                    spot.gameObject.SetActive(true);
+                    SetLabelsVisible(slot, true);
+                    Tween.Custom(this, 0f, 1f, 0.45f, (_, t) =>
+                    {
+                        if (spot != null) spot.localScale = scale * t;
+                    }, Ease.OutBack);
+                });
+            }
         }
 
         // Results: the k-th ranked slot (order[k]) stands with its feet on spots[k] of the results art. Place 1 gets

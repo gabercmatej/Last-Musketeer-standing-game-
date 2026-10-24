@@ -14,6 +14,7 @@ namespace Musketeers.UI
     {
         void Pick(int character);
         void SetReady(bool ready);
+        void SetName(string name);
         void SetLoadout(string serialized);
         void SetSettings(int map, int pointsToWin, int hearts);
         void DefaultSettings();
@@ -92,6 +93,10 @@ namespace Musketeers.UI
             return r;
         }
 
+        public bool WaitingForResults
+        {
+            get { if (_seats != null) foreach (var seat in _seats) if (seat.InResults) return true; return false; }
+        }
         public bool AllReady()
         {
             for (int i = 0; i < Players; i++)
@@ -171,6 +176,7 @@ namespace Musketeers.UI
                     _seats.Add(entries[i]);
             }
             Players = _seats.Count;
+            Name = _seats[0].Name;
             Character = Mathf.Clamp(_seats[0].Character, 0, Mathf.Max(0, RosterCount - 1));
             Map = Mathf.Clamp(settings.Map, 0, MapCount - 1);
             PointsToWin = settings.PointsToWin;
@@ -192,7 +198,7 @@ namespace Musketeers.UI
         {
             get
             {
-                int n = 0;
+                int n = _seats == null ? Mathf.Max(0, Players - 1) : 0;
                 if (_seats != null)
                 {
                     foreach (var s in _seats)
@@ -203,6 +209,24 @@ namespace Musketeers.UI
                 }
                 return n;
             }
+        }
+
+        public int HumanCount => Online ? Players - BotCount : 1;
+        public int MaxBots => Mathf.Max(0, Mathf.Min(4, RosterCount) - HumanCount);
+        public int MinBots => Online ? 0 : 1;
+
+        public bool Rename(string raw)
+        {
+            string clean = NameRules.Clean(raw);
+            if (!NameRules.IsValid(clean, out _))
+                return false;
+            PlayerPrefs.SetString("Musketeers.PlayerName", clean);
+            PlayerPrefs.Save();
+            if (Online)
+                Backend.SetName(clean);
+            else
+                Name = clean;
+            return true;
         }
 
         // Stage name tags: online each seat's own name ("Bot" for bots); offline null (AppFlow builds them).
@@ -255,8 +279,8 @@ namespace Musketeers.UI
             Backend.SetLoadout(LoadoutOfCharacter(character).Serialize());
         }
 
-        // The wardrobe's Default button (FIXES_4E §3.3): Hat, Face and Cape to none. Boots are not selectable.
-        public void ClearMyLoadout() => SetMyLoadout(default);
+        // Explicit Default restores this character's feather and cape without altering saved outfits implicitly.
+        public void ClearMyLoadout() => SetMyLoadout(_roster?.Get(Character)?.DefaultLoadout ?? default);
 
         // Copies the lobby's rules into a match setup (hearts per round, points to win).
         public void ApplyTo(MatchSetup setup)
@@ -291,12 +315,21 @@ namespace Musketeers.UI
             {
                 if (slot == 0)
                     return MyLoadout;
-                if (slot >= _seats.Count || _seats[slot].IsBot)
+                if (slot < 0 || slot >= _seats.Count)
                     return default;
+                if (_seats[slot].IsBot)
+                    return DefaultForCharacter(_seats[slot].Character);
                 var l = Loadout.Parse(_seats[slot].Loadout, default);
                 return _catalog != null ? _catalog.Sanitize(l) : l;
             }
-            return slot == 0 ? MyLoadout : _bots[slot];
+            if (slot < 0 || slot >= Players) return default;
+            return slot == 0 ? MyLoadout : DefaultForCharacter(Characters()[slot]);
+        }
+
+        Loadout DefaultForCharacter(int character)
+        {
+            var outfit = _roster != null ? _roster.Get(character)?.DefaultLoadout ?? default : default;
+            return _catalog != null ? _catalog.Sanitize(outfit) : outfit;
         }
 
         public Loadout[] Loadouts()
@@ -333,7 +366,7 @@ namespace Musketeers.UI
                 SetMyLoadout(_catalog.RandomLoadout());
         }
 
-        // Bots never wear cosmetics (FIXES_v0.2 §1.3): bare head, their own boots.
+        // Bots use their character defaults at render time, never player preferences or randomized outfits.
         public void RerollBot(int slot)
         {
             if (slot > 0 && slot < 4)
