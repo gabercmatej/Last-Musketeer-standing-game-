@@ -37,6 +37,7 @@ namespace Musketeers.Sim
         public int WinPoints = 3;
         public int KillPoints = 1;
         public int CrownKillPoints = 2;
+        public int EnvironmentalDeathPenalty = 1; // Day 6: charged on every fall, independent of kill credit
 
         // --- rule constants from §4–§6 prose ---
         public int CatchBreathGrit = 1;       // §5 Catch Breath

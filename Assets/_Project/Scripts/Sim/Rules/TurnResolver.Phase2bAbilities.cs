@@ -75,6 +75,13 @@ namespace Musketeers.Sim
             {
                 case LineHit.Unit:
                 {
+                    // Day 6 amendment: a funded Parry blocks the hook before movement or credit.
+                    // Signature cost was already paid in Phase 0; reason 1 excludes this from shot awards.
+                    if (target.Parrying)
+                    {
+                        c.Log.Add(SimEventKind.Parried, unit: target.Slot, other: i, to: target.Pos, dir: dir, reason: 1);
+                        break;
+                    }
                     // FIXES_4E §8.3: dragged tile by tile toward the grappler; the first pit or water tile on the
                     // way (the landing tile included) swallows the target, with the kill credited to the grappler.
                     Int2 from = target.Pos;

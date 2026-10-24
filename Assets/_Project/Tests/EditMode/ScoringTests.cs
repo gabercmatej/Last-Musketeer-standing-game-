@@ -93,7 +93,7 @@ namespace Musketeers.Sim.Tests
         }
 
         [Test]
-        public void SelfKill_ScoresNothing()
+        public void SelfFall_CostsOnePoint()
         {
             var m = Match(@"
                 .......
@@ -103,7 +103,7 @@ namespace Musketeers.Sim.Tests
             p[0].A0 = PlannedAction.Move(Dir.W);
             var o = MatchRunner.PlayTurn(m, p);
             Assert.That(o.RoundResult.Winner, Is.EqualTo(1));
-            Assert.That(m.Points, Is.EqualTo(new[] { 0, 3 }));
+            Assert.That(m.Points, Is.EqualTo(new[] { -1, 3 }));
             Assert.That(m.Stats.SelfRingOuts[0], Is.EqualTo(1));
         }
 
@@ -291,8 +291,8 @@ namespace Musketeers.Sim.Tests
                 Assert.That(u.Loaded, Is.True);
                 Assert.That(u.LastAttacker, Is.EqualTo(-1));
             }
-            Assert.That(r.Units[0].Pos, Is.EqualTo(new Int2(1, 1)));
-            Assert.That(r.Units[1].Pos, Is.EqualTo(new Int2(5, 1)));
+            Assert.That(r.Units[0].Pos, Is.EqualTo(new Int2(5, 1)));
+            Assert.That(r.Units[1].Pos, Is.EqualTo(new Int2(1, 1)));
         }
 
         [Test]
@@ -307,7 +307,7 @@ namespace Musketeers.Sim.Tests
             Assert.That(o.TurnStart, Is.Not.Null);
             Assert.That(o.TurnStart.Contains(SimEventKind.Died), Is.True);
             Assert.That(o.RoundResult.Winner, Is.EqualTo(0));
-            Assert.That(m.Points, Is.EqualTo(new[] { 3, 0 }));
+            Assert.That(m.Points, Is.EqualTo(new[] { 3, -1 }));
         }
 
         [Test]

@@ -29,7 +29,7 @@ namespace Musketeers.Sim
             "x1....~b~....2x\n" +
             "....~~~b~~~....\n" +
             ".~..~~...~~..~.\n" +
-            ".~..bb.#.bb..~.\n" +   // 4F §3: one pillar, dead centre (7,4)
+            ".~#.bb...bb.#~.\n" +   // Day 6: pillars (2,4), (12,4), clear centre
             ".~..~~...~~..~.\n" +
             "....~~~b~~~....\n" +
             "x3....~b~....4x\n" +

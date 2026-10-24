@@ -34,8 +34,8 @@ namespace Musketeers.Sim
     //   TileCrumbled        To = tile, Amount = ring (TurnStart)
     //   CrateDestroyed      Unit = shooter / shover / keg credit (-1 if none), Keg = exploding keg or -1, To,
     //                       Amount = Grit actually gained by Unit (0 when the roll failed or Grit was full)
-    //   PointsScored        Unit = scorer, Other = victim, Amount = points, Reason = PointReason; emitted right after the
-    //                       victim's Died event, the moment the kill happens (FIXES_4E §8.6)
+    //   PointsScored        Unit = scorer (or falling victim), Other = victim, Amount = signed points, Reason = PointReason; emitted right after the
+    //                       victim's Died event, the moment death happens (FIXES_4E §8.6 / Day 6)
     //   SignatureUsed       Unit, Amount = (int)Ability, To = user tile; emitted in Phase 0 once the Grit is paid (FIXES_4E §8.5)
     //   Died                Unit, Other = killer or -1 (self-kill), To, Reason = DeathCause
     //   RoundEnded          Unit = winner slot or -1 for a draw

@@ -2,7 +2,7 @@ using System.Collections.Generic;
 
 namespace Musketeers.Sim
 {
-    public enum PointReason : byte { LastStanding, Kill, CrownKill }
+    public enum PointReason : byte { LastStanding, Kill, CrownKill, EnvironmentalDeath }
 
     // One line on the between-rounds scoreboard: "+2 Matej (crown kill on Nik)".
     public struct PointGain
@@ -12,7 +12,7 @@ namespace Musketeers.Sim
         public PointReason Reason;
         public int Victim;   // -1 for LastStanding
 
-        public override string ToString() => $"+{Amount} p{Player} {Reason}{(Victim >= 0 ? $" on p{Victim}" : "")}";
+        public override string ToString() => $"{(Amount >= 0 ? "+" : "")}{Amount} p{Player} {Reason}{(Victim >= 0 ? $" on p{Victim}" : "")}";
     }
 
     // GAME_DESIGN §2 scoring and Crown. Pure functions over a MatchState.

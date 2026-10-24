@@ -77,10 +77,11 @@ namespace Musketeers.Sim
             m.RoundGains.Clear();
 
             var units = new Unit[n];
+            var spawnSlots = SpawnRotation.Assign(m.Map.Spawns, m.RoundNumber);
             for (int i = 0; i < n; i++)
             {
-                // §3: spawns in slot order.
-                units[i] = Unit.Spawn(i, m.Characters[i], m.Abilities[i], m.Map.Spawns[i], cfg);
+                // Host roster fixes stable identity; every replica derives the same round assignment.
+                units[i] = Unit.Spawn(i, m.Characters[i], m.Abilities[i], m.Map.Spawns[spawnSlots[i]], cfg);
             }
             var board = m.Map.Board.Clone();
             // FIXES_4E §5.3: fresh random pits and crates every round, from the match seed and round number.

@@ -111,17 +111,22 @@ namespace Musketeers.Sim
         static void Kill(TickContext c, int unit, DeathCause cause)
         {
             var u = c.S.Units[unit];
+            if (!u.Alive)
+                return;
             u.Alive = false;
             u.Parrying = false;
             int killer = Killer(c.S, u, c.Cfg);
             c.Log.Add(SimEventKind.Died, unit: unit, other: killer, to: u.Pos, reason: (byte)cause);
-            ScoreKill(c.S, c.Log, c.Cfg, unit, killer);
+            ScoreDeath(c.S, c.Log, c.Cfg, unit, killer, cause);
         }
 
-        // FIXES_4E §8.6: kill points are scored the moment of death (§2: +1, +2 on the Crowned; self-kills
-        // score nothing). MatchRunner adds them to the player's points; the +3 for surviving waits for round end.
-        internal static void ScoreKill(GameState s, EventLog log, GameConfig cfg, int victim, int killer)
+        // §2 / Day 6 scoring amendment: every fall costs its victim one point, even when an attacker
+        // gets kill credit. Both gains land live; surviving still scores only at round end.
+        internal static void ScoreDeath(GameState s, EventLog log, GameConfig cfg, int victim, int killer, DeathCause cause)
         {
+            if (cause == DeathCause.Fell)
+                log.Add(SimEventKind.PointsScored, unit: victim, other: victim,
+                    amount: -cfg.EnvironmentalDeathPenalty, reason: (byte)PointReason.EnvironmentalDeath);
             if (killer < 0 || killer == victim)
                 return;
             bool crown = victim == s.Crowned;

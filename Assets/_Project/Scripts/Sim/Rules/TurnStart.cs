@@ -52,7 +52,7 @@ namespace Musketeers.Sim
                     log.Add(SimEventKind.Fell, unit: i, to: u.Pos);
                     int killer = TurnResolver.Killer(s, u, cfg);
                     log.Add(SimEventKind.Died, unit: i, other: killer, to: u.Pos, reason: (byte)DeathCause.Fell);
-                    TurnResolver.ScoreKill(s, log, cfg, i, killer);
+                    TurnResolver.ScoreDeath(s, log, cfg, i, killer, DeathCause.Fell);
                 }
                 foreach (var keg in s.Kegs.ToArray())
                 {

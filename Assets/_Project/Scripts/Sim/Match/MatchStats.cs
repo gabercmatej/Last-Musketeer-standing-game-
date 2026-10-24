@@ -56,7 +56,7 @@ namespace Musketeers.Sim
                         Bonks[e.Unit]++;
                         break;
                     case SimEventKind.Parried:
-                        if (e.Keg == SimEvent.None)
+                        if (e.Keg == SimEvent.None && e.Reason == 0)
                             ShotsParried[e.Unit]++;
                         break;
                     case SimEventKind.Damaged:
