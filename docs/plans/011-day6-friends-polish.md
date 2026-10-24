@@ -2,7 +2,7 @@
 
 > **For agentic workers:** Use superpowers:executing-plans to implement assigned tasks; the implementation lead alone operates Unity and integrates verification.
 
-**Goal:** Complete the requested Day 6 online polish and eleven friend-play improvements, preserving cosmetic fits and deterministic simulation.
+**Goal:** Complete the requested Day 6 online polish and twelve friend-play improvements, preserving cosmetic fits and deterministic simulation.
 **Architecture:** Existing pure-C# sim, host-authoritative lobby and lockstep remain. Reuse current UI Toolkit screens and art. Shared history requires authenticated durable infrastructure; do not represent browser-only storage as shared or expose anonymous writes.
 **Tech stack:** Installed Unity 6000.6.6f1, NGO 2.13.3, Multiplayer Services 2.4.1, UI Toolkit, PlayerPrefs.
 **Spec:** User request dated 2026-10-23; docs/CODEX_HANDOFF.md Day 6; GAME_DESIGN with explicit Oct 23–24 amendments: environmental-death -1, Bridge pillars, Grappin/Parry and four-round spawn rotation.
@@ -71,3 +71,11 @@ Checked implementation items mean the code is present/reviewed, not that browser
 - [ ] Every round-death montage including crumble, skip from guest, repeated skip and disconnect; immediate final state restoration and synchronized scoreboard.
 - [ ] Separate visible browser full matches, staggered independent results returns, next match only after required players return/ready; map switch and leave variant.
 - [ ] Latest version Web build, production deploy, final commit/push and exact evidence in handoff.
+
+## Final presentation amendments (2026-10-25)
+- [x] Replace full-screen moving replay with framed inset over stationary frozen arena; badge preserves aspect; chronological clips target ~10 seconds with slower presentation.
+- [x] Between rounds: any human Skip uses host barrier. Final round: local See Results/natural finish; authoritative completion permits early lobby return while returning-player flags gate next match.
+- [x] Remove lobby chat interface; retain reusable match chat/emotes.
+- [x] Replace opponents' arena arrows with compact portrait/action/direction rows, resolved plans only, cleared next planning; own preview retained.
+- [x] 589/589 fresh MCP EditMode tests; zero compile errors; Play Mode inset/panel rendered. Web v0.4.1 built successfully in 131s. Commit41c24c2 pushed.
+- [ ] Revised candidate Chrome smoke: global skip, local final results, independent returns and full second match; exact hashes and deployment evidence recorded at completion.

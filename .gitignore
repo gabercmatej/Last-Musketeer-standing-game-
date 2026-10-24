@@ -56,3 +56,5 @@ node_modules/
 /Assets/_Recovery.meta
 /Assets/Screenshots/
 /Assets/Screenshots.meta
+
+/node_modules

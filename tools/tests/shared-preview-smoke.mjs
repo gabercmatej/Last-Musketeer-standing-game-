@@ -1,0 +1,25 @@
+import { randomUUID } from 'node:crypto';
+import { writeFile } from 'node:fs/promises';
+const base=process.argv[2];
+if (!base || !/^https:\/\/[a-z0-9-]+--last-musketeer\.netlify\.app$/.test(base)) throw Error('Use an isolated Netlify preview URL only.');
+const api=base+'/api/match-history';
+if ((await(await fetch(api)).json()).Preview !== true) throw Error('Refusing to write test data outside an isolated preview.');
+const auth=await fetch('https://player-auth.services.api.unity.com/v1/authentication/anonymous',{method:'POST',headers:{'Content-Type':'application/json',ProjectId:'d55ea045-93c5-474d-a3e9-8003f0b0f578'},body:'{}'});
+if(!auth.ok) throw Error('Anonymous game test sign-in failed: HTTP '+auth.status);
+const identity=await auth.json(); const token=identity.idToken;
+if(!token) throw Error('Test sign-in did not return an ID token');
+const post=async(body,bearer=token,origin)=>{
+ const headers={'Content-Type':'application/json'}; if(bearer)headers.Authorization='Bearer '+bearer;if(origin)headers.Origin=origin;
+ const r=await fetch(api,{method:'POST',headers,body:JSON.stringify(body)});return {status:r.status,body:await r.json()};
+};
+const MatchId=randomUUID().replaceAll('-','');
+const setup={Action:'start',MatchId,MapId:'bridge',PointsToWin:6,Hearts:1,IsAutomated:true,Roster:[{CharacterId:'matej',Name:'Preview Test A',IsBot:false},{CharacterId:'nik',Name:'Preview Test B',IsBot:false}]};
+const checks={unauthenticated:await post(setup,null),wrongOrigin:await post(setup,token,'https://unrelated.example'),bots:await post({...setup,Roster:[setup.Roster[0],{...setup.Roster[1],IsBot:true}]}),registered:await post(setup)};
+console.log(JSON.stringify(checks));
+if(checks.registered.status!==200) process.exit(1);
+await new Promise(r=>setTimeout(r,11000));
+const result={Action:'complete',Completed:true,RoundCount:2,FinalHash:'abcdef01',Record:{MatchId,MapId:'bridge',Players:[{CharacterId:'matej',Name:'Preview Test A',Place:1,Points:8,RoundWins:2,Kills:2,Deaths:0,Badges:[]},{CharacterId:'nik',Name:'Preview Test B',Place:2,Points:0,RoundWins:0,Kills:0,Deaths:2,Badges:[]}]}};
+checks.completed=await post(result);checks.retry=await post(result);
+const shared=await(await fetch(api)).json();checks.savedExactlyOnce=shared.Matches.filter(m=>m.MatchId===MatchId).length===1;checks.preview=shared.Preview;checks.standings=shared.Leaderboard;
+await writeFile('docs/playtest/day6/shared-api-smoke.json',JSON.stringify(checks,null,2));console.log(JSON.stringify(checks));
+if(checks.completed.status!==200||checks.retry.body.Created!==false||!checks.savedExactlyOnce||checks.preview!==true) process.exit(1);

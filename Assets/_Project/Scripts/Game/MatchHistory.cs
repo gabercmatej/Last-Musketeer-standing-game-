@@ -55,6 +55,7 @@ namespace Musketeers.Game
     {
         public string CharacterId;
         public int Wins;
+        public string LastWin;
     }
 
     [Serializable]
@@ -74,11 +75,17 @@ namespace Musketeers.Game
             foreach (var id in rosterIds)
                 {
                 int wins = 0;
+                string lastWin = "";
                 foreach (var match in Matches)
-                    if (match.Players.Exists(p => p.CharacterId == id && p.Place == 1)) wins++;
-                result.Add(new CharacterWins { CharacterId = id, Wins = wins });
+                    if (match.Players.Exists(p => p.CharacterId == id && p.Place == 1))
+                    {
+                        wins++;
+                        if (string.CompareOrdinal(match.CompletedUtc, lastWin) > 0) lastWin = match.CompletedUtc;
+                    }
+                result.Add(new CharacterWins { CharacterId = id, Wins = wins, LastWin = lastWin });
             }
-            result.Sort((a, b) => a.Wins != b.Wins ? b.Wins.CompareTo(a.Wins) : string.CompareOrdinal(a.CharacterId, b.CharacterId));
+            result.Sort((a, b) => a.Wins != b.Wins ? b.Wins.CompareTo(a.Wins) :
+                a.LastWin != b.LastWin ? string.CompareOrdinal(b.LastWin, a.LastWin) : string.CompareOrdinal(a.CharacterId, b.CharacterId));
             return result;
         }
     }

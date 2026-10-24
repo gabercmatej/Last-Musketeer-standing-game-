@@ -161,3 +161,27 @@ MonoBehaviour:
     Sprite: {fileID: 21300000, guid: 7a7f44208fa2e4d0b9dca2c387f290c8, type: 3}
   - Key: UI/buttons/skip-replay
     Sprite: {fileID: 21300000, guid: d1ce6e39d7f574ce681d28bf76b0fe15, type: 3}
+  - Key: Board/shared/spawn-local
+    Sprite: {fileID: 21300000, guid: f7c9deddf6a57471eb7139e338eb9cad, type: 3}
+  - Key: Board/shared/spawn-other
+    Sprite: {fileID: 21300000, guid: 76b6de01a27d94dddae21b81ab681a2c, type: 3}
+  - Key: UI/leaderboard/matej_leaderboard
+    Sprite: {fileID: 21300000, guid: 310b1d40106644bbfa4fea5da0bd0ca9, type: 3}
+  - Key: UI/leaderboard/matic_leaderboard
+    Sprite: {fileID: 21300000, guid: 8c9c1cfc06f824d0cb740bb4c9835adc, type: 3}
+  - Key: UI/leaderboard/nik_leaderboard
+    Sprite: {fileID: 21300000, guid: 7afe9bcd8eaed4fb9bb3c25078ef9f38, type: 3}
+  - Key: "UI/leaderboard/alja\u017E_leaderboard"
+    Sprite: {fileID: 21300000, guid: 6d4411439537945a59e50bbbc30ba1fe, type: 3}
+  - Key: UI/leaderboard/history-tab
+    Sprite: {fileID: 218923305673773205, guid: 013e8ed469db34c2491a9432cd8065a1, type: 3}
+  - Key: UI/leaderboard/leaderboard-tab
+    Sprite: {fileID: 2714471993988987167, guid: 013e8ed469db34c2491a9432cd8065a1, type: 3}
+  - Key: UI/leaderboard/rank-2
+    Sprite: {fileID: -3307188833557011459, guid: d0a6e64fd2769406684225d6c516edd1, type: 3}
+  - Key: UI/leaderboard/rank-4
+    Sprite: {fileID: 4440243326138471094, guid: d0a6e64fd2769406684225d6c516edd1, type: 3}
+  - Key: UI/leaderboard/rank-1
+    Sprite: {fileID: -5974809333081149370, guid: d0a6e64fd2769406684225d6c516edd1, type: 3}
+  - Key: UI/leaderboard/rank-3
+    Sprite: {fileID: -5632741655726029432, guid: d0a6e64fd2769406684225d6c516edd1, type: 3}

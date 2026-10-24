@@ -28,6 +28,7 @@ namespace Musketeers.Presentation
         public int Height { get; private set; }
 
         SpriteRenderer[] _ground;
+        SpriteRenderer[] _spawnRings;
         SpriteRenderer[] _grid;
         SpriteRenderer[][] _trim;   // bridge tiles only: dark trim on the N/E/S/W sides that border water
         bool[] _bridge;
@@ -48,7 +49,7 @@ namespace Musketeers.Presentation
         public UnitView Unit(int slot) => slot >= 0 && slot < _units.Length ? _units[slot] : null;
 
         // `bridges` (MapData.Bridges, optional): which tiles are bridge planks.
-        public void Build(GameState s, GameConfig cfg, int[] characters, string[] names, Loadout[] loadouts, bool[] bridges = null)
+        public void Build(GameState s, GameConfig cfg, int[] characters, string[] names, Loadout[] loadouts, bool[] bridges = null, int localSlot = 0)
         {
             Clear();
             Config = cfg;
@@ -65,6 +66,7 @@ namespace Musketeers.Presentation
 
             int n = Width * Height;
             _ground = new SpriteRenderer[n];
+            _spawnRings = new SpriteRenderer[n];
             _grid = new SpriteRenderer[n];
             _trim = new SpriteRenderer[n][];
             _bridge = new bool[n];
@@ -123,6 +125,18 @@ namespace Musketeers.Presentation
                     cell.gameObject.SetActive(false);
                     prop.gameObject.SetActive(false);
                 }
+            }
+
+            // Tile-owned markers stay at the round's actual rotated spawn slots, never follow units.
+            for (int slot = 0; slot < s.Units.Length; slot++)
+            {
+                var pos = s.Units[slot].Pos;
+                int cell = pos.Y * Width + pos.X;
+                var sprite = _art.Game != null ? _art.Game.Get(slot == localSlot ? "Board/shared/spawn-local" : "Board/shared/spawn-other") : null;
+                if (sprite == null) continue;
+                var ring = _art.MakeRenderer("Spawn " + slot, _ground[cell].transform.parent, sprite, Color.white, Layers.TileOverlay + 2);
+                ring.transform.localScale = Vector3.one * (0.98f / Mathf.Max(sprite.bounds.size.x, sprite.bounds.size.y));
+                _spawnRings[cell] = ring;
             }
 
             _units = new UnitView[s.Units.Length];
@@ -262,6 +276,7 @@ namespace Musketeers.Presentation
             if (!InBounds(p))
                 return;
             int i = p.Y * Width + p.X;
+            if (_spawnRings != null && _spawnRings[i] != null) _spawnRings[i].enabled = t != TileType.Pit;
             var g = _ground[i];
             var prop = _props[i];
             g.transform.localScale = Vector3.one;

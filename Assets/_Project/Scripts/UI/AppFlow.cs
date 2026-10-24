@@ -563,7 +563,7 @@ namespace Musketeers.UI
         void OnRoundStarted(EventLog opening)
         {
             var m = _mc.Match;
-            _board.Build(m.Round, m.Cfg, _setup.Characters, _setup.Names, SetupLoadouts(), BridgesOf(_setup.MapId));
+            _board.Build(m.Round, m.Cfg, _setup.Characters, _setup.Names, SetupLoadouts(), BridgesOf(_setup.MapId), _setup.LocalSlot);
             _rig.Fit(m.Round.Board.Width, m.Round.Board.Height);
             _director.ShowState(m.Round, m.Crowned);
             _log.Line($"Round {m.RoundNumber}: En garde!", "log-line--turn");

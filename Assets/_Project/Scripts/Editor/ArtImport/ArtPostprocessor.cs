@@ -24,6 +24,21 @@ namespace Musketeers.EditorTools.ArtImport
             string name = System.IO.Path.GetFileNameWithoutExtension(p);
             var ti = (TextureImporter)assetImporter;
 
+            // These explicitly sliced final UI sheets must retain their import mode and source detail.
+            if (rel.StartsWith("UI/leaderboard/") || rel == "Board/shared/spawn-local.png" || rel == "Board/shared/spawn-other.png")
+            {
+                ti.textureType = TextureImporterType.Sprite;
+                ti.spriteImportMode = rel.EndsWith("tab_icons.png") || rel.EndsWith("placement_borders.png") ? SpriteImportMode.Multiple : SpriteImportMode.Single;
+                ti.spritePixelsPerUnit = 256; ti.mipmapEnabled = false; ti.alphaIsTransparency = true;
+                ti.wrapMode = TextureWrapMode.Clamp; ti.filterMode = FilterMode.Bilinear;
+                ti.textureCompression = TextureImporterCompression.CompressedHQ; ti.crunchedCompression = false;
+                ti.compressionQuality = 100; ti.maxTextureSize = 4096; ti.npotScale = TextureImporterNPOTScale.None;
+                var finalSettings = new TextureImporterSettings(); ti.ReadTextureSettings(finalSettings);
+                finalSettings.spriteMeshType = SpriteMeshType.FullRect; finalSettings.spriteAlignment = (int)SpriteAlignment.Center;
+                finalSettings.spritePivot = new Vector2(0.5f, 0.5f); ti.SetTextureSettings(finalSettings);
+                return;
+            }
+
             ti.textureType = TextureImporterType.Sprite;
             ti.spriteImportMode = SpriteImportMode.Single;
             ti.spritePixelsPerUnit = 256;

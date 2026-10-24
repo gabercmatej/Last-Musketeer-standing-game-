@@ -94,5 +94,16 @@ namespace Musketeers.Sim.Tests
             Assert.That(store.Record(Record()), Is.False);
             Assert.That(PlayerPrefs.GetString(Key), Is.EqualTo("not-json"));
         }
+        [Test] public void EqualVictories_UseMostRecentWin_ThenStableCharacterId()
+        {
+            var old = Record("old"); old.CompletedUtc = "2026-10-24T10:00:00Z";
+            var recent = Record("recent"); recent.CompletedUtc = "2026-10-24T11:00:00Z";
+            recent.Players[0].Place = 2; recent.Players[1].Place = 1;
+            var data = new MatchHistoryData(); data.Add(old); data.Add(recent);
+            Assert.That(data.Leaderboard(Ids)[0].CharacterId, Is.EqualTo("matic"));
+            recent.CompletedUtc = old.CompletedUtc;
+            Assert.That(data.Leaderboard(Ids)[0].CharacterId, Is.EqualTo("matej"));
+            Assert.That(data.Leaderboard(Ids)[2].CharacterId, Is.EqualTo("aljaz"));
+        }
     }
 }

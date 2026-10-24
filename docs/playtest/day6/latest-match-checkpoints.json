@@ -1,0 +1,80 @@
+[
+  [
+    {
+      "level": "log",
+      "message": "AUTOTEST match over map=bridge hash=62ea6cdf\n",
+      "timestamp": "2026-10-24T23:18:19.984Z",
+      "url": "http://localhost:8765/Build/f0d34849dfeb1358152342b59eaac960.framework.js"
+    },
+    {
+      "level": "log",
+      "message": "AUTOTEST done\n",
+      "timestamp": "2026-10-24T23:18:19.984Z",
+      "url": "http://localhost:8765/Build/f0d34849dfeb1358152342b59eaac960.framework.js"
+    }
+  ],
+  [
+    {
+      "level": "log",
+      "message": "AUTOTEST on mode=On role=joiner name=Tester12\n",
+      "timestamp": "2026-10-24T23:18:19.946Z",
+      "url": "http://localhost:8765/Build/f0d34849dfeb1358152342b59eaac960.framework.js"
+    },
+    {
+      "level": "log",
+      "message": "AUTOTEST match over map=courtyard hash=de8b930c\n",
+      "timestamp": "2026-10-24T23:18:19.973Z",
+      "url": "http://localhost:8765/Build/f0d34849dfeb1358152342b59eaac960.framework.js"
+    },
+    {
+      "level": "log",
+      "message": "AUTOTEST independent return slot=1 role=joiner\n",
+      "timestamp": "2026-10-24T23:18:19.973Z",
+      "url": "http://localhost:8765/Build/f0d34849dfeb1358152342b59eaac960.framework.js"
+    },
+    {
+      "level": "log",
+      "message": "AUTOTEST match over map=bridge hash=62ea6cdf\n",
+      "timestamp": "2026-10-24T23:18:19.973Z",
+      "url": "http://localhost:8765/Build/f0d34849dfeb1358152342b59eaac960.framework.js"
+    },
+    {
+      "level": "log",
+      "message": "AUTOTEST done\n",
+      "timestamp": "2026-10-24T23:18:19.973Z",
+      "url": "http://localhost:8765/Build/f0d34849dfeb1358152342b59eaac960.framework.js"
+    }
+  ],
+  [
+    {
+      "level": "log",
+      "message": "AUTOTEST on mode=On role=joiner name=Tester32\n",
+      "timestamp": "2026-10-24T23:18:20.058Z",
+      "url": "http://localhost:8765/Build/f0d34849dfeb1358152342b59eaac960.framework.js"
+    },
+    {
+      "level": "log",
+      "message": "AUTOTEST match over map=courtyard hash=de8b930c\n",
+      "timestamp": "2026-10-24T23:18:20.063Z",
+      "url": "http://localhost:8765/Build/f0d34849dfeb1358152342b59eaac960.framework.js"
+    },
+    {
+      "level": "log",
+      "message": "AUTOTEST independent return slot=2 role=joiner\n",
+      "timestamp": "2026-10-24T23:18:20.063Z",
+      "url": "http://localhost:8765/Build/f0d34849dfeb1358152342b59eaac960.framework.js"
+    },
+    {
+      "level": "log",
+      "message": "AUTOTEST match over map=bridge hash=62ea6cdf\n",
+      "timestamp": "2026-10-24T23:18:20.063Z",
+      "url": "http://localhost:8765/Build/f0d34849dfeb1358152342b59eaac960.framework.js"
+    },
+    {
+      "level": "log",
+      "message": "AUTOTEST done\n",
+      "timestamp": "2026-10-24T23:18:20.063Z",
+      "url": "http://localhost:8765/Build/f0d34849dfeb1358152342b59eaac960.framework.js"
+    }
+  ]
+]

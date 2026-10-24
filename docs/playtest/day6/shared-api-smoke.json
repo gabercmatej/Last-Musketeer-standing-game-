@@ -1,0 +1,67 @@
+{
+  "unauthenticated": {
+    "status": 401,
+    "body": {
+      "Error": "A current game sign-in is required."
+    }
+  },
+  "wrongOrigin": {
+    "status": 403,
+    "body": {
+      "Error": "Origin is not allowed."
+    }
+  },
+  "bots": {
+    "status": 400,
+    "body": {
+      "Error": "Bots or duplicate characters are ineligible."
+    }
+  },
+  "registered": {
+    "status": 200,
+    "body": {
+      "Registered": true,
+      "Preview": true
+    }
+  },
+  "completed": {
+    "status": 200,
+    "body": {
+      "Saved": true,
+      "Created": true,
+      "Preview": true
+    }
+  },
+  "retry": {
+    "status": 200,
+    "body": {
+      "Saved": true,
+      "Created": false,
+      "Preview": true
+    }
+  },
+  "savedExactlyOnce": true,
+  "preview": true,
+  "standings": [
+    {
+      "CharacterId": "matej",
+      "Wins": 1,
+      "LastWin": "2026-10-24T23:32:39.825Z"
+    },
+    {
+      "CharacterId": "aljaz",
+      "Wins": 0,
+      "LastWin": ""
+    },
+    {
+      "CharacterId": "matic",
+      "Wins": 0,
+      "LastWin": ""
+    },
+    {
+      "CharacterId": "nik",
+      "Wins": 0,
+      "LastWin": ""
+    }
+  ]
+}

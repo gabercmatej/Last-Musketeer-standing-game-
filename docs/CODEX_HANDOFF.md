@@ -2,6 +2,17 @@
 
 You (Codex) are taking over from Claude Code. Read this file first, then `AGENTS.md`. **Goal: finish Day 5 (online), then Day 6 and Day 7, within 2 days, so 4 friends can play in their browsers this weekend.**
 
+## Spawn markers and shared leaderboard — 2026-10-25 (current)
+
+- Latest attachment adds tile-anchored local-gold/opponent spawn rings and shared Netlify history with illustrated leaderboard. Keep Sol only/no subagents. Production still v0.3.0 until candidate verification.
+- Prior v0.4.1 smoke recovered both completions: Courtyard `de8b930c`, Bridge `62ea6cdf`, identical on all3 clients; global guest Skip, local final See Results (another guest remained in replay), and independent lobby returns verified. Earlier long attempt had simultaneous Relay inactivity timeout; fully tiled smaller-window retry completed. Evidence saved under `docs/playtest/day6/`.
+- New code: BoardView owns marker sprites by initial round tile; only localSlot gets gold, SetTile(Pit) hides them; fresh Build uses rotated spawns. Play Mode confirmed fixed marker positions and pit hide/restore; fits unchanged.
+- Final supplied art imported/sliced via narrow Day6 importer; ArtPostprocessor has exact-path exceptions preserving multi-sprite sheets and high quality. Illustrated four-banner UI inspected in Play Mode; rank decorations follow rank, portraits follow character.
+- Shared backend now implemented (supersedes v1.1 deferral): Netlify Functions + site-wide Blobs, Unity JWT/project verification, host-bound start registration, human-only eligibility, limits, immutable conditional writes and server timestamps. Preview stores isolated by deployID. See `docs/SHARED_HISTORY.md` for security limits and setup.
+- User explicitly approved pinned SDK installation; npm audit0 vulnerabilities. All6 Node backend tests pass. Live isolated draft API verified real Unity JWT, anonymous401, foreign-origin403, bot400, one saved completion and duplicate Created:false. No production test records.
+- Unity latest full suite590/590 passed, zero errors. v0.4.2 Web build succeeded143s, then a small explicit local-save-failure UI fallback was added; refresh/tests and incremental rebuild pending.
+- Remaining gate: rebuild latest0.4.2; deploy draft including functions; Chrome shared-data/illustrated UI + online ring perspectives and completed qualifying preview match; verify no multiplayer regression; commit/push; existing tools/deploy-web.sh production deploy; verify Preview:false/empty initial production history and live menu.
+
 ## Final presentation corrections — 2026-10-25 (current)
 
 - Latest user requires Sol only, no delegates; freeze features after these corrections. Production remains v0.3.0 until new smoke tests pass.
