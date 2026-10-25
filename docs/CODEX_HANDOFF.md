@@ -2,9 +2,17 @@
 
 You (Codex) are taking over from Claude Code. Read this file first, then `AGENTS.md`. **Goal: finish Day 5 (online), then Day 6 and Day 7, within 2 days, so 4 friends can play in their browsers this weekend.**
 
+## RELEASED — v0.4.2 — 2026-10-25
+
+**Play:** https://last-musketeer.netlify.app
+
+Published through unchanged `tools/deploy-web.sh` after candidate verification. Production deploy `6addb2d00a0f2854f7e1d6e0`; source `fd984f8`, evidence commit `2d9fae2`. HTTP confirms0.4.2; production history API returns `Preview:false`,0 matches, all4 characters0 wins. Preview matches never entered production. Site-wide production store persists across deployments. Netlify’s injected public badge was covering the lower-right game area; disabled the reversible per-site `built_with_badge_enabled` setting (no source/build changes).
+
+Rollback if required: previous v0.3.0 published deploy `6adb6f4c413752df7fe9f565` remains in Netlify deploy history. Production Chrome menu and shared four-character leaderboard rendered correctly,0 client errors; clean0-win standings and no branding overlay. Screenshot: `docs/playtest/day6/production-leaderboard.png`. No fits/reset import changes. Human follow-up only: friends on another network/device, subjective audio/badge timing and broader disconnect/roster cases. Day7 is stability/playtesting/balance feedback, no new release features.
+
 ## Final release candidate verified — 2026-10-25
 
-Version0.4.2, latest code `fd984f8` (planner/replay milestone `e444059`, shared-history/art `935e858`). Candidate deploy `6addae11c28b5f91fdd971ab`, https://day6-final--last-musketeer.netlify.app. Production publish is the remaining immediate step; production is still0.3.0 at this checkpoint.
+Version0.4.2, latest code `fd984f8` (planner/replay milestone `e444059`, shared-history/art `935e858`). Candidate deploy `6addae11c28b5f91fdd971ab`, https://day6-final--last-musketeer.netlify.app. This candidate passed and was published in the RELEASED entry above; the checkpoints below remain historical.
 
 - Latest source:595/595 EditMode passed,0 failed/skipped,8.51s; console0 errors; Web build67s. Backend6 tests pass, audit0 vulnerabilities; isolated authenticated API/idempotency smoke passed.
 - Chrome two separate visible windows, same machine/network, actual Relay/WSS: completed Bridge then Courtyard in the same session, independently returned and readied, no client errors. Server host final hashes `0b7e544b` and `52447920`; manual mode does not print each guest hash, so none is invented. Earlier three-client identical hashes remain below.

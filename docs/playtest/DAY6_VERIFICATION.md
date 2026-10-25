@@ -38,3 +38,11 @@ Retry required: at22:30:04 UTC all three clients reported Relay inactivity/alloc
 - Non-final guest Skip captured with replay then host round scoreboard; next-round arena clean, rings rotated. Final guest See Results captured with guest Results and host still replaying; independent lobby return and natural final completion observed. Self-caused framing inspected; player-shot replay exercised in Bridge; causal bounds regression-tested. Audio channel cancellation/baseline covered by PlayMode probe; no claim of subjective listening.
 - Real client registered/submitted two qualifying matches: shared store exactly2 distinct IDs, Matej2 wins. Matching host/guest illustrated standings; expanded statistics/badges; both matches survived browser reload. Completed bot match afterward produced no record and Matic remained0 shared wins. See final-shared-records.json and screenshots.
 - Final production URL/version/API check recorded after publish below. Another network/device and subjective audio remain friend acceptance checks.
+
+## Production publication
+
+Published v0.4.2 through tools/deploy-web.sh; deploy `6addb2d00a0f2854f7e1d6e0`, https://last-musketeer.netlify.app. HTTP page version0.4.2 and shared API `Preview:false`,0 matches, four0-win characters verified. No preview/test records imported. Source `fd984f8`; candidate evidence `2d9fae2`. Production Chrome menu/leaderboard check follows.
+
+Production Chrome: menu starts with no client error logs. Netlify public badge initially overlapped the lower-right action area; disabled the official per-site setting (`built_with_badge_enabled:false`), verified injected hud script absent on the next HTTP request. No rebuild required. [Official setting documentation](https://docs.netlify.com/manage/projects/powered-by-netlify-badge/).
+
+Final production Chrome check passed:0.4.2 menu, working shared leaderboard status, all four illustrated rows and0 wins,0 error logs, no badge overlay. Screenshot: day6/production-leaderboard.png. No production match was created during verification.

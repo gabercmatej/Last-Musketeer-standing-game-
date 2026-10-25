@@ -1,0 +1,24 @@
+{
+  "version": "0.4.2",
+  "url": "https://last-musketeer.netlify.app",
+  "deployId": "6addb2d00a0f2854f7e1d6e0",
+  "sourceCommit": "fd984f8",
+  "editMode": {
+    "passed": 595,
+    "failed": 0,
+    "skipped": 0
+  },
+  "serviceTestsPassed": 6,
+  "unityErrors": 0,
+  "productionBrowserErrors": 0,
+  "productionApi": {
+    "Preview": false,
+    "Matches": 0
+  },
+  "previewMatchHashes": [
+    "0b7e544b",
+    "52447920"
+  ],
+  "previewMatchesAfterCompletedBotGame": 2,
+  "netlifyPublicBadgeEnabled": false
+}

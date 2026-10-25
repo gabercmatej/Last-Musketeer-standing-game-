@@ -43,7 +43,7 @@ Checked implementation items mean the code is present/reviewed, not that browser
 - [x] Full MCP EditMode suite excluding Balance; report pass/fail and zero console errors.
 - [x] Bump version, rebuild reproducible Main scene if necessary; Web build to Builds/Web.
 - [ ] Separate visible browser windows: full online match, lobby return/rematch, chat/rename/bot replacement; distinguish local-browser verification from another network.
-- [ ] Deploy via tools/deploy-web.sh. Update decisions/handoff/checklist with evidence and exact remaining backend blocker if any.
+- [x] Deploy via tools/deploy-web.sh. Update decisions/handoff/checklist with exact evidence; shared backend operational.
 - [x] Explicitly stage relevant files only, commit then push origin main as separate commands.
 
 ## Amendments — 2026-10-24 (latest user specification)
@@ -88,6 +88,6 @@ Checked implementation items mean the code is present/reviewed, not that browser
 - [x] Own planner preserved through edit/lock/reveal/execution, including offline synchronous submission; independent opponent panel.
 - [x] Replay audio/tween/pose/recoil cleanup; baseline camera; natural/global Skip/local final exit. Cause-aware bounds, simultaneous grouping and no sim mutation.
 - [x] Final595 EditMode +6 service tests;0 compile errors; successful67-second build. Candidate two full matches plus bot completion,0 browser error logs.
-- [ ] Production publish + post-publish URL/version/API verification (append final deployment evidence).
+- [x] Production publish + post-publish URL/version/API verification:0.4.2, deploy `6addb2d00a0f2854f7e1d6e0`, Preview:false and clean initial standings.
 
 Earlier mixed runtime checkboxes remain conservative: not every cosmetic/disconnect/audio combination was manually exercised. Different-network play and subjective audio remain human acceptance checks, not claimed passes.
