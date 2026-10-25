@@ -21,4 +21,4 @@ Protected fits, simulation, networking, shared history and existing lore edit ar
 - [x] Correct environmental death descriptions and scoreboard negative-point lines; preserve existing attribution/scoring.
 - [x] Replace crate reward with seeded uniform0–3 Grit, capped, once per crate; update only this authorized rule and its tip.
 - [x] Focused and complete regression tests, final1.0.0 build, three visible Chrome clients with matching hashes, guest skip and individual results.
-- [ ] Commit, push, tagv1.0.0, existing production deploy, verify shared data/version and handoff.
+- [x] Commit, push, tagv1.0.0, existing production deploy, verify shared data/version and handoff.
