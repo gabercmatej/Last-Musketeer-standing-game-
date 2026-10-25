@@ -278,3 +278,5 @@ Format: `YYYY-MM-DD — Decision — Why`
 - 2026-10-25 — User-authorized v1.1.0 balance: Courtyard center (7,4) becomes normal floor in asset and embedded map; other fixed tiles/spawns and Bridge layout unchanged. Existing random round setup remains unchanged.
 - 2026-10-25 — v1.1.0 shifts the entire shrinking schedule by exactly one turn: first warning 5→6, first fall 6→7, subsequent rings every two turns (last falls on15). “Round” in the request means the planning/reveal/resolution turn within a combat round, matching the existing mechanic. No animation changes.
 - 2026-10-25 — v1.1.0 StartGrit2→3 for every character on every round through shared Unit.Spawn; MaxGrit5, regeneration/costs/abilities/timers/speed unchanged. Grit already participates in state hashing and snapshots. GAME_DESIGN’s Courtyard/stat/schedule sections updated to match this explicit balance request.
+
+- 2026-10-25 — Released v1.1.0 from c7e27be/tagv1.1.0 after610 Unity +6 backend tests and three-client both-map matching Relay hashes; production deploy6ade20900ffda91ab4ec6506. Fresh live1.1.0 menu/shared history/leaderboard verified; before/after production data identical.
