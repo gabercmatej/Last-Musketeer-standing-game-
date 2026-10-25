@@ -287,7 +287,7 @@ namespace Musketeers.Sim.Tests
             {
                 Assert.That(u.Alive, Is.True);
                 Assert.That(u.Hp, Is.EqualTo(3));
-                Assert.That(u.Grit, Is.EqualTo(2));
+                Assert.That(u.Grit, Is.EqualTo(3));
                 Assert.That(u.Loaded, Is.True);
                 Assert.That(u.LastAttacker, Is.EqualTo(-1));
             }
@@ -314,10 +314,10 @@ namespace Musketeers.Sim.Tests
         public void TurnStart_GivesGritFromTurnTwo_ThroughTheRunner()
         {
             var m = Match(Duel, Two);
-            Assert.That(m.Round.Units[0].Grit, Is.EqualTo(2));
+            Assert.That(m.Round.Units[0].Grit, Is.EqualTo(3));
             MatchRunner.PlayTurn(m, Plans(m));
             Assert.That(m.Round.Turn, Is.EqualTo(2));
-            Assert.That(m.Round.Units[0].Grit, Is.EqualTo(3));
+            Assert.That(m.Round.Units[0].Grit, Is.EqualTo(4));
         }
 
         [TestCase(new[] { 0, 0, 0 }, -1)]

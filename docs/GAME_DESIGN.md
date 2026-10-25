@@ -73,7 +73,7 @@ xx...........xx
 x1...........2x
 ...#.......#...
 ...............
-.......#.......
+...............
 ...............
 ...#.......#...
 x3...........4x
@@ -100,12 +100,12 @@ Maps are plain-text files, so new maps (your hangout spots) are easy to add. The
 
 ### The Cardinal's Guard closes in (shrinking arena)
 Each tile has a **ring index**: `min(x, y, W-1-x, H-1-y)`. The outer ring is 0. On the 15×9 maps the center ring is 4, which is the middle row of 7 tiles.
-- At the start of **turn 5**, ring 0 is **warned** (it glows red for one turn).
-- At the start of **turn 6**, ring 0 **crumbles** into pit. Anyone standing on it falls.
-- The next ring is then warned, and it crumbles the following turn: ring 1 is warned on turn 7 and falls on turn 8, and so on.
-- On the 15×9 maps ring 3 falls on turn 12, which leaves only the 7-tile center row, and on turn 14 that row falls too: anyone still alive dies and the round is a draw.
+- At the start of **turn 6**, ring 0 is **warned** (it glows red for one turn).
+- At the start of **turn 7**, ring 0 **crumbles** into pit. Anyone standing on it falls.
+- The next ring is then warned, and it crumbles the following turn: ring 1 is warned on turn 8 and falls on turn 9, and so on.
+- On the 15×9 maps ring 3 falls on turn 13, which leaves only the 7-tile center row, and on turn 15 that row falls too: anyone still alive dies and the round is a draw.
 
-Config: `CrumbleStartTurn = 5`, `CrumbleEvery = 2`.
+Config: `CrumbleStartTurn = 6`, `CrumbleEvery = 2`.
 
 ---
 
@@ -116,7 +116,7 @@ All four musketeers have identical base stats. They differ only in their **signa
 | Stat | Value |
 |---|---|
 | HP (hearts per round) | **3** by default; the host sets 1-5 in the lobby |
-| Grit (energy) | starts at **2**, max **5**, **+1 at the start of every turn after the first** |
+| Grit (energy) | starts at **3**, max **5**, **+1 at the start of every turn after the first** |
 | Musket | starts **loaded** |
 
 Everyone can see everyone's HP, Grit and loaded/unloaded musket at all times. These are the tells you read.
@@ -237,7 +237,7 @@ These resolve one at a time in **initiative order**, each using the positions le
 
 ### Turn start (before planning)
 1. Turn ≥ 2: every unit gets +1 Grit.
-2. Crumble: warned tiles fall, and the next ring gets warned (from turn 5).
+2. Crumble: warned tiles fall, and the next ring gets warned (from turn 6).
 3. Units standing on crumbled tiles fall.
 
 ### Kill credit
@@ -337,7 +337,7 @@ Offline (vs bots) the lobby is local; online (Day 5) the same lobby is shared an
 |---|---|
 | BoardWidth / BoardHeight (both maps) | 15 / 9 |
 | MaxHp | 3 (lobby: hearts per round 1-5) |
-| StartGrit / MaxGrit / GritPerTurn | 2 / 5 / 1 |
+| StartGrit / MaxGrit / GritPerTurn | 3 / 5 / 1 |
 | StartLoaded (muskets start loaded, §4) | true |
 | TicksPerTurn | 3 |
 | PlanningSeconds | 30 |
@@ -350,7 +350,7 @@ Offline (vs bots) the lobby is local; online (Day 5) the same lobby is shared an
 | GrappleRange / BullRushDistance / BullRushPush / BullRushDamage | 5 / 3 / 5 / 1 |
 | CrateGritMin / CrateGritMax | 0 / 3 |
 | RandomPitsMin / RandomPitsMax / RandomCrates | 3 / 6 / 3 |
-| CrumbleStartTurn / CrumbleEvery | 5 / 2 |
+| CrumbleStartTurn / CrumbleEvery | 6 / 2 |
 | PointsToWin / WinPoints / KillPoints / CrownKillPoints | 12 (lobby: 10-30) / 3 / 1 / 2 |
 
 Balance with bot simulations (build plan Day 6), then with friends.

@@ -34,13 +34,63 @@ namespace Musketeers.Sim.Tests
             }
             Assert.That(pits, Is.EqualTo(0));
             Assert.That(crates, Is.EqualTo(0));
-            Assert.That(pillars, Is.EqualTo(5));
+            Assert.That(pillars, Is.EqualTo(4));
             Assert.That(removed, Is.EqualTo(12));
             Assert.That(map.RandomPits && map.RandomCrates, Is.True);
-            foreach (var p in new[] { new Int2(3, 6), new Int2(11, 6), new Int2(3, 2), new Int2(11, 2), new Int2(7, 4) })
+            foreach (var p in new[] { new Int2(3, 6), new Int2(11, 6), new Int2(3, 2), new Int2(11, 2) })
                 Assert.That(b.Get(p), Is.EqualTo(TileType.Pillar), $"pillar at {p}");
+            Assert.That(b.Get(new Int2(7, 4)), Is.EqualTo(TileType.Floor));
             foreach (var p in map.Spawns)
                 Assert.That(b.Get(p), Is.EqualTo(TileType.Floor), $"spawn {p} is floor");
+        }
+
+        [Test]
+        public void CourtyardCenter_AllowsMovementShotsAndPushes()
+        {
+            string ascii = BuiltInMaps.Courtyard.Replace('1', '.').Replace('2', '.').Replace('3', '.').Replace('4', '.');
+            // Use the real map row, so restoring the center pillar breaks all three cases.
+            var rows = MapParser.SplitRows(ascii);
+            string CenterScenario(string row) => string.Join("\n", new[] {
+                rows[0], rows[1], rows[2], rows[3], row, rows[5], rows[6], rows[7], rows[8] });
+            char center = rows[4][7];
+            Scenario.From(CenterScenario("......A" + center + "..B...."))
+                .Plan('A', Act.Move(Dir.E)).ResolveTick().AssertPos('A', 7, 4);
+            Scenario.From(CenterScenario("......A" + center + "B......"))
+                .Plan('A', Act.Fire(Dir.E)).ResolveTick().AssertHp('B', 2);
+            Scenario.From(CenterScenario(".....AB" + center + "......."))
+                .Plan('A', Act.Shove(Dir.E)).ResolveTick().AssertPos('B', 7, 4).AssertHp('B', 3);
+        }
+
+        [Test]
+        public void EveryRound_AllFourCharactersStartAtThreeGrit_OnBothMaps_AndSnapshotPreservesIt()
+        {
+            foreach (string ascii in new[] { BuiltInMaps.Courtyard, BuiltInMaps.Bridge })
+            {
+                var cfg = new GameConfig { PointsToWin = 100 };
+                var m = MatchRunner.NewMatch(MapParser.Parse(ascii),
+                    new[] { Ability.Grappin, Ability.Switcheroo, Ability.TripleCharge, Ability.BullRush }, cfg, 42);
+                for (int round = 1; round <= 4; round++)
+                {
+                    Assert.That(m.RoundNumber, Is.EqualTo(round));
+                    Assert.That(m.Round.Turn, Is.EqualTo(1));
+                    foreach (var unit in m.Round.Units)
+                        Assert.That(unit.Grit, Is.EqualTo(3));
+                    var restored = MatchStateSerializer.Deserialize(MatchStateSerializer.Serialize(m), m);
+                    Assert.That(restored.ComputeHash(), Is.EqualTo(m.ComputeHash()));
+                    restored.Round.Units[0].Grit--;
+                    Assert.That(restored.ComputeHash(), Is.Not.EqualTo(m.ComputeHash()));
+
+                    // Let the unchanged crumble rule end this round, after spending everyone's Grit.
+                    foreach (var unit in m.Round.Units)
+                    {
+                        unit.Grit = 0;
+                        unit.Pos = new Int2(5 + unit.Slot, 4);
+                    }
+                    m.Round.Turn = Crumble.FallTurn(4, cfg) - 1;
+                    MatchRunner.PlayTurn(m, new[] { new TurnPlan(0), new TurnPlan(1), new TurnPlan(2), new TurnPlan(3) });
+                }
+                Assert.That(cfg.MaxGrit, Is.EqualTo(5));
+            }
         }
 
         [Test]

@@ -77,13 +77,13 @@ namespace Musketeers.Sim.Tests
                 .........
                 .........
                 .........
-                A.......B").WithTurn(5);
+                A.......B").WithTurn(6);
             for (uint seed = 1; seed <= 30; seed++)
             {
                 var sim = s.State.Clone();
                 var p = new BotPlanner(0, seed).Plan(sim, s.Config);
                 TurnResolver.ResolveTurn(sim, new[] { p, new TurnPlan(1) }, s.Config);
-                TurnStart.Begin(sim, s.Config);   // turn 6: ring 0 crumbles
+                TurnStart.Begin(sim, s.Config);   // turn 7: ring 0 crumbles
                 Assert.That(sim.Units[0].Alive, Is.True, $"seed {seed}: {p.A0} / {p.A1} / {p.A2}");
             }
         }

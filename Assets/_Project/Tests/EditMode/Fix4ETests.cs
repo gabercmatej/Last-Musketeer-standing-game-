@@ -89,11 +89,11 @@ namespace Musketeers.Sim.Tests
         {
             Scenario.From("A.x")
                 .Plan('A', Act.Dash(Dir.E)).ResolveTick()
-                .AssertAlive('A').AssertPos('A', 0, 0).AssertGrit('A', 1).AssertHp('A', 3)
+                .AssertAlive('A').AssertPos('A', 0, 0).AssertGrit('A', 2).AssertHp('A', 3)
                 .AssertEvent(SimEventKind.MoveBlocked, 'A');
             Scenario.From("Ax.")
                 .Plan('A', Act.Dash(Dir.E)).ResolveTick()
-                .AssertAlive('A').AssertPos('A', 0, 0).AssertGrit('A', 1)
+                .AssertAlive('A').AssertPos('A', 0, 0).AssertGrit('A', 2)
                 .AssertEvent(SimEventKind.MoveBlocked, 'A');
         }
 

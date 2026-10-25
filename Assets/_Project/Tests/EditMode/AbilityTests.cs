@@ -222,7 +222,7 @@ namespace Musketeers.Sim.Tests
                 .....
                 .....
                 ....B", Ability.Switcheroo)
-                .WithTurn(5)
+                .WithTurn(6)
                 .Plan('A', Act.Switcheroo('B'))
                 .ResolveTick()
                 .AssertPos('A', 0, 4)
@@ -242,7 +242,7 @@ namespace Musketeers.Sim.Tests
                 ..A..
                 .....
                 .....", Ability.Switcheroo)
-                .WithTurn(5)
+                .WithTurn(6)
                 .Plan('A', Act.Switcheroo('B'))
                 .ResolveTick()
                 .AssertPos('A', 0, 4)

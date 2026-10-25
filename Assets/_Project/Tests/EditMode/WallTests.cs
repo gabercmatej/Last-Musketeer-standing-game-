@@ -46,7 +46,7 @@ namespace Musketeers.Sim.Tests
                 .Plan('A', Act.Dash(Dir.E))
                 .ResolveTick()
                 .AssertPos('A', 0, 0)
-                .AssertGrit('A', 1)
+                .AssertGrit('A', 2)
                 .AssertEvent(SimEventKind.MoveBlocked, 'A');
             // Middle tile outside.
             Scenario.From("@walls\n.A")
@@ -58,7 +58,7 @@ namespace Musketeers.Sim.Tests
                 .Plan('A', Act.Dash(Dir.E))
                 .ResolveTick()
                 .AssertAlive('A')
-                .AssertGrit('A', 1)
+                .AssertGrit('A', 2)
                 .AssertEvent(SimEventKind.MoveBlocked, 'A');
         }
 
@@ -123,7 +123,7 @@ namespace Musketeers.Sim.Tests
         public void CrumblingStillMakesPitsInsideAWalledBoard()
         {
             Scenario.From("@walls\n...\n...\n...")
-                .WithTurn(6).TurnStart()
+                .WithTurn(7).TurnStart()
                 .AssertTile(0, 0, TileType.Pit)
                 .AssertTile(1, 1, TileType.Floor);
         }

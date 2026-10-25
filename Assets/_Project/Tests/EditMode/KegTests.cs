@@ -13,7 +13,7 @@ namespace Musketeers.Sim.Tests
             var s = Scenario.From("A......")
                 .Plan('A', Act.Keg(3, 0))
                 .ResolveTick()
-                .AssertGrit('A', 0)
+                .AssertGrit('A', 1)
                 .AssertKegAt(3, 0)
                 .AssertEvent(SimEventKind.KegThrown, 'A')
                 .AssertEvent(SimEventKind.KegLanded, 'A')
@@ -46,7 +46,7 @@ namespace Musketeers.Sim.Tests
                 .Plan('A', Act.Keg(4, 0))
                 .ResolveTick()
                 .AssertFizzle('A', FizzleReason.OutOfRange)
-                .AssertGrit('A', 2)
+                .AssertGrit('A', 3)
                 .AssertNoKegs();
         }
 
@@ -57,7 +57,7 @@ namespace Musketeers.Sim.Tests
                 .Plan('A', Act.Keg(-1, 0))
                 .ResolveTick()
                 .AssertFizzle('A', FizzleReason.OutOfRange)
-                .AssertGrit('A', 2);
+                .AssertGrit('A', 3);
         }
 
         [Test]

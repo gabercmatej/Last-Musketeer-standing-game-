@@ -16,7 +16,7 @@ namespace Musketeers.Sim.Tests
         [Test]
         public void Grit_RunsOut_ThirdDash_IsGreyedOut()
         {
-            var b = Builder(Scenario.From("A........B"));   // StartGrit 2
+            var b = Builder(Scenario.From("A........B").WithGrit('A', 2));   // isolate the two-Grit exhaustion case
             Assert.That(b.Choose(ActionType.Dash) && b.CommitDirection(Dir.E));
             Assert.That(b.Choose(ActionType.Dash) && b.CommitDirection(Dir.E));
             Assert.That(b.IssueFor(ActionType.Dash), Is.EqualTo(PlanIssue.NoGrit));
@@ -184,8 +184,8 @@ namespace Musketeers.Sim.Tests
         [Test]
         public void Switcheroo_FromTheWarnedRing_IsAnIssue_AndKeepsThePosition()
         {
-            // Turn 5 warns ring 0 (the outer ring); A stands on it, so the sim would fail the swap.
-            var s = Scenario.From("A....\n.....\n.....\n.....\n....B").WithAbility('A', Ability.Switcheroo).WithGrit('A', 5).WithTurn(5);
+            // Turn 6 warns ring 0 (the outer ring); A stands on it, so the sim would fail the swap.
+            var s = Scenario.From("A....\n.....\n.....\n.....\n....B").WithAbility('A', Ability.Switcheroo).WithGrit('A', 5).WithTurn(6);
             var b = Builder(s);
             Assert.That(b.IssueFor(ActionType.Signature), Is.EqualTo(PlanIssue.Warned));
             Assert.That(b.Choose(ActionType.Signature), Is.False);
@@ -197,7 +197,7 @@ namespace Musketeers.Sim.Tests
             Assert.That(proj.States[1].Pos, Is.EqualTo(s.State.Units[0].Pos), "a failed swap moves nobody");
 
             // Off the ring it is fine.
-            var safe = Scenario.From(".....\n.A...\n.....\n.....\n....B").WithAbility('A', Ability.Switcheroo).WithGrit('A', 5).WithTurn(5);
+            var safe = Scenario.From(".....\n.A...\n.....\n.....\n....B").WithAbility('A', Ability.Switcheroo).WithGrit('A', 5).WithTurn(6);
             Assert.That(Builder(safe).IssueFor(ActionType.Signature), Is.EqualTo(PlanIssue.None));
         }
 

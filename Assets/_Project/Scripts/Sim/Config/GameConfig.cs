@@ -11,7 +11,7 @@ namespace Musketeers.Sim
         public int BoardWidth = 15;           // maps are 15x9 (the map text is the source of truth; these document it)
         public int BoardHeight = 9;
         public int MaxHp = 3;
-        public int StartGrit = 2;
+        public int StartGrit = 3;
         public int MaxGrit = 5;
         public int GritPerTurn = 1;
         public bool StartLoaded = true;       // §4 musket starts loaded; false = everyone starts unloaded (Matej's test knob)
@@ -31,7 +31,7 @@ namespace Musketeers.Sim
         public int BullRushDistance = 3;
         public int BullRushPush = 5;          // FIXES_4E §8.4: was 4
         public int BullRushDamage = 1;        // FIXES_4E §8.4
-        public int CrumbleStartTurn = 5;
+        public int CrumbleStartTurn = 6;
         public int CrumbleEvery = 2;
         public int PointsToWin = 12;
         public int WinPoints = 3;

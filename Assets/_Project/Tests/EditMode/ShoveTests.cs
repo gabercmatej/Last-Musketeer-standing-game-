@@ -49,7 +49,7 @@ namespace Musketeers.Sim.Tests
                 .AssertBoard("A..B.C")
                 .AssertHp('B', 2)
                 .AssertHp('C', 3)
-                .AssertGrit('B', 1)
+                .AssertGrit('B', 2)
                 .AssertEvent(SimEventKind.GuardBreak, 'B')
                 .AssertNoEvent(SimEventKind.Parried)
                 .AssertNoEvent(SimEventKind.Reflected);

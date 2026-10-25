@@ -11,7 +11,7 @@ namespace Musketeers.Sim.Tests
             Scenario.From("A.B")
                 .Plan('A', Act.CatchBreath())
                 .ResolveTick()
-                .AssertGrit('A', 3)
+                .AssertGrit('A', 4)
                 .AssertEvent(SimEventKind.CaughtBreath, 'A');
         }
 
@@ -53,7 +53,7 @@ namespace Musketeers.Sim.Tests
             var s = Scenario.From("A.B")
                 .Plan('A', Act.Parry())
                 .ResolveTick()
-                .AssertGrit('A', 1)
+                .AssertGrit('A', 2)
                 .AssertEvent(SimEventKind.ParryRaised, 'A');
             Assert.That(s.Unit('A').Parrying, Is.False);
         }
@@ -80,7 +80,7 @@ namespace Musketeers.Sim.Tests
                 .Plan('A', Act.Fire(Dir.E))
                 .ResolveTick()
                 .AssertHp('B', 3)
-                .AssertGrit('A', 2)
+                .AssertGrit('A', 3)
                 .AssertLoaded('A', false)
                 .AssertNoEvent(SimEventKind.ShotFired);
             var e = s.Find(SimEventKind.Fizzled, 'A').Value;
@@ -97,7 +97,7 @@ namespace Musketeers.Sim.Tests
                 .ResolveTurn()
                 .AssertHp('B', 2)
                 .AssertLoaded('A', false)
-                .AssertGrit('A', 3);
+                .AssertGrit('A', 4);
         }
 
         [Test]
@@ -116,8 +116,8 @@ namespace Musketeers.Sim.Tests
             // Rule change 2026-10-18: unplanned ticks Idle; only a planned Catch Breath gives Grit.
             var s = Scenario.From("A..B")
                 .ResolveTurn()
-                .AssertGrit('A', 2)
-                .AssertGrit('B', 2)
+                .AssertGrit('A', 3)
+                .AssertGrit('B', 3)
                 .AssertEventCount(SimEventKind.CaughtBreath, 0)
                 .AssertEventCount(SimEventKind.Fizzled, 0);
             Assert.That(s.State.Turn, Is.EqualTo(2));
@@ -152,7 +152,7 @@ namespace Musketeers.Sim.Tests
             var s = Scenario.From("A..B").WithGrit('A', 0);
             TurnResolver.ResolveTurn(s.State, new[] { TurnPlan.AllCatchBreath(0), new TurnPlan(1) }, s.Config);
             Assert.That(s.Unit('A').Grit, Is.EqualTo(3));
-            Assert.That(s.Unit('B').Grit, Is.EqualTo(2));
+            Assert.That(s.Unit('B').Grit, Is.EqualTo(3));
         }
 
         [Test]

@@ -1,0 +1,12 @@
+# v1.1.0 release verification — 2026-10-25
+
+Candidate: https://release-v110--last-musketeer.netlify.app, deploy `6ade1d8c3abe3fb995be4d08`. Web version1.1.0, successful81s Unity build (102MB output). Candidate accepted on both maps; production publication pending.
+
+- Only gameplay diff: StartGrit2→3, CrumbleStartTurn5→6, Courtyard(7,4) pillar→floor in text asset and embedded map. Bridge layout unchanged. No scoring, ability, regeneration, resource-cap/cost, planning/movement timing, network protocol, presentation animation or protected cosmetic fit changes. No reset import.
+-610/610 EditMode passed,0 failed/skipped,21.48s, MCP job `226e1af276574612976939d9c589d772`. Backend6/6. Zero compiler errors. Existing determinism/fuzz, scoring, abilities, cosmetic and replay regressions included.
+- Regression updates assert all five ring warning/fall turns(6/7,8/9,10/11,12/13,14/15), no warnings before6, unchanged costs/regen/caps and environmental attribution; Courtyard center movement/shooting/shoving; all four abilities' units at3 Grit across four fresh rounds on both maps, snapshot hash equality and hash sensitivity to Grit.
+- Both maps visually inspected in Unity Play Mode: Courtyard center floor, four surrounding pillars; Bridge center floor and symmetric(2,4)/(12,4) pillars; four units at3 Grit on turn1. Evidence courtyard-editor.png and bridge-editor.png. Temporary editor test preferences removed after inspection.
+- Three separate visible Chrome windows, actual Relay/WSS, Courtyard completed five rounds with identical final hash `a71f3e6e` on all three. Independent returns followed by Bridge in the same session. Courtyard errors0/DESYNC0; bot-generated plans control the three human network clients. These automated matches are excluded from shared persistence.
+- Production before release: Preview:false,0 matches/all four characters0 wins. Preview API: Preview:true,0 matches/all0 wins. Saved before/after responses prove preservation without writing test records into production. Functions/backend code unchanged.
+
+Bridge also completed on all3 clients with matching `7cb51ff5`; each logged AUTOTEST done. Independent returns passed. Both-map client errors0/DESYNC0. Shared preview history unchanged after both completed matches. Final re-run610/610 passed after tightening the multi-round test fixture;21.48s. Production acceptance pending. Same-machine/network smoke does not establish different-network/device coverage. Existing UnityCache Content-Length/User-Agent warnings remain nonblocking.

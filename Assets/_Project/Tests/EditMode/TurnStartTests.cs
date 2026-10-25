@@ -19,8 +19,8 @@ namespace Musketeers.Sim.Tests
         [Test]
         public void Turn1_NoGrit_FromTurn2_PlusOne_Capped()
         {
-            Scenario.From("A.B").WithTurn(1).TurnStart().AssertGrit('A', 2);
-            Scenario.From("A.B").WithTurn(2).TurnStart().AssertGrit('A', 3);
+            Scenario.From("A.B").WithTurn(1).TurnStart().AssertGrit('A', 3);
+            Scenario.From("A.B").WithTurn(2).TurnStart().AssertGrit('A', 4);
             Scenario.From("A.B").WithTurn(3).WithGrit('B', 5).TurnStart().AssertGrit('B', 5);
         }
 
@@ -29,42 +29,42 @@ namespace Musketeers.Sim.Tests
         {
             var s = Scenario.From("A.B").WithTurn(2);
             s.Unit('B').Alive = false;
-            s.TurnStart().AssertGrit('B', 2);
+            s.TurnStart().AssertGrit('B', 3);
         }
 
-        [TestCase(0, 5, 6)]
-        [TestCase(1, 7, 8)]
-        [TestCase(2, 9, 10)]
-        [TestCase(3, 11, 12)]
-        [TestCase(4, 13, 14)]   // the center falls on turn 14
+        [TestCase(0, 6, 7)]
+        [TestCase(1, 8, 9)]
+        [TestCase(2, 10, 11)]
+        [TestCase(3, 12, 13)]
+        [TestCase(4, 14, 15)]   // the center falls on turn 15
         public void Schedule_RingWarnedThenFallsNextTurn(int ring, int warn, int fall)
         {
             var b = new Board(9, 9);
             var cfg = GameConfig.Default;
             Assert.That(Crumble.WarnedRing(warn, b, cfg), Is.EqualTo(ring));
             Assert.That(Crumble.FallingRing(fall, b, cfg), Is.EqualTo(ring));
-            // The turn a ring falls is not also the turn the next ring is warned (§3: ring 1 is warned on 7).
+            // The turn a ring falls is not also the turn the next ring is warned (§3: ring 1 is warned on 8).
             Assert.That(Crumble.WarnedRing(fall, b, cfg), Is.EqualTo(-1));
         }
 
         [Test]
-        public void NothingHappens_BeforeTurn5_OrAfterTheCenterFell()
+        public void NothingHappens_BeforeTurn6_OrAfterTheCenterFell()
         {
             var b = new Board(9, 9);
             var cfg = GameConfig.Default;
-            for (int t = 1; t <= 4; t++)
+            for (int t = 1; t <= 5; t++)
             {
                 Assert.That(Crumble.WarnedRing(t, b, cfg), Is.EqualTo(-1), $"turn {t}");
                 Assert.That(Crumble.FallingRing(t, b, cfg), Is.EqualTo(-1), $"turn {t}");
             }
-            Assert.That(Crumble.WarnedRing(15, b, cfg), Is.EqualTo(-1));
-            Assert.That(Crumble.FallingRing(16, b, cfg), Is.EqualTo(-1));
+            Assert.That(Crumble.WarnedRing(16, b, cfg), Is.EqualTo(-1));
+            Assert.That(Crumble.FallingRing(17, b, cfg), Is.EqualTo(-1));
         }
 
         [Test]
-        public void Turn5_WarnsOuterRing_WithoutChangingTheBoard()
+        public void Turn6_WarnsOuterRing_WithoutChangingTheBoard()
         {
-            var s = Scenario.From(Board9).WithTurn(5).TurnStart()
+            var s = Scenario.From(Board9).WithTurn(6).TurnStart()
                 .AssertEventCount(SimEventKind.TileWarned, 32)
                 .AssertNoEvent(SimEventKind.TileCrumbled)
                 .AssertTile(0, 0, TileType.Floor)
@@ -74,9 +74,9 @@ namespace Musketeers.Sim.Tests
         }
 
         [Test]
-        public void Turn6_OuterRingCrumbles_UnitOnItFalls()
+        public void Turn7_OuterRingCrumbles_UnitOnItFalls()
         {
-            Scenario.From(Board9).WithTurn(6).TurnStart()
+            Scenario.From(Board9).WithTurn(7).TurnStart()
                 .AssertEventCount(SimEventKind.TileCrumbled, 32)
                 .AssertEventCount(SimEventKind.TileWarned, 0)
                 .AssertTile(0, 0, TileType.Pit)
@@ -88,9 +88,9 @@ namespace Musketeers.Sim.Tests
         }
 
         [Test]
-        public void Turn7_WarnsSecondRing()
+        public void Turn8_WarnsSecondRing()
         {
-            Scenario.From(Board9).WithTurn(7).TurnStart()
+            Scenario.From(Board9).WithTurn(8).TurnStart()
                 .AssertEventCount(SimEventKind.TileWarned, 24)
                 .AssertNoEvent(SimEventKind.TileCrumbled);
         }
@@ -98,8 +98,8 @@ namespace Musketeers.Sim.Tests
         [Test]
         public void CrumbleFall_WithinKillCreditWindow_CreditsAttacker()
         {
-            Scenario.From(Board9).WithTurn(6)
-                .WithLastAttacker('B', 'A', 5)
+            Scenario.From(Board9).WithTurn(7)
+                .WithLastAttacker('B', 'A', 6)
                 .TurnStart()
                 .AssertDead('B')
                 .AssertKilledBy('B', 'A');
@@ -108,7 +108,7 @@ namespace Musketeers.Sim.Tests
         [Test]
         public void CrumbleFall_EndsTheRound_WhenOneIsLeft()
         {
-            var s = Scenario.From(Board9).WithTurn(6).TurnStart()
+            var s = Scenario.From(Board9).WithTurn(7).TurnStart()
                 .AssertEvent(SimEventKind.RoundEnded);
             Assert.That(s.State.RoundOver, Is.True);
             Assert.That(s.State.RoundWinner, Is.EqualTo(0));
@@ -122,7 +122,7 @@ namespace Musketeers.Sim.Tests
                 .....
                 ..A..
                 .B...
-                o....").WithTurn(6);
+                o....").WithTurn(7);
             s.TurnStart()
                 .AssertNoKegs()
                 .AssertTile(4, 4, TileType.Pit)

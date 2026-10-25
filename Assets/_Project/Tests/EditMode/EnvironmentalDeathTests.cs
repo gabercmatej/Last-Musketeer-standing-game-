@@ -44,8 +44,8 @@ namespace Musketeers.Sim.Tests
             var s = Scenario.From(@"
                 A....
                 .B.C.
-                .....").WithTurn(6);
-            if (attacked) s.WithLastAttacker('A', 'B', 5);
+                .....").WithTurn(7);
+            if (attacked) s.WithLastAttacker('A', 'B', 6);
             s.TurnStart().AssertDead('A');
             var score = Scores(s.Log);
             Assert.That(score.Length, Is.EqualTo(attacked ? 2 : 1));

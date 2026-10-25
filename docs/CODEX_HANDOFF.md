@@ -2,6 +2,12 @@
 
 You (Codex) are taking over from Claude Code. Read this file first, then `AGENTS.md`. **Goal: finish Day 5 (online), then Day 6 and Day 7, within 2 days, so 4 friends can play in their browsers this weekend.**
 
+## v1.1.0 balance candidate — 2026-10-25
+
+- Focused user request only: Courtyard center(7,4) floor; StartGrit3 (max5 unchanged); crumble warning now turn6, first fall7, later rings keep two-turn spacing. Bridge layout, animation timing, scoring, costs, regeneration, abilities, cosmetics and killcam code unchanged. No reset import/protected fit edits.
+- Full EditMode610/610 passed,0 failed/skipped,21.48s, MCP job `226e1af276574612976939d9c589d772`; backend6/6; zero compile errors. Both maps visually inspected in Unity with four characters at3 Grit. Center movement/fire/shove and multi-round/snapshot/hash regressions pass.
+- Web1.1.0 build succeeded81s. Candidate https://release-v110--last-musketeer.netlify.app (`6ade1d8c3abe3fb995be4d08`) verified: three visible Chrome Relay/WSS clients finished Courtyard `a71f3e6e` and Bridge `7cb51ff5`, identical on all3,0 client errors/DESYNC; independent returns passed. Publication pending; production remains1.0.0 until release deploy. Evidence `docs/playtest/v110/`. Production history snapshot before release: Preview:false,0 matches/all0 wins. Preserve preexisting lore.txt edit and untracked root art/audio/AGENTS/.codex/day6 evidence outside staging.
+
 ## RELEASED — v1.0.0 (2026-10-25)
 
 - Candidate https://release-v100--last-musketeer.netlify.app, deploy `6addf1ad5a2b97579c59dd98`; final Web build117s, version1.0.0. Published through unchanged tools/deploy-web.sh to https://last-musketeer.netlify.app; production deploy `6addf75d1531105200964587`, release commit `ea3d3ec`, pushed annotated tag `v1.0.0`.

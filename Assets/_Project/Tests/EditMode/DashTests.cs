@@ -13,7 +13,7 @@ namespace Musketeers.Sim.Tests
                 .Plan('A', Act.Dash(Dir.E))
                 .ResolveTick()
                 .AssertBoard("..A.")
-                .AssertGrit('A', 1)
+                .AssertGrit('A', 2)
                 .AssertEvent(SimEventKind.Dashed, 'A')
                 .AssertNoEvent(SimEventKind.Leaped);
         }
@@ -82,7 +82,7 @@ namespace Musketeers.Sim.Tests
                 .Plan('A', Act.Dash(Dir.E))
                 .ResolveTick()
                 .AssertBoard("A#..")
-                .AssertGrit('A', 1)
+                .AssertGrit('A', 2)
                 .AssertEvent(SimEventKind.MoveBlocked, 'A');
         }
 
@@ -95,7 +95,7 @@ namespace Musketeers.Sim.Tests
                 .Plan('A', Act.Dash(Dir.E))
                 .ResolveTick()
                 .AssertPos('A', 0, 0)
-                .AssertGrit('A', 1)
+                .AssertGrit('A', 2)
                 .AssertEvent(SimEventKind.MoveBlocked, 'A')
                 .AssertNoEvent(SimEventKind.Dashed);
             Assert.That(s.Find(SimEventKind.MoveBlocked, 'A').Value.Reason, Is.EqualTo((byte)BlockReason.Obstacle));

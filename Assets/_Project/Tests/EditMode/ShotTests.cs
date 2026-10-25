@@ -112,7 +112,7 @@ namespace Musketeers.Sim.Tests
                 .ResolveTick()
                 .AssertHp('A', 2)
                 .AssertHp('B', 3)
-                .AssertGrit('B', 1)
+                .AssertGrit('B', 2)
                 .AssertEvent(SimEventKind.Parried, 'B')
                 .AssertEvent(SimEventKind.Reflected, 'B');
             Assert.That(s.Unit('A').LastAttacker, Is.EqualTo(1), "a reflected hit is credited to the parrier");
