@@ -2,7 +2,7 @@
 
 You (Codex) are taking over from Claude Code. Read this file first, then `AGENTS.md`. **Goal: finish Day 5 (online), then Day 6 and Day 7, within 2 days, so 4 friends can play in their browsers this weekend.**
 
-## Final UI-only polish — v0.4.3 candidate (2026-10-25)
+## RELEASED — v0.4.3 — final UI polish (2026-10-25)
 
 - User requested leaderboard typography/counter/portrait polish and compact history cards only. No simulation, networking, ranking, backend, artwork or stored-record changes.
 - Names use existing Pirata One font in ivory with subtle shadow. Portraits reduced about8%; overlays align to the banner's actual fitted rectangle, keeping numeric counts centered on existing laurel/caption art.
@@ -10,7 +10,7 @@ You (Codex) are taking over from Claude Code. Read this file first, then `AGENTS
 -597/597 EditMode passed (8.64s),0 failed/skipped, zero compile errors. Web build82s; candidate deploy `6addb6aec562111ed66fd32d`.
 - Chrome actual Web UI inspected at1280×720 game viewport and850×500: counts0/7/12/128;2/3/4-player cards;24-character names (including an unbroken string); all4 banners visible; correct local08:28 from07:28Z, previous-day23:28Z→local01:28 across DST; details expand.
 - Visual fixtures were temporary intercepted GET responses in a separate preview tab. No API writes. Interception removed, fresh real GET restored empty preview cache, temporary viewport/tab closed. Production API remained0 records/0 wins. Fixture screenshots explicitly named ui-polish-*-fixtures.png.
-- Production publish via existing tools/deploy-web.sh follows this verified candidate. Prior0.4.2 gameplay/online evidence remains below; not repeated for these UI-only edits.
+- Published via existing tools/deploy-web.sh: https://last-musketeer.netlify.app, deploy `6addb8c5bcfc51a56c2e091e`, source `9b0454d`. Production Chrome menu/leaderboard pass with0 client errors, version0.4.3 and clean unchanged shared data (`Preview:false`,0 records/all0 wins). Screenshot `docs/playtest/day6/ui-polish-production.png`. Prior0.4.2 gameplay/online evidence remains below; not repeated for these UI-only edits. All game windows must refresh to0.4.3 before joining.
 
 ## RELEASED — v0.4.2 — 2026-10-25
 

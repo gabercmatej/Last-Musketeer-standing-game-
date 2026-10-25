@@ -91,3 +91,9 @@ Checked implementation items mean the code is present/reviewed, not that browser
 - [x] Production publish + post-publish URL/version/API verification:0.4.2, deploy `6addb2d00a0f2854f7e1d6e0`, Preview:false and clean initial standings.
 
 Earlier mixed runtime checkboxes remain conservative: not every cosmetic/disconnect/audio combination was manually exercised. Different-network play and subjective audio remain human acceptance checks, not claimed passes.
+
+## Released UI-only follow-up — v0.4.3
+- [x] Ivory Pirata One names, smaller portraits and image-relative centered victory counters.
+- [x] Compact2–4-player history with local time, readable character-colored names and distinct placement pills; expansion preserved.
+- [x] Chrome1280×720 and850×500 visual fixtures (long names,0/7/12/128 counts), no server writes; fixtures removed and genuine cache restored.
+- [x]597 tests/0 failures,0 compile errors,82-second Web build; published deploy `6addb8c5bcfc51a56c2e091e`,0 production browser errors. Ranking/storage/multiplayer unchanged.
