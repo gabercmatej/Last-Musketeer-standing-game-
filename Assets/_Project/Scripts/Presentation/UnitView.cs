@@ -296,6 +296,10 @@ namespace Musketeers.Presentation
         public void CancelPlayback()
         {
             Tween.StopAll(this); Tween.StopAll(transform); Tween.StopAll(_bodyRoot); Tween.StopAll(_rig.transform);
+            _rig.CancelPlayback();
+            _bodyRoot.localPosition = Vector3.zero;
+            _bodyRoot.localRotation = Quaternion.identity;
+            _bodyRoot.localScale = Vector3.one;
             _dying = false;
         }
 

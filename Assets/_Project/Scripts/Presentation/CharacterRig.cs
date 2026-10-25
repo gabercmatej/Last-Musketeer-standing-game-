@@ -163,6 +163,14 @@ namespace Musketeers.Presentation
             if (_musket != null) Tween.StopAll(_musket.transform);
         }
 
+        public void CancelPlayback()
+        {
+            _poseTimer.Stop(); _holdTimer.Stop(); Tween.StopAll(this);
+            if (_musketPivot != null) Tween.StopAll(_musketPivot);
+            if (_musket != null) Tween.StopAll(_musket.transform);
+            Rest(); SetRapier(false); SetTint(Color.white); SetPose(PoseKind.Idle);
+        }
+
         public void SetLoadout(Loadout loadout)
         {
             var catalog = _art.Cosmetics;
@@ -385,7 +393,7 @@ namespace Musketeers.Presentation
         public void Flash(Color c, float duration)
         {
             var back = _tint;
-            Tween.Custom(0f, 1f, Mathf.Max(0.02f, duration), t =>
+            Tween.Custom(this, 0f, 1f, Mathf.Max(0.02f, duration), (_, t) =>
             {
                 if (this == null) return;
                 _tint = Color.Lerp(c, back, t);
