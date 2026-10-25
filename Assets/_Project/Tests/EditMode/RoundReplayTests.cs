@@ -155,5 +155,50 @@ namespace Musketeers.Sim.Tests
             replay.Clear();
             Assert.That(replay.Clips, Is.Empty);
         }
+        static ReplayClip FramingClip(EventLog log)
+        {
+            var state = Match().Round;
+            var replay = new RoundReplay();
+            replay.Add(new TurnPlayback { RoundNumber = 1, Before = state, After = state.Clone(),
+                AfterTick = new[] { state.Clone() }, TickLogs = new[] { log }, Outcome = new TurnOutcome() });
+            return replay.Clips[0];
+        }
+
+        [Test]
+        public void Framing_DirectShotIncludesAttackerVictimAndProjectile()
+        {
+            var log = new EventLog();
+            log.Add(SimEventKind.ShotFired, unit: 0, from: new Int2(1, 2), to: new Int2(6, 2));
+            log.Add(SimEventKind.Damaged, unit: 1, other: 0);
+            log.Add(SimEventKind.Died, unit: 1, other: 0, to: new Int2(3, 2));
+            var clip = FramingClip(log);
+            Assert.That(clip.FrameMin, Is.EqualTo(new Int2(1, 2)));
+            Assert.That(clip.FrameMax, Is.EqualTo(new Int2(6, 2)));
+        }
+
+        [TestCase(-1)]
+        [TestCase(0)] // Historical kill credit alone does not establish a cause in this clip.
+        public void Framing_EnvironmentalDeathKeepsOnlyVictimAndHazard(int credited)
+        {
+            var log = new EventLog();
+            log.Add(SimEventKind.Died, unit: 1, other: credited, to: new Int2(4, 2), reason: (byte)DeathCause.Fell);
+            var clip = FramingClip(log);
+            Assert.That(clip.FrameMin, Is.EqualTo(new Int2(3, 2)));
+            Assert.That(clip.FrameMax, Is.EqualTo(new Int2(4, 2)));
+        }
+
+        [Test]
+        public void Framing_ForcedFallIncludesPusherAndGroupsSimultaneousVictims()
+        {
+            var log = new EventLog();
+            log.Add(SimEventKind.Pushed, unit: 1, other: 0);
+            log.Add(SimEventKind.Died, unit: 1, other: 0, to: new Int2(4, 2));
+            log.Add(SimEventKind.Died, unit: 3, to: new Int2(8, 0));
+            var clip = FramingClip(log);
+            Assert.That(clip.DeathCount, Is.EqualTo(2));
+            Assert.That(clip.FrameMin, Is.EqualTo(new Int2(1, 0)));
+            Assert.That(clip.FrameMax, Is.EqualTo(new Int2(8, 2)));
+        }
+
     }
 }

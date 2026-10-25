@@ -1,6 +1,8 @@
 # Day 6 release verification
 
-Candidate v0.4.1, code commit `41c24c2` (following integration `e17911b` and sim/map milestone `dc59052`). Production remains v0.3.0 until the final smoke checks pass.
+Candidate v0.4.2, code commit `935e858` (following v0.4.1 `41c24c2`, integration `e17911b`, sim/map `dc59052`). Production remains v0.3.0 until the final candidate checks pass.
+
+Final checkpoint: 590/590 EditMode tests, 0 failed/skipped (9.16s), job `8040aed1067d4bfd894b6190b2f80e1a`; 6/6 Node service tests; npm audit0 vulnerabilities; zero Unity compile errors. Latest0.4.2 Web rebuild succeeded116s.
 
 - Unity MCP: 589 EditMode tests passed, 0 failed/skipped, 16.38 seconds. Job `7c257334d9634f9c9991e781627c06bb`.
 - Unity Console: zero errors after compile and successful Web build (131 seconds).
@@ -11,10 +13,19 @@ Candidate v0.4.1, code commit `41c24c2` (following integration `e17911b` and sim
 - Guest clicked Skip while montage was at clip1/2: both guest windows displayed the same round3 scoreboard afterward, confirming global skip/cleanup. Chrome showed stationary backdrop, framed inset, original-aspect badge and centered Skip artwork.
 - Compact portrait/action/direction rows observed throughout execution, absent during planning; opponents' map-wide indicators removed. Match chat/emotes present; lobby chat absent.
 - Host returned independently at 22:25:58 UTC; first guest at 22:26:03 UTC; remaining guest returned and Bridge started in the same session. Readiness/start gate held until returns.
-- Pending in this checkpoint: complete Bridge, click final See Results while another client remains in replay, persist final hashes, deploy and production load check.
+- Successful subsequent retry: Courtyard `de8b930c`, Bridge `62ea6cdf` on all3 clients in the same session. Guest See Results opened only that guest’s final Results while another guest remained in the final replay; independent lobby returns and second-match start completed. Final hashes preserved in `day6/latest-match-checkpoints.json`.
 
 Earlier v0.4.0 candidate completed Courtyard with `d5d88967` on three clients, then began Bridge; tabs closed after interruption, so its second completion was not recovered. This evidence does not replace v0.4.1 verification.
 
-Shared history is explicitly browser-local; secure cross-device persistence is deferred to v1.1. Autotest matches do not enter history. Subjective badge/victory audio timing and another-network friend play remain human acceptance checks.
+Shared history supersedes the earlier local-only deferral: authenticated host registration/submission, server validation and conditional immutable Netlify Blobs writes. Six backend tests and isolated live API smoke pass, including real Unity JWT, anonymous401, foreign-origin403, bot400 and deduplicated completion. Preview test records are isolated per deploy; production store remains untouched. See `../SHARED_HISTORY.md`. Subjective badge/victory audio and another-network friend play remain human acceptance checks.
 
 Retry required: at22:30:04 UTC all three clients reported Relay inactivity/allocation-invalid and returned safely to menu during Bridge. No second-match completion is claimed for this attempt. The host window had entered fullscreen; fullscreen/occlusion or shared machine/network stalling are hypotheses, not an established root cause. All documents reported visible after the failure. Logs saved in `day6/v0.4.1-interrupted-bridge-logs.json`. Retry uses three fully tiled smaller windows and the normal6-point/1-heart lobby controls to reduce test duration and rendering load. No networking code changed based on this failure.
+
+## Final additions
+
+- Spawn markers and illustrated leaderboard inspected in Unity Play Mode. Gold assigned localSlot, other slots regular; markers remain on initial tiles after movement; direct presentation SetTile(Pit)/restore check hides/restores without moving. Four rank banners and correct character portraits render without stretching.
+- Chrome hosted0.4.2 candidate checks and final deployment: pending below.
+
+## Morning presentation fix checkpoint
+
+595/595 EditMode tests passed (8.59s, job `04c1d51ce1b445bc96957155736f178b`), zero errors. Added planner icon/direction/label retention through lock/opponent visibility, direct-shot/forced-fall/environmental/old-credit framing checks. PlayMode active audio channels1→0; repeated stop preserved music; reset camera stayed at zero on a later probe. Latest hosted Chrome and rebuild checks pending. The previous0.4.2 qualifying manual match was interrupted before completion.

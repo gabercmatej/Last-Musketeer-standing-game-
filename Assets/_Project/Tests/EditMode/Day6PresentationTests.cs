@@ -28,5 +28,34 @@ namespace Musketeers.Sim.Tests
             Assert.That(panel.childCount, Is.EqualTo(0));
             Assert.That(panel.style.display.value, Is.EqualTo(DisplayStyle.None));
         }
+        [Test]
+        public void OwnPlanner_RetainsIconsDirectionsAndLabelsThroughLockAndOpponentReveal()
+        {
+            var root = AssetDatabase.LoadAssetAtPath<VisualTreeAsset>("Assets/_Project/UI/HUD.uxml").CloneTree();
+            var bar = new PlanBarUI(root);
+            var state = Scenario.From("A.B\n...\nC.D").State;
+            var cfg = new GameConfig();
+            var builder = new PlanBuilder();
+            var plan = new TurnPlan(0) { A0 = PlannedAction.Move(Dir.E), A1 = PlannedAction.Fire(Dir.S), A2 = PlannedAction.Reload() };
+            builder.Load(state, 0, cfg, plan, false);
+            bar.Refresh(builder, cfg, null);
+            var labels = root.Q("slots").Query<Label>(className: "slot-text").ToList();
+            string[] expected = { labels[0].text, labels[1].text, labels[2].text };
+            builder.SetLocked(true); bar.Refresh(builder, cfg, null);
+            bar.ShowOpponents(new TurnPlayback { Before = state, Plans = new[] { new TurnPlan(1) } }, 0, new[] { 0, 1, 2, 3 });
+            bar.SetMessage("Resolving..."); bar.HideOpponents();
+            for (int tick = 0; tick < 3; tick++)
+            {
+                Assert.That(labels[tick].text, Is.EqualTo(expected[tick]));
+                var slot = root.Q("slots").ElementAt(tick);
+                Assert.That(slot.Q(className: "slot-icon").style.backgroundImage.value.sprite, Is.Not.Null);
+                Assert.That(slot.Q(className: "slot-dir").style.display.value,
+                    Is.EqualTo(tick < 2 ? DisplayStyle.Flex : DisplayStyle.None));
+            }
+            Assert.That(root.Q("plan-panel").style.display.value, Is.Not.EqualTo(DisplayStyle.None));
+            builder.Begin(state, 0, cfg); bar.Refresh(builder, cfg, null);
+            Assert.That(labels[0].text, Does.StartWith("Next"));
+        }
+
     }
 }

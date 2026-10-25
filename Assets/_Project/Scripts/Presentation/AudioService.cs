@@ -120,6 +120,14 @@ namespace Musketeers.Presentation
 
         // ---------- playback ----------
 
+        // Replay/round boundary: stop one-shots and voices, preserving music and preferences.
+        public void StopPlaybackEffects()
+        {
+            if (_sfx != null) foreach (var source in _sfx) source.Stop();
+            _announcer?.Stop(); _character?.Stop();
+            _lastPlayed.Clear();
+        }
+
         // "SFX/actions/musket_fire" picks one of its variants. volume is relative (0..1).
         public void Sfx(string key, float volume = 1f)
         {

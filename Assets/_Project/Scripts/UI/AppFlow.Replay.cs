@@ -43,7 +43,7 @@ namespace Musketeers.UI
             window.style.borderLeftWidth = window.style.borderRightWidth = window.style.borderTopWidth = window.style.borderBottomWidth = 2;
             window.style.borderLeftColor = window.style.borderRightColor = window.style.borderTopColor = window.style.borderBottomColor = new Color(0.9f, 0.12f, 0.1f);
             _replayFrame.Add(window);
-            _replayImage = new Image { scaleMode = ScaleMode.ScaleAndCrop, pickingMode = PickingMode.Ignore };
+            _replayImage = new Image { scaleMode = ScaleMode.ScaleToFit, pickingMode = PickingMode.Ignore };
             _replayImage.StretchToParentSize(); window.Add(_replayImage);
             var badge = new Image { sprite = UiArt.Get("UI/badges/killcam"), scaleMode = ScaleMode.ScaleToFit, pickingMode = PickingMode.Ignore };
             badge.style.position = Position.Absolute; badge.style.width = 150; badge.style.height = 110;
@@ -79,6 +79,9 @@ namespace Musketeers.UI
         {
             _replayResult = result; _replayTurn = _mc.TurnSeq; _replayIndex = 0;
             _replayFinal = _mc.Match.MatchOver;
+            _audio?.StopPlaybackEffects();
+            _rig.ResetShake();
+            _fx.ClearTransient();
             _replayOldSpeed = _director.Speed;
             _replayCameraLocal = _rig.Camera.transform.localPosition;
             _replayCameraSize = _rig.Camera.orthographicSize; _replayCameraAspect = _rig.Camera.aspect;
@@ -129,12 +132,19 @@ namespace Musketeers.UI
             }
             var clip = _roundReplay.Clips[_replayIndex++];
             _replayCaption.text = "KILLCAM · " + _replayIndex + " / " + _roundReplay.Clips.Count;
-            Vector3 point = BoardMath.ToWorld(clip.Focus);
+            _audio?.StopPlaybackEffects();
+            _fx.ClearTransient();
+            for (int i = 0; i < _board.UnitCount; i++) _board.Unit(i)?.CancelPlayback();
+            var min = BoardMath.ToWorld(clip.FrameMin);
+            var max = BoardMath.ToWorld(clip.FrameMax);
+            Vector3 point = (min + max) * 0.5f;
             Vector3 cameraPosition = _rig.Camera.transform.position;
             point.z = cameraPosition.z;
             PrimeTween.Tween.StopAll(_rig.Camera.transform);
             PrimeTween.Tween.Position(_rig.Camera.transform, point, _replayIndex == 1 ? 0.01f : 0.25f, Ease.InOutQuad);
-            _rig.Camera.orthographicSize = Mathf.Min(_replayCameraSize, 3.8f);
+            float size = Mathf.Max(2.4f, (max.y - min.y) * 0.5f + 1.3f, ((max.x - min.x) * 0.5f + 1.3f) / _rig.Camera.aspect);
+            PrimeTween.Tween.StopAll(_rig.Camera);
+            PrimeTween.Tween.Custom(_rig.Camera, _rig.Camera.orthographicSize, size, _replayIndex == 1 ? 0.01f : 0.25f, (camera, value) => camera.orthographicSize = value, Ease.InOutQuad);
             _director.PlayReplay(clip, 10f / Mathf.Max(1, _roundReplay.Clips.Count), PlayReplayClip);
         }
         void FinishReplay(int turn)
@@ -151,7 +161,9 @@ namespace Musketeers.UI
             if (_replayCapture != null) StopCoroutine(_replayCapture);
             _replayCapture = null;
             _director.Stop(); _director.Speed = _replayOldSpeed > 0 ? _replayOldSpeed : 1f;
-            PrimeTween.Tween.StopAll(_rig.Camera.transform);
+            _audio?.StopPlaybackEffects();
+            PrimeTween.Tween.StopAll(_rig.Camera);
+            _rig.ResetShake();
             _rig.Camera.targetTexture = null;
             _rig.Camera.transform.localPosition = _replayCameraLocal;
             if (_replayCameraSize > 0) { _rig.Camera.orthographicSize = _replayCameraSize; _rig.Camera.aspect = _replayCameraAspect; }

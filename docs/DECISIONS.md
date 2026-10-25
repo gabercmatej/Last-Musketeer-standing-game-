@@ -263,3 +263,5 @@ Format: `YYYY-MM-DD — Decision — Why`
 
 - 2026-10-25 — Final replay presentation uses one camera redirected to bounded render targets, a frozen arena backdrop, an inset cropped viewport and original-aspect badge. Between-round replay skip remains host-authoritative; final See Results/natural replay finish are individual. Host marks legitimate match completion at final resolution, while each participant's InResults flag still gates the next start. No simulation/scoring changes.
 - 2026-10-25 — User removed lobby chat and replaced opponents' map-wide reveal with a compact resolved-plan panel; local planning preview and match chat/emotes remain. Opponent summaries are cleared at next planning.
+
+- 2026-10-25: Replay framing uses direct causal events in the elimination clip, rather than historical kill credit alone; simultaneous deaths share one framing box. Replay boundaries cancel effects/voices and normalize camera without touching authoritative state.

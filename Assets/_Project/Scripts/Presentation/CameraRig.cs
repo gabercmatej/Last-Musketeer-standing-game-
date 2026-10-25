@@ -176,6 +176,13 @@ namespace Musketeers.Presentation
             _background.transform.localPosition = new Vector3(0f, 0f, 20f);
         }
 
+        public void ResetShake()
+        {
+            if (_camera == null) return;
+            Tween.StopAll(_camera.transform);
+            _camera.transform.localPosition = Vector3.zero;
+        }
+
         public void Shake(float strength, float duration)
         {
             if (_camera == null || strength <= 0f)

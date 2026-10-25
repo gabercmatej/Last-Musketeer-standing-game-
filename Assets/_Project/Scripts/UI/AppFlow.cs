@@ -562,6 +562,10 @@ namespace Musketeers.UI
 
         void OnRoundStarted(EventLog opening)
         {
+            _director.Stop();
+            _audio?.StopPlaybackEffects();
+            _rig.ResetShake();
+            _fx.ClearTransient();
             var m = _mc.Match;
             _board.Build(m.Round, m.Cfg, _setup.Characters, _setup.Names, SetupLoadouts(), BridgesOf(_setup.MapId), _setup.LocalSlot);
             _rig.Fit(m.Round.Board.Width, m.Round.Board.Height);
@@ -641,7 +645,6 @@ namespace Musketeers.UI
                 return;
             _plans[_activeSlot] = _builder.Plan;
             _locked[_activeSlot] = _builder.Locked;
-            _mc.SubmitPlan(_builder.Plan, _builder.Locked);
             _planBar.Refresh(_builder, _mc.Cfg, _art.Character(_setup.Characters[_activeSlot]));
             RedrawPreview();
             // UI feedback: added / removed an action, locked in.
@@ -654,6 +657,8 @@ namespace Musketeers.UI
                 _audio?.Sfx("SFX/ui/plan_undo");
             _lastPlanCount = count;
             _lastLocked = _builder.Locked;
+            // Submission may synchronously reveal a local match. Render the draft first.
+            _mc.SubmitPlan(_builder.Plan, _builder.Locked);
         }
 
         void RedrawPreview()
@@ -724,6 +729,9 @@ namespace Musketeers.UI
                 if (plan.Slot == _setup.LocalSlot && p.Before.Units[plan.Slot].Alive)
                 {
                     ownPlan.Load(p.Before, plan.Slot, _mc.Cfg, plan, true);
+                    var character = _art.Character(_setup.Characters[plan.Slot]);
+                    _planBar.SetCharacter(character, _mc.Cfg, p.Before.Units[plan.Slot].Ability, _setup.Names[plan.Slot], _colors[plan.Slot]);
+                    _planBar.Refresh(ownPlan, _mc.Cfg, character);
                     _preview.Draw(ownPlan, _colors[plan.Slot], null);
                 }
             _log.Turn(p);

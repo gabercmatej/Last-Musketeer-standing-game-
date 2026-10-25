@@ -99,7 +99,7 @@ namespace Musketeers.Presentation
             var sr = _art.MakeRenderer("tracer", transform, PlaceholderArt.Pixel, c, Layers.Fx);
             PlaceLine(sr.transform, a, a + (b - a) * 0.01f, width);
             float grow = duration * 0.35f;
-            Tween.Custom(0.01f, 1f, grow, t => { if (sr != null) PlaceLine(sr.transform, a, a + (b - a) * t, width); }, Ease.OutQuad);
+            Tween.Custom(sr, 0.01f, 1f, grow, (_, t) => { if (sr != null) PlaceLine(sr.transform, a, a + (b - a) * t, width); }, Ease.OutQuad);
             FadeOut(sr, duration - grow, grow);
         }
 
@@ -111,7 +111,7 @@ namespace Musketeers.Presentation
             var head = Sprite(real ? _art.Game.Get(GameArt.Hook) : PlaceholderArt.Ring, start, real ? Color.white : new Color(0.85f, 0.85f, 0.9f),
                 0.38f * SizeOf(real ? _art.Game.Get(GameArt.Hook) : PlaceholderArt.Ring), Layers.Fx - 1);
             float total = outTime + holdTime + backTime;
-            Tween.Custom(0f, 1f, total, t =>
+            Tween.Custom(rope, 0f, 1f, total, (_, t) =>
             {
                 if (rope == null || head == null)
                     return;
@@ -143,7 +143,7 @@ namespace Musketeers.Presentation
             face.transform.localPosition = new Vector3(0f, 0.06f, 0f);
             root.localScale = Vector3.one * 0.2f;
             Tween.Scale(root, 1f, 0.25f, Ease.OutBack);
-            Tween.Custom(0f, 1f, seconds, t =>
+            Tween.Custom(root, 0f, 1f, seconds, (_, t) =>
             {
                 if (root == null) return;
                 if (follow != null)
@@ -183,9 +183,8 @@ namespace Musketeers.Presentation
         {
             foreach (Transform child in transform)
             {
-                Tween.StopAll(child);
-                var sprite = child.GetComponent<SpriteRenderer>();
-                if (sprite != null) Tween.StopAll(sprite);
+                foreach (var part in child.GetComponentsInChildren<Transform>(true)) Tween.StopAll(part);
+                foreach (var sprite in child.GetComponentsInChildren<SpriteRenderer>(true)) Tween.StopAll(sprite);
                 child.gameObject.SetActive(false);
                 Destroy(child.gameObject);
             }

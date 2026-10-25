@@ -2,6 +2,15 @@
 
 You (Codex) are taking over from Claude Code. Read this file first, then `AGENTS.md`. **Goal: finish Day 5 (online), then Day 6 and Day 7, within 2 days, so 4 friends can play in their browsers this weekend.**
 
+## Release-blocking presentation fixes — 2026-10-25 morning
+
+- User added planner retention, replay cleanup and cause-aware framing before final release. Production remains v0.3.0; do not publish before latest candidate checks.
+- Own planner refresh now happens before submission (local submission can reveal synchronously). Reveal explicitly renders the authoritative local plan, independently of opponent rows, and keeps it through execution. Existing layout unchanged.
+- Replay boundaries stop one-shot/voice channels while preserving music/preferences; camera shake resets before baseline capture and after replay. FX custom tweens now have cancellable targets and nested effects are cancelled. New rounds proactively clear playback leftovers.
+- Replay bounds include victim/hazard, plus attacker only when this clip has a direct damage/push/grapple/rush event. Historical credit alone does not frame an unrelated attacker. Simultaneous deaths share bounds; fit rendering avoids cropping; framing/zoom tween smoothly. Simulation unchanged.
+- Full suite595/595 passed,0 failed/skipped,8.59s; job `04c1d51ce1b445bc96957155736f178b`. Zero compile errors. PlayMode probe: active one-shot1→0, repeat cleanup safe, music preserved, camera baseline zero and unchanged later.
+- Latest Web rebuild and hosted Chrome checks pending. Earlier0.4.2 manual qualifying preview match was interrupted before completion, so no claim of Web-to-shared completion yet. Earlier successful v0.4.1 two-match hashes remain valid historical evidence, not verification of these latest presentation fixes.
+
 ## Spawn markers and shared leaderboard — 2026-10-25 (current)
 
 - Latest attachment adds tile-anchored local-gold/opponent spawn rings and shared Netlify history with illustrated leaderboard. Keep Sol only/no subagents. Production still v0.3.0 until candidate verification.
