@@ -1,0 +1,464 @@
+[
+  [
+    {
+      "level": "log",
+      "message": "AUTOTEST on mode=On role=host name=Tester1\n",
+      "timestamp": "2026-10-25T12:13:11.095Z",
+      "url": "https://release-v100--last-musketeer.netlify.app/Build/9e67c85d3e713c120977c915be31b250.framework.js"
+    },
+    {
+      "level": "log",
+      "message": "AUTOTEST code=GKJRQP\n",
+      "timestamp": "2026-10-25T12:13:17.610Z",
+      "url": "https://release-v100--last-musketeer.netlify.app/Build/9e67c85d3e713c120977c915be31b250.framework.js"
+    },
+    {
+      "level": "log",
+      "message": "AUTOTEST replay begin slot=0 turn=1 round=1 final=False clock=87.199 music=Music/battle\n",
+      "timestamp": "2026-10-25T12:14:43.350Z",
+      "url": "https://release-v100--last-musketeer.netlify.app/Build/9e67c85d3e713c120977c915be31b250.framework.js"
+    },
+    {
+      "level": "log",
+      "message": "AUTOTEST replay started slot=0 turn=1 round=1 final=False clock=87.282 music=Music/replay\n",
+      "timestamp": "2026-10-25T12:14:43.444Z",
+      "url": "https://release-v100--last-musketeer.netlify.app/Build/9e67c85d3e713c120977c915be31b250.framework.js"
+    },
+    {
+      "level": "log",
+      "message": "AUTOTEST replay finished slot=0 turn=1 round=1 final=False clock=97.384 music=Music/replay\n",
+      "timestamp": "2026-10-25T12:14:53.548Z",
+      "url": "https://release-v100--last-musketeer.netlify.app/Build/9e67c85d3e713c120977c915be31b250.framework.js"
+    },
+    {
+      "level": "log",
+      "message": "AUTOTEST review begin remaining=5 slot=0 turn=1 round=1 final=False clock=97.384 music=Music/battle\n",
+      "timestamp": "2026-10-25T12:14:53.550Z",
+      "url": "https://release-v100--last-musketeer.netlify.app/Build/9e67c85d3e713c120977c915be31b250.framework.js"
+    },
+    {
+      "level": "log",
+      "message": "AUTOTEST review end slot=0 turn=1 round=1 final=False clock=102.634 music=Music/battle\n",
+      "timestamp": "2026-10-25T12:14:58.782Z",
+      "url": "https://release-v100--last-musketeer.netlify.app/Build/9e67c85d3e713c120977c915be31b250.framework.js"
+    },
+    {
+      "level": "log",
+      "message": "AUTOTEST replay begin slot=0 turn=2 round=2 final=True clock=113.232 music=Music/battle\n",
+      "timestamp": "2026-10-25T12:15:03.845Z",
+      "url": "https://release-v100--last-musketeer.netlify.app/Build/9e67c85d3e713c120977c915be31b250.framework.js"
+    },
+    {
+      "level": "log",
+      "message": "AUTOTEST replay started slot=0 turn=2 round=2 final=True clock=113.232 music=Music/replay\n",
+      "timestamp": "2026-10-25T12:15:03.846Z",
+      "url": "https://release-v100--last-musketeer.netlify.app/Build/9e67c85d3e713c120977c915be31b250.framework.js"
+    },
+    {
+      "level": "log",
+      "message": "AUTOTEST replay finished slot=0 turn=2 round=2 final=True clock=123.249 music=Music/replay\n",
+      "timestamp": "2026-10-25T12:15:13.864Z",
+      "url": "https://release-v100--last-musketeer.netlify.app/Build/9e67c85d3e713c120977c915be31b250.framework.js"
+    },
+    {
+      "level": "log",
+      "message": "AUTOTEST review begin remaining=5 slot=0 turn=2 round=2 final=True clock=123.249 music=Music/battle\n",
+      "timestamp": "2026-10-25T12:15:13.866Z",
+      "url": "https://release-v100--last-musketeer.netlify.app/Build/9e67c85d3e713c120977c915be31b250.framework.js"
+    },
+    {
+      "level": "log",
+      "message": "AUTOTEST review end slot=0 turn=2 round=2 final=True clock=128.249 music=Music/battle\n",
+      "timestamp": "2026-10-25T12:15:18.861Z",
+      "url": "https://release-v100--last-musketeer.netlify.app/Build/9e67c85d3e713c120977c915be31b250.framework.js"
+    },
+    {
+      "level": "log",
+      "message": "AUTOTEST match over map=bridge hash=20f92293\n",
+      "timestamp": "2026-10-25T12:15:18.861Z",
+      "url": "https://release-v100--last-musketeer.netlify.app/Build/9e67c85d3e713c120977c915be31b250.framework.js"
+    },
+    {
+      "level": "log",
+      "message": "AUTOTEST independent return slot=0 role=host\n",
+      "timestamp": "2026-10-25T12:15:21.995Z",
+      "url": "https://release-v100--last-musketeer.netlify.app/Build/9e67c85d3e713c120977c915be31b250.framework.js"
+    },
+    {
+      "level": "log",
+      "message": "AUTOTEST replay begin slot=0 turn=1 round=1 final=False clock=143.566 music=Music/battle\n",
+      "timestamp": "2026-10-25T12:15:39.712Z",
+      "url": "https://release-v100--last-musketeer.netlify.app/Build/9e67c85d3e713c120977c915be31b250.framework.js"
+    },
+    {
+      "level": "log",
+      "message": "AUTOTEST replay started slot=0 turn=1 round=1 final=False clock=143.666 music=Music/replay\n",
+      "timestamp": "2026-10-25T12:15:39.826Z",
+      "url": "https://release-v100--last-musketeer.netlify.app/Build/9e67c85d3e713c120977c915be31b250.framework.js"
+    },
+    {
+      "level": "log",
+      "message": "AUTOTEST replay finished slot=0 turn=1 round=1 final=False clock=153.865 music=Music/replay\n",
+      "timestamp": "2026-10-25T12:15:50.034Z",
+      "url": "https://release-v100--last-musketeer.netlify.app/Build/9e67c85d3e713c120977c915be31b250.framework.js"
+    },
+    {
+      "level": "log",
+      "message": "AUTOTEST review begin remaining=5 slot=0 turn=1 round=1 final=False clock=153.865 music=Music/battle\n",
+      "timestamp": "2026-10-25T12:15:50.039Z",
+      "url": "https://release-v100--last-musketeer.netlify.app/Build/9e67c85d3e713c120977c915be31b250.framework.js"
+    },
+    {
+      "level": "log",
+      "message": "AUTOTEST review end slot=0 turn=1 round=1 final=False clock=159.117 music=Music/battle\n",
+      "timestamp": "2026-10-25T12:15:55.261Z",
+      "url": "https://release-v100--last-musketeer.netlify.app/Build/9e67c85d3e713c120977c915be31b250.framework.js"
+    },
+    {
+      "level": "log",
+      "message": "AUTOTEST replay begin slot=0 turn=3 round=2 final=True clock=172.332 music=Music/battle\n",
+      "timestamp": "2026-10-25T12:16:02.946Z",
+      "url": "https://release-v100--last-musketeer.netlify.app/Build/9e67c85d3e713c120977c915be31b250.framework.js"
+    },
+    {
+      "level": "log",
+      "message": "AUTOTEST replay started slot=0 turn=3 round=2 final=True clock=172.332 music=Music/replay\n",
+      "timestamp": "2026-10-25T12:16:02.948Z",
+      "url": "https://release-v100--last-musketeer.netlify.app/Build/9e67c85d3e713c120977c915be31b250.framework.js"
+    },
+    {
+      "level": "log",
+      "message": "AUTOTEST replay finished slot=0 turn=3 round=2 final=True clock=182.349 music=Music/replay\n",
+      "timestamp": "2026-10-25T12:16:12.966Z",
+      "url": "https://release-v100--last-musketeer.netlify.app/Build/9e67c85d3e713c120977c915be31b250.framework.js"
+    },
+    {
+      "level": "log",
+      "message": "AUTOTEST review begin remaining=5 slot=0 turn=3 round=2 final=True clock=182.349 music=Music/battle\n",
+      "timestamp": "2026-10-25T12:16:12.968Z",
+      "url": "https://release-v100--last-musketeer.netlify.app/Build/9e67c85d3e713c120977c915be31b250.framework.js"
+    },
+    {
+      "level": "log",
+      "message": "AUTOTEST review end slot=0 turn=3 round=2 final=True clock=187.349 music=Music/battle\n",
+      "timestamp": "2026-10-25T12:16:17.963Z",
+      "url": "https://release-v100--last-musketeer.netlify.app/Build/9e67c85d3e713c120977c915be31b250.framework.js"
+    },
+    {
+      "level": "log",
+      "message": "AUTOTEST match over map=courtyard hash=84af0077\n",
+      "timestamp": "2026-10-25T12:16:17.963Z",
+      "url": "https://release-v100--last-musketeer.netlify.app/Build/9e67c85d3e713c120977c915be31b250.framework.js"
+    },
+    {
+      "level": "log",
+      "message": "AUTOTEST done\n",
+      "timestamp": "2026-10-25T12:16:17.963Z",
+      "url": "https://release-v100--last-musketeer.netlify.app/Build/9e67c85d3e713c120977c915be31b250.framework.js"
+    }
+  ],
+  [
+    {
+      "level": "log",
+      "message": "AUTOTEST on mode=On role=joiner name=Tester12\n",
+      "timestamp": "2026-10-25T12:14:27.250Z",
+      "url": "https://release-v100--last-musketeer.netlify.app/Build/9e67c85d3e713c120977c915be31b250.framework.js"
+    },
+    {
+      "level": "log",
+      "message": "AUTOTEST replay begin slot=2 turn=1 round=1 final=False clock=87.150 music=Music/battle\n",
+      "timestamp": "2026-10-25T12:14:43.396Z",
+      "url": "https://release-v100--last-musketeer.netlify.app/Build/9e67c85d3e713c120977c915be31b250.framework.js"
+    },
+    {
+      "level": "log",
+      "message": "AUTOTEST replay started slot=2 turn=1 round=1 final=False clock=87.232 music=Music/replay\n",
+      "timestamp": "2026-10-25T12:14:43.494Z",
+      "url": "https://release-v100--last-musketeer.netlify.app/Build/9e67c85d3e713c120977c915be31b250.framework.js"
+    },
+    {
+      "level": "log",
+      "message": "AUTOTEST replay finished slot=2 turn=1 round=1 final=False clock=97.356 music=Music/replay\n",
+      "timestamp": "2026-10-25T12:14:53.610Z",
+      "url": "https://release-v100--last-musketeer.netlify.app/Build/9e67c85d3e713c120977c915be31b250.framework.js"
+    },
+    {
+      "level": "log",
+      "message": "AUTOTEST review begin remaining=5 slot=2 turn=1 round=1 final=False clock=97.356 music=Music/battle\n",
+      "timestamp": "2026-10-25T12:14:53.612Z",
+      "url": "https://release-v100--last-musketeer.netlify.app/Build/9e67c85d3e713c120977c915be31b250.framework.js"
+    },
+    {
+      "level": "log",
+      "message": "AUTOTEST review end slot=2 turn=1 round=1 final=False clock=102.649 music=Music/battle\n",
+      "timestamp": "2026-10-25T12:14:58.876Z",
+      "url": "https://release-v100--last-musketeer.netlify.app/Build/9e67c85d3e713c120977c915be31b250.framework.js"
+    },
+    {
+      "level": "log",
+      "message": "AUTOTEST replay begin slot=2 turn=2 round=2 final=True clock=36.885 music=Music/battle\n",
+      "timestamp": "2026-10-25T12:15:03.878Z",
+      "url": "https://release-v100--last-musketeer.netlify.app/Build/9e67c85d3e713c120977c915be31b250.framework.js"
+    },
+    {
+      "level": "log",
+      "message": "AUTOTEST replay started slot=2 turn=2 round=2 final=True clock=36.885 music=Music/replay\n",
+      "timestamp": "2026-10-25T12:15:03.879Z",
+      "url": "https://release-v100--last-musketeer.netlify.app/Build/9e67c85d3e713c120977c915be31b250.framework.js"
+    },
+    {
+      "level": "log",
+      "message": "AUTOTEST replay finished slot=2 turn=2 round=2 final=True clock=46.886 music=Music/replay\n",
+      "timestamp": "2026-10-25T12:15:13.879Z",
+      "url": "https://release-v100--last-musketeer.netlify.app/Build/9e67c85d3e713c120977c915be31b250.framework.js"
+    },
+    {
+      "level": "log",
+      "message": "AUTOTEST review begin remaining=5 slot=2 turn=2 round=2 final=True clock=46.886 music=Music/battle\n",
+      "timestamp": "2026-10-25T12:15:13.881Z",
+      "url": "https://release-v100--last-musketeer.netlify.app/Build/9e67c85d3e713c120977c915be31b250.framework.js"
+    },
+    {
+      "level": "log",
+      "message": "AUTOTEST review end slot=2 turn=2 round=2 final=True clock=51.887 music=Music/battle\n",
+      "timestamp": "2026-10-25T12:15:18.878Z",
+      "url": "https://release-v100--last-musketeer.netlify.app/Build/9e67c85d3e713c120977c915be31b250.framework.js"
+    },
+    {
+      "level": "log",
+      "message": "AUTOTEST match over map=bridge hash=20f92293\n",
+      "timestamp": "2026-10-25T12:15:18.878Z",
+      "url": "https://release-v100--last-musketeer.netlify.app/Build/9e67c85d3e713c120977c915be31b250.framework.js"
+    },
+    {
+      "level": "log",
+      "message": "AUTOTEST independent return slot=2 role=joiner\n",
+      "timestamp": "2026-10-25T12:15:28.961Z",
+      "url": "https://release-v100--last-musketeer.netlify.app/Build/9e67c85d3e713c120977c915be31b250.framework.js"
+    },
+    {
+      "level": "log",
+      "message": "AUTOTEST replay begin slot=2 turn=1 round=1 final=False clock=143.531 music=Music/battle\n",
+      "timestamp": "2026-10-25T12:15:39.776Z",
+      "url": "https://release-v100--last-musketeer.netlify.app/Build/9e67c85d3e713c120977c915be31b250.framework.js"
+    },
+    {
+      "level": "log",
+      "message": "AUTOTEST replay started slot=2 turn=1 round=1 final=False clock=143.648 music=Music/replay\n",
+      "timestamp": "2026-10-25T12:15:39.908Z",
+      "url": "https://release-v100--last-musketeer.netlify.app/Build/9e67c85d3e713c120977c915be31b250.framework.js"
+    },
+    {
+      "level": "log",
+      "message": "AUTOTEST replay finished slot=2 turn=1 round=1 final=False clock=153.839 music=Music/replay\n",
+      "timestamp": "2026-10-25T12:15:50.094Z",
+      "url": "https://release-v100--last-musketeer.netlify.app/Build/9e67c85d3e713c120977c915be31b250.framework.js"
+    },
+    {
+      "level": "log",
+      "message": "AUTOTEST review begin remaining=5 slot=2 turn=1 round=1 final=False clock=153.839 music=Music/battle\n",
+      "timestamp": "2026-10-25T12:15:50.117Z",
+      "url": "https://release-v100--last-musketeer.netlify.app/Build/9e67c85d3e713c120977c915be31b250.framework.js"
+    },
+    {
+      "level": "log",
+      "message": "AUTOTEST review end slot=2 turn=1 round=1 final=False clock=159.120 music=Music/battle\n",
+      "timestamp": "2026-10-25T12:15:55.360Z",
+      "url": "https://release-v100--last-musketeer.netlify.app/Build/9e67c85d3e713c120977c915be31b250.framework.js"
+    },
+    {
+      "level": "log",
+      "message": "AUTOTEST replay begin slot=2 turn=3 round=2 final=True clock=96.035 music=Music/battle\n",
+      "timestamp": "2026-10-25T12:16:03.027Z",
+      "url": "https://release-v100--last-musketeer.netlify.app/Build/9e67c85d3e713c120977c915be31b250.framework.js"
+    },
+    {
+      "level": "log",
+      "message": "AUTOTEST replay started slot=2 turn=3 round=2 final=True clock=96.035 music=Music/replay\n",
+      "timestamp": "2026-10-25T12:16:03.030Z",
+      "url": "https://release-v100--last-musketeer.netlify.app/Build/9e67c85d3e713c120977c915be31b250.framework.js"
+    },
+    {
+      "level": "log",
+      "message": "AUTOTEST replay finished slot=2 turn=3 round=2 final=True clock=106.037 music=Music/replay\n",
+      "timestamp": "2026-10-25T12:16:13.034Z",
+      "url": "https://release-v100--last-musketeer.netlify.app/Build/9e67c85d3e713c120977c915be31b250.framework.js"
+    },
+    {
+      "level": "log",
+      "message": "AUTOTEST review begin remaining=5 slot=2 turn=3 round=2 final=True clock=106.037 music=Music/battle\n",
+      "timestamp": "2026-10-25T12:16:13.054Z",
+      "url": "https://release-v100--last-musketeer.netlify.app/Build/9e67c85d3e713c120977c915be31b250.framework.js"
+    },
+    {
+      "level": "log",
+      "message": "AUTOTEST review end slot=2 turn=3 round=2 final=True clock=111.052 music=Music/battle\n",
+      "timestamp": "2026-10-25T12:16:18.045Z",
+      "url": "https://release-v100--last-musketeer.netlify.app/Build/9e67c85d3e713c120977c915be31b250.framework.js"
+    },
+    {
+      "level": "log",
+      "message": "AUTOTEST match over map=courtyard hash=84af0077\n",
+      "timestamp": "2026-10-25T12:16:18.046Z",
+      "url": "https://release-v100--last-musketeer.netlify.app/Build/9e67c85d3e713c120977c915be31b250.framework.js"
+    },
+    {
+      "level": "log",
+      "message": "AUTOTEST done\n",
+      "timestamp": "2026-10-25T12:16:18.046Z",
+      "url": "https://release-v100--last-musketeer.netlify.app/Build/9e67c85d3e713c120977c915be31b250.framework.js"
+    }
+  ],
+  [
+    {
+      "level": "log",
+      "message": "AUTOTEST on mode=On role=joiner name=Tester68\n",
+      "timestamp": "2026-10-25T12:14:21.596Z",
+      "url": "https://release-v100--last-musketeer.netlify.app/Build/9e67c85d3e713c120977c915be31b250.framework.js"
+    },
+    {
+      "level": "log",
+      "message": "AUTOTEST replay begin slot=1 turn=1 round=1 final=False clock=87.150 music=Music/battle\n",
+      "timestamp": "2026-10-25T12:14:43.395Z",
+      "url": "https://release-v100--last-musketeer.netlify.app/Build/9e67c85d3e713c120977c915be31b250.framework.js"
+    },
+    {
+      "level": "log",
+      "message": "AUTOTEST replay started slot=1 turn=1 round=1 final=False clock=87.232 music=Music/replay\n",
+      "timestamp": "2026-10-25T12:14:43.494Z",
+      "url": "https://release-v100--last-musketeer.netlify.app/Build/9e67c85d3e713c120977c915be31b250.framework.js"
+    },
+    {
+      "level": "log",
+      "message": "AUTOTEST replay finished slot=1 turn=1 round=1 final=False clock=97.367 music=Music/replay\n",
+      "timestamp": "2026-10-25T12:14:53.611Z",
+      "url": "https://release-v100--last-musketeer.netlify.app/Build/9e67c85d3e713c120977c915be31b250.framework.js"
+    },
+    {
+      "level": "log",
+      "message": "AUTOTEST review begin remaining=5 slot=1 turn=1 round=1 final=False clock=97.367 music=Music/battle\n",
+      "timestamp": "2026-10-25T12:14:53.613Z",
+      "url": "https://release-v100--last-musketeer.netlify.app/Build/9e67c85d3e713c120977c915be31b250.framework.js"
+    },
+    {
+      "level": "log",
+      "message": "AUTOTEST review end slot=1 turn=1 round=1 final=False clock=102.649 music=Music/battle\n",
+      "timestamp": "2026-10-25T12:14:58.876Z",
+      "url": "https://release-v100--last-musketeer.netlify.app/Build/9e67c85d3e713c120977c915be31b250.framework.js"
+    },
+    {
+      "level": "log",
+      "message": "AUTOTEST replay begin slot=1 turn=2 round=2 final=True clock=42.535 music=Music/battle\n",
+      "timestamp": "2026-10-25T12:15:03.877Z",
+      "url": "https://release-v100--last-musketeer.netlify.app/Build/9e67c85d3e713c120977c915be31b250.framework.js"
+    },
+    {
+      "level": "log",
+      "message": "AUTOTEST replay started slot=1 turn=2 round=2 final=True clock=42.535 music=Music/replay\n",
+      "timestamp": "2026-10-25T12:15:03.879Z",
+      "url": "https://release-v100--last-musketeer.netlify.app/Build/9e67c85d3e713c120977c915be31b250.framework.js"
+    },
+    {
+      "level": "log",
+      "message": "AUTOTEST replay finished slot=1 turn=2 round=2 final=True clock=52.536 music=Music/replay\n",
+      "timestamp": "2026-10-25T12:15:13.879Z",
+      "url": "https://release-v100--last-musketeer.netlify.app/Build/9e67c85d3e713c120977c915be31b250.framework.js"
+    },
+    {
+      "level": "log",
+      "message": "AUTOTEST review begin remaining=5 slot=1 turn=2 round=2 final=True clock=52.536 music=Music/battle\n",
+      "timestamp": "2026-10-25T12:15:13.881Z",
+      "url": "https://release-v100--last-musketeer.netlify.app/Build/9e67c85d3e713c120977c915be31b250.framework.js"
+    },
+    {
+      "level": "log",
+      "message": "AUTOTEST review end slot=1 turn=2 round=2 final=True clock=57.537 music=Music/battle\n",
+      "timestamp": "2026-10-25T12:15:18.877Z",
+      "url": "https://release-v100--last-musketeer.netlify.app/Build/9e67c85d3e713c120977c915be31b250.framework.js"
+    },
+    {
+      "level": "log",
+      "message": "AUTOTEST match over map=bridge hash=20f92293\n",
+      "timestamp": "2026-10-25T12:15:18.878Z",
+      "url": "https://release-v100--last-musketeer.netlify.app/Build/9e67c85d3e713c120977c915be31b250.framework.js"
+    },
+    {
+      "level": "log",
+      "message": "AUTOTEST independent return slot=1 role=joiner\n",
+      "timestamp": "2026-10-25T12:15:27.328Z",
+      "url": "https://release-v100--last-musketeer.netlify.app/Build/9e67c85d3e713c120977c915be31b250.framework.js"
+    },
+    {
+      "level": "log",
+      "message": "AUTOTEST replay begin slot=1 turn=1 round=1 final=False clock=143.531 music=Music/battle\n",
+      "timestamp": "2026-10-25T12:15:39.776Z",
+      "url": "https://release-v100--last-musketeer.netlify.app/Build/9e67c85d3e713c120977c915be31b250.framework.js"
+    },
+    {
+      "level": "log",
+      "message": "AUTOTEST replay started slot=1 turn=1 round=1 final=False clock=143.615 music=Music/replay\n",
+      "timestamp": "2026-10-25T12:15:39.875Z",
+      "url": "https://release-v100--last-musketeer.netlify.app/Build/9e67c85d3e713c120977c915be31b250.framework.js"
+    },
+    {
+      "level": "log",
+      "message": "AUTOTEST replay finished slot=1 turn=1 round=1 final=False clock=153.839 music=Music/replay\n",
+      "timestamp": "2026-10-25T12:15:50.095Z",
+      "url": "https://release-v100--last-musketeer.netlify.app/Build/9e67c85d3e713c120977c915be31b250.framework.js"
+    },
+    {
+      "level": "log",
+      "message": "AUTOTEST review begin remaining=5 slot=1 turn=1 round=1 final=False clock=153.839 music=Music/battle\n",
+      "timestamp": "2026-10-25T12:15:50.120Z",
+      "url": "https://release-v100--last-musketeer.netlify.app/Build/9e67c85d3e713c120977c915be31b250.framework.js"
+    },
+    {
+      "level": "log",
+      "message": "AUTOTEST review end slot=1 turn=1 round=1 final=False clock=159.120 music=Music/battle\n",
+      "timestamp": "2026-10-25T12:15:55.360Z",
+      "url": "https://release-v100--last-musketeer.netlify.app/Build/9e67c85d3e713c120977c915be31b250.framework.js"
+    },
+    {
+      "level": "log",
+      "message": "AUTOTEST replay begin slot=1 turn=3 round=2 final=True clock=101.685 music=Music/battle\n",
+      "timestamp": "2026-10-25T12:16:03.026Z",
+      "url": "https://release-v100--last-musketeer.netlify.app/Build/9e67c85d3e713c120977c915be31b250.framework.js"
+    },
+    {
+      "level": "log",
+      "message": "AUTOTEST replay started slot=1 turn=3 round=2 final=True clock=101.685 music=Music/replay\n",
+      "timestamp": "2026-10-25T12:16:03.030Z",
+      "url": "https://release-v100--last-musketeer.netlify.app/Build/9e67c85d3e713c120977c915be31b250.framework.js"
+    },
+    {
+      "level": "log",
+      "message": "AUTOTEST replay finished slot=1 turn=3 round=2 final=True clock=111.687 music=Music/replay\n",
+      "timestamp": "2026-10-25T12:16:13.033Z",
+      "url": "https://release-v100--last-musketeer.netlify.app/Build/9e67c85d3e713c120977c915be31b250.framework.js"
+    },
+    {
+      "level": "log",
+      "message": "AUTOTEST review begin remaining=5 slot=1 turn=3 round=2 final=True clock=111.687 music=Music/battle\n",
+      "timestamp": "2026-10-25T12:16:13.054Z",
+      "url": "https://release-v100--last-musketeer.netlify.app/Build/9e67c85d3e713c120977c915be31b250.framework.js"
+    },
+    {
+      "level": "log",
+      "message": "AUTOTEST review end slot=1 turn=3 round=2 final=True clock=116.702 music=Music/battle\n",
+      "timestamp": "2026-10-25T12:16:18.045Z",
+      "url": "https://release-v100--last-musketeer.netlify.app/Build/9e67c85d3e713c120977c915be31b250.framework.js"
+    },
+    {
+      "level": "log",
+      "message": "AUTOTEST match over map=courtyard hash=84af0077\n",
+      "timestamp": "2026-10-25T12:16:18.046Z",
+      "url": "https://release-v100--last-musketeer.netlify.app/Build/9e67c85d3e713c120977c915be31b250.framework.js"
+    },
+    {
+      "level": "log",
+      "message": "AUTOTEST done\n",
+      "timestamp": "2026-10-25T12:16:18.046Z",
+      "url": "https://release-v100--last-musketeer.netlify.app/Build/9e67c85d3e713c120977c915be31b250.framework.js"
+    }
+  ]
+]

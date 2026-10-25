@@ -14,6 +14,7 @@
             </ui:VisualElement>
             <ui:VisualElement name="page-howto" class="info-page">
                 <ui:ScrollView class="info-scroll">
+                    <ui:Label text="Tactical Arena Brawler" class="title info-title" />
                     <ui:Label name="howto-text" text="" class="info-text" />
                     <ui:VisualElement name="howto-table" class="howto-table" />
                 </ui:ScrollView>

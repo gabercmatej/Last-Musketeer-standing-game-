@@ -135,24 +135,21 @@ namespace Musketeers.Sim
                 reason: (byte)(crown ? PointReason.CrownKill : PointReason.Kill));
         }
 
-        // FIXES_4E §5.1-5.2: a crate always breaks (shot, shove or explosion). If someone is to credit, the
-        // sim's own Rng rolls CrateGritChancePct and the winner gets CrateGrit Grit (capped). The roll is
-        // always drawn when there is a destroyer (even at full Grit) so the Rng stays in step on every client.
+        // §3: one seeded uniform 0–3 reward per credited crate, including at full Grit.
+        // Draw order follows the existing deterministic destruction order on every client.
         static void BreakCrate(TickContext c, Int2 p, int destroyer, int keg = SimEvent.None)
         {
             var s = c.S;
+            if (s.Board.Get(p) != TileType.Crate) return;
             s.Board.Set(p, TileType.Floor);
             int gained = 0;
             if (destroyer >= 0 && destroyer < s.Units.Length)
             {
-                bool lucky = s.Rng.Range(0, 100) < c.Cfg.CrateGritChancePct;
+                int reward = s.Rng.Range(c.Cfg.CrateGritMin, c.Cfg.CrateGritMax + 1);
                 var u = s.Units[destroyer];
-                if (lucky && u.Alive)
-                {
-                    int before = u.Grit;
-                    u.Grit = Math.Min(c.Cfg.MaxGrit, u.Grit + c.Cfg.CrateGrit);
-                    gained = u.Grit - before;
-                }
+                int before = u.Grit;
+                u.Grit = Math.Min(c.Cfg.MaxGrit, u.Grit + reward);
+                gained = u.Grit - before;
             }
             c.Log.Add(SimEventKind.CrateDestroyed, unit: destroyer, keg: keg, to: p, amount: gained);
         }

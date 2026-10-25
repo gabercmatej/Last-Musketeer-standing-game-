@@ -21,6 +21,7 @@ namespace Musketeers.UI
         Coroutine _replayCapture;
         int _replayTurn, _replayIndex;
         bool _replayFinal;
+        string _replayMusic;
         float _replayOldSpeed, _replayCameraSize, _replayCameraAspect;
         Vector3 _replayCameraLocal;
 
@@ -71,14 +72,18 @@ namespace Musketeers.UI
         void ReplayAction()
         {
             if (_replayResult == null) return;
-            if (_replayFinal || _netTransport == null) FinishReplay(_replayTurn);
+            if (_replayFinal) FinishReplay(_replayTurn, true);
+            else if (_netTransport == null) FinishReplay(_replayTurn);
             else MatchNet.Instance?.SkipReplay(_replayTurn);
         }
 
         void BeginRoundReplay(RoundResult result)
         {
+            AutoTestTrace("replay begin");
             _replayResult = result; _replayTurn = _mc.TurnSeq; _replayIndex = 0;
             _replayFinal = _mc.Match.MatchOver;
+            _replayMusic = _audio != null ? _audio.CurrentMusic : null;
+            _audio?.Music("Music/replay", 0.45f);
             _audio?.StopPlaybackEffects();
             _rig.ResetShake();
             _fx.ClearTransient();
@@ -116,7 +121,8 @@ namespace Musketeers.UI
 
         void StartReplay(int turn)
         {
-            if (_replayResult == null || turn != _replayTurn) return;
+            if (_replayResult == null || turn != _replayTurn || _replayIndex != 0) return;
+            AutoTestTrace("replay started");
             _director.Speed = Mathf.Clamp(_roundReplay.Clips.Count * 0.28f, 0.65f, 0.9f);
             PlayReplayClip();
         }
@@ -137,31 +143,37 @@ namespace Musketeers.UI
             for (int i = 0; i < _board.UnitCount; i++) _board.Unit(i)?.CancelPlayback();
             var min = BoardMath.ToWorld(clip.FrameMin);
             var max = BoardMath.ToWorld(clip.FrameMax);
+            // Tiles mark feet. Include the full upper body, Crown and ability indicator.
+            min.y -= 1.3f; max.y += 2.8f;
             Vector3 point = (min + max) * 0.5f;
             Vector3 cameraPosition = _rig.Camera.transform.position;
             point.z = cameraPosition.z;
             PrimeTween.Tween.StopAll(_rig.Camera.transform);
             PrimeTween.Tween.Position(_rig.Camera.transform, point, _replayIndex == 1 ? 0.01f : 0.25f, Ease.InOutQuad);
-            float size = Mathf.Max(2.4f, (max.y - min.y) * 0.5f + 1.3f, ((max.x - min.x) * 0.5f + 1.3f) / _rig.Camera.aspect);
+            float size = Mathf.Max(2.4f, (max.y - min.y) * 0.5f, ((max.x - min.x) * 0.5f + 1.3f) / _rig.Camera.aspect);
             PrimeTween.Tween.StopAll(_rig.Camera);
             PrimeTween.Tween.Custom(_rig.Camera, _rig.Camera.orthographicSize, size, _replayIndex == 1 ? 0.01f : 0.25f, (camera, value) => camera.orthographicSize = value, Ease.InOutQuad);
             _director.PlayReplay(clip, 10f / Mathf.Max(1, _roundReplay.Clips.Count), PlayReplayClip);
         }
-        void FinishReplay(int turn)
+        void FinishReplay(int turn) => FinishReplay(turn, false);
+        void FinishReplay(int turn, bool immediate)
         {
             if (_replayResult == null || turn != _replayTurn) return;
+            AutoTestTrace(immediate ? "replay individual results" : "replay finished");
             var result = _replayResult; bool final = _replayFinal; _replayResult = null;
-            StopReplayVisuals();
+            StopReplayVisuals(!final || !immediate);
             _director.ShowState(_mc.Current.After, _mc.Current.CrownedBefore);
-            if (final) _mc.ContinueAfterRound();
+            if (final && immediate) _mc.ContinueAfterRound();
             else { _hud.SetVisible(true); ShowRoundScoreboard(result); }
         }
-        void StopReplayVisuals()
+        void StopReplayVisuals(bool restoreMusic = true)
         {
             if (_replayCapture != null) StopCoroutine(_replayCapture);
             _replayCapture = null;
             _director.Stop(); _director.Speed = _replayOldSpeed > 0 ? _replayOldSpeed : 1f;
             _audio?.StopPlaybackEffects();
+            if (restoreMusic && !string.IsNullOrEmpty(_replayMusic))
+                _audio?.Music(_replayMusic, 0.45f);
             PrimeTween.Tween.StopAll(_rig.Camera);
             _rig.ResetShake();
             _rig.Camera.targetTexture = null;

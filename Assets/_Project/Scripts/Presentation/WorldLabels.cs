@@ -70,6 +70,8 @@ namespace Musketeers.Presentation
                     continue;
                 Vector3 world = (wl.Follow != null ? wl.Follow.position : wl.World) + wl.Offset;
                 Vector2 p = RuntimePanelUtils.CameraTransformWorldToPanel(_layer.panel, world, _camera);
+                if (wl.MinimumPanelY > 0f)
+                    p.y = Mathf.Max(p.y, wl.MinimumPanelY + wl.Element.layout.height * 0.5f);
                 // 4F §5: writing left/top dirties the panel's layout, so skip labels that didn't move.
                 if ((p - wl.Shown).sqrMagnitude < 0.01f)
                     continue;
@@ -87,6 +89,7 @@ namespace Musketeers.Presentation
         public Transform Follow;
         public Vector3 World;
         public Vector3 Offset;
+        public float MinimumPanelY;
         public bool Destroyed { get; private set; }
 
         internal WorldLabel(WorldLabels owner, Label element)

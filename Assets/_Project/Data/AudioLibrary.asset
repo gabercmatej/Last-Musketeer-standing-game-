@@ -305,3 +305,6 @@ MonoBehaviour:
   - Key: Voice/nik/victory
     Clips:
     - {fileID: 8300000, guid: 3837833ee2fd14b99a387fc4a0afb5ba, type: 3}
+  - Key: Music/replay
+    Clips:
+    - {fileID: 8300000, guid: 83d01fdda9228468aa7a01594278a463, type: 3}

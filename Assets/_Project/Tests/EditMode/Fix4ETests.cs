@@ -9,12 +9,10 @@ namespace Musketeers.Sim.Tests
     // crates (grit roll), random per-round setup, live kill points, match point, signature event.
     public class Fix4ETests
     {
-        static bool Roll(uint seed) => new DeterministicRng(seed).Range(0, 100) < 50;
-
         static uint SeedWhere(bool lucky)
         {
             for (uint s = 1; s < 1000; s++)
-                if (Roll(s) == lucky) return s;
+                if (new DeterministicRng(s).Range(0, 4) == (lucky ? 1 : 0)) return s;
             throw new System.InvalidOperationException();
         }
 

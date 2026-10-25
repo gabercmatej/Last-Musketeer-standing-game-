@@ -66,6 +66,7 @@ namespace Musketeers.UI
             _leaderboardTab = Tab(tabs, "Character leaderboard", true);
             panel.Add(tabs);
             _list = new ScrollView();
+            GentleScroll.Apply(_list);
             _list.style.flexGrow = 1;
             _list.style.minHeight = 0;
             panel.Add(_list);

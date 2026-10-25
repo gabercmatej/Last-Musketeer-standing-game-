@@ -2,7 +2,7 @@ Every turn, everyone plans 3 actions in secret. When the timer ends (or all of y
 
 Last musketeer standing wins the round. Points decide the match, and whoever wears the Crown becomes the target. Grit pays for the strong moves, and Catch Breath earns you more.
 
-Nobody can walk off the map. On the Bridge, a push over an edge or into a missing corner is a deadly fall. On the Courtyard, the edges are walls. Crates break when shot, shoved or blown up, and may give +1 Grit. Kill points count the moment they happen, and a gold border means match point: if nobody overtakes you by the end of the round, you win.
+Nobody can walk off the map. On the Bridge, a push over an edge or into a missing corner is a deadly fall. On the Courtyard, the edges are walls. Crates break when shot, shoved or blown up, and give a random 0–3 Grit (capped at 5). Kill points count the moment they happen, and a gold border means match point: if nobody overtakes you by the end of the round, you win.
 
 Scoring: +3 for winning a round, +1 per kill, or +2 for killing the Crowned musketeer. Every fall into a pit, water or over an edge costs the victim 1 point, even when someone pushes or pulls them in; the attacker still earns kill points. Scores can go below zero. The match ends at round end when the leading score reaches the target. Ties compare the latest round, then earlier rounds; an exact tie shares the place.
 

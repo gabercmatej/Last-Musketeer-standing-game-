@@ -47,14 +47,16 @@ namespace Musketeers.UI
                 string reason;
                 switch (g.Reason)
                 {
+                    case PointReason.EnvironmentalDeath: reason = "environmental fall"; break;
                     case PointReason.LastStanding: reason = "last one standing"; break;
                     case PointReason.CrownKill: reason = $"took the crown off {names[g.Victim]}"; break;
                     default: reason = $"took down {names[g.Victim]}"; break;
                 }
-                _gains.Add(Row($"+{g.Amount}", $"{names[g.Player]}: {reason}", colors[g.Player]));
+                _gains.Add(Row((g.Amount >= 0 ? "+" : "") + g.Amount, $"{names[g.Player]}: {reason}", colors[g.Player]));
             }
             Totals(_totals, m, names, colors, portraits);
             _continue.text = m.MatchOver ? "See results" : "Next round";
+            _continue.SetEnabled(m.MatchOver);
             SetVisible(true);
         }
 

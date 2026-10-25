@@ -7,7 +7,7 @@ A shove against a parrying musketeer is a Guard Break: they fly two tiles.
 Moving beats shoving and shooting, as long as you move where they didn't aim.
 Kegs explode on the same tick of the next turn. Plan your escape before you throw.
 Watch the muskets over everyone's heads: an unloaded musket can't shoot you.
-Break a crate with a shot, a shove or a blast for a 50% chance at +1 Grit.
+Break a crate with a shot, a shove or a blast for a random 0–3 Grit reward.
 Crates are placed at random every round, and on the Courtyard so are the pits. Read the board first.
 The outer ring crumbles from turn 6. Red tiles fall at the start of next turn.
 The leader wears the Crown. Taking it off them is worth 2 points.

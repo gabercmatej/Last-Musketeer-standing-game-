@@ -18,7 +18,6 @@ namespace Musketeers.UI
     public sealed partial class AppFlow : MonoBehaviour
     {
         const string SpeedKey = "Musketeers.Speed";
-        const float ScoreboardSeconds = 10f;
         const float EmoteCooldown = 1.2f;
 
         enum Screen { Menu, Lobby, Loading, Match, Results }
@@ -85,7 +84,8 @@ namespace Musketeers.UI
         bool[] _locked;
         int _activeSlot;
         int _speedIndex = 1;
-        float _scoreboardLeft;
+        readonly PostReplayCountdown _postReplay = new PostReplayCountdown();
+        Coroutine _victoryDelay;
         bool _planning;
         int _lastPlanCount;
         bool _lastLocked;
@@ -145,6 +145,7 @@ namespace Musketeers.UI
             InitDay6Lobby();
             InitReplay();
             InitHistory();
+            _root.Query<ScrollView>().ForEach(GentleScroll.Apply);
 
             _menu.PlayClicked += ShowCharacterSelect;
             _menu.HostClicked += HostOnline;
@@ -327,6 +328,7 @@ namespace Musketeers.UI
             _charSelectFromLobby = false;
             _model.Name = _menu.PlayerName;
             ShowStageBackdrop();
+            PlayLobbyMusic();
             _charSelect.Show(_model.Character);
         }
 
@@ -348,6 +350,7 @@ namespace Musketeers.UI
             _charSelectFromLobby = true;
             _lobby.SetVisible(false);
             ShowStageBackdrop();
+            PlayLobbyMusic();
             _charSelect.Show(_model.Character);
         }
 
@@ -410,6 +413,8 @@ namespace Musketeers.UI
         void Teardown()
         {
             CancelReplay();
+            if (_victoryDelay != null) StopCoroutine(_victoryDelay);
+            _victoryDelay = null; _postReplay.Reset();
             PrimeTween.Tween.StopAll(this);   // delayed results sounds (victory line)
             _results.Stop();                  // pending badge reveals
             _planning = false;
@@ -734,7 +739,8 @@ namespace Musketeers.UI
                     _planBar.Refresh(ownPlan, _mc.Cfg, character);
                     _preview.Draw(ownPlan, _colors[plan.Slot], null);
                 }
-            _log.Turn(p);
+            _log.Turn(p, _setup.MapId == "bridge");
+            AutoTestRewards(p);
             Tween(_mc.Cfg.RevealMs / 1000f, () => BeginTurnPlayback(p));
         }
 
@@ -755,13 +761,27 @@ namespace Musketeers.UI
             });
         }
 
-        void OnRoundEnded(RoundResult r) => BeginRoundReplay(r);
+        void OnRoundEnded(RoundResult r)
+        {
+            if (_victoryDelay == null) _victoryDelay = StartCoroutine(WaitForVictory(r));
+        }
+        System.Collections.IEnumerator WaitForVictory(RoundResult result)
+        {
+            yield return new WaitForSecondsRealtime(PostReplayCountdown.VictoryDelay);
+            _victoryDelay = null;
+            if (_mc != null && _mc.Phase == MatchPhase.RoundOver) BeginRoundReplay(result);
+        }
+        double ReviewClock => _netTransport != null && !_mc.Match.MatchOver && MatchNet.Instance != null
+            ? MatchNet.Instance.ReviewClock : Time.unscaledTimeAsDouble;
 
         void ShowRoundScoreboard(RoundResult r)
         {
             var m = _mc.Match;
             _scoreboard.Show(r, m, _setup.Names, _colors, _portraits);
-            _scoreboardLeft = AutoHumans ? 1.5f : ScoreboardSeconds;
+            double deadline = _netTransport != null && !m.MatchOver && MatchNet.Instance != null ? MatchNet.Instance.ReviewEndsAt : 0;
+            _postReplay.Begin(_mc.TurnSeq, ReviewClock, deadline);
+            _scoreboard.SetCountdown(5, m.MatchOver);
+            AutoTestTrace("review begin remaining=5");
             _hud.SetPhase("Round over");
             if (r.Winner >= 0)
                 _log.Line($"{_setup.Names[r.Winner]} wins round {r.RoundNumber}", "log-line--turn");
@@ -786,6 +806,9 @@ namespace Musketeers.UI
         {
             if (_replayResult != null || _mc == null || _mc.Phase != MatchPhase.RoundOver)
                 return;
+            if (!_mc.Match.MatchOver && _postReplay.Remaining(ReviewClock) > 0f) return;
+            AutoTestTrace("review end");
+            _postReplay.Finish();
             _scoreboard.SetVisible(false);
             _mc.ContinueAfterRound();
         }
@@ -999,11 +1022,11 @@ namespace Musketeers.UI
                 _board.Unit(i)?.SetPlanningReady(planning && _mc.IsLocked(i));
             }
 
-            if (_mc.Phase == MatchPhase.RoundOver)
+            if (_mc.Phase == MatchPhase.RoundOver && _postReplay.Active)
             {
-                _scoreboardLeft -= dt;
-                _scoreboard.SetCountdown(Mathf.CeilToInt(Mathf.Max(0f, _scoreboardLeft)), m.MatchOver);
-                if (_scoreboardLeft <= 0f)
+                float left = _postReplay.Remaining(ReviewClock);
+                _scoreboard.SetCountdown(Mathf.CeilToInt(left), m.MatchOver);
+                if (left <= 0f)
                     ContinueAfterRound();
             }
         }

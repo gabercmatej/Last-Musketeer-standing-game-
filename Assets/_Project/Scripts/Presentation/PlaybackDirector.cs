@@ -107,6 +107,7 @@ namespace Musketeers.Presentation
         // one after another) and plays each group, waiting for its longest animation.
         IEnumerator PlayLog(EventLog log)
         {
+            int indicated = 0;
             int i = 0;
             while (i < log.Count)
             {
@@ -114,6 +115,16 @@ namespace Musketeers.Presentation
                 var phase = log[i].Phase;
                 do
                 {
+                    var activation = log[i];
+                    // A Triple Shot produces three shot events in this tick: announce it once.
+                    if ((activation.Kind == SimEventKind.BullRushed || StartsTripleChargeShot(activation)) &&
+                        activation.Unit >= 0 && activation.Unit < 4 && (indicated & (1 << activation.Unit)) == 0)
+                    {
+                        indicated |= 1 << activation.Unit;
+                        var unit = _board.Unit(activation.Unit);
+                        if (unit != null) _fx.AbilityIndicator(unit.transform,
+                            activation.Kind == SimEventKind.BullRushed ? "FX/bull_rush" : "FX/triple_shot", S(1.15f));
+                    }
                     _group.Add(log[i]);
                     i++;
                 } while (i < log.Count && log[i].Phase == phase && !(phase == SimPhase.MovementAbilities && StartsAbility(log[i].Kind))
@@ -464,7 +475,7 @@ namespace Musketeers.Presentation
                         _fx.Dust(to, 0f, 0.9f, S(0.45f));
                     });
                     Sfx(delay, "SFX/impacts/crate_break");
-                    // FIXES_4E §5.2: a lucky crate pays its breaker 1 Grit; the sim already rolled it (Amount = Grit gained).
+                    // §3: the sim already rolled the crate's 0–3 reward (Amount = Grit actually gained).
                     if (e.Amount > 0 && u != null)
                     {
                         At(delay + 0.2f, () => _fx.Popup("+" + e.Amount + " Grit", u.transform.localPosition + Vector3.up * 1.1f, Gold, S(1f), "popup-big"));

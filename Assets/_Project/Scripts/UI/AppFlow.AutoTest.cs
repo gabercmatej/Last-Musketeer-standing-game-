@@ -1,5 +1,6 @@
 using System;
 using Musketeers.Net;
+using Musketeers.Game;
 using Musketeers.Sim;
 using UnityEngine;
 #if UNITY_EDITOR
@@ -112,6 +113,21 @@ namespace Musketeers.UI
             var plan = _atBot.Plan(round, _mc.Cfg, _mc.Match.RoundNumber);
             plan.Slot = (byte)slot;
             _mc.SubmitPlan(plan, true);
+        }
+
+        // Opt-in test evidence only; no additional logging during ordinary games.
+        void AutoTestTrace(string stage)
+        {
+            if (_atMode != AutoTestMode.Off && _mc != null)
+                Debug.Log($"AUTOTEST {stage} slot={_setup.LocalSlot} turn={_mc.TurnSeq} round={_mc.Current?.RoundNumber} final={_mc.Match.MatchOver} clock={ReviewClock:F3} music={_audio?.CurrentMusic}");
+        }
+        void AutoTestRewards(TurnPlayback playback)
+        {
+            if (_atMode == AutoTestMode.Off) return;
+            foreach (var log in playback.TickLogs)
+                foreach (var e in log.Events)
+                    if (e.Kind == SimEventKind.CrateDestroyed)
+                        Debug.Log($"AUTOTEST crate turn={playback.TurnSeq} tick={e.Tick} tile={e.To} owner={e.Unit} grit={e.Amount} hash={playback.After.ComputeHash():x8}");
         }
 
         void AutoTestMatchOver(MatchState m)

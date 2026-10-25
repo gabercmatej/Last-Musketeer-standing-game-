@@ -12,6 +12,8 @@ namespace Musketeers.Presentation
         [SerializeField] private WorldLabels _labels;
         [SerializeField] private CameraRig _camera;
 
+        readonly System.Collections.Generic.Dictionary<Transform, SpriteRenderer> _abilityIndicators = new System.Collections.Generic.Dictionary<Transform, SpriteRenderer>();
+
         public WorldLabels Labels => _labels;
         public ArtLibrary Art => _art;
 
@@ -46,6 +48,28 @@ namespace Musketeers.Presentation
             Tween.Scale(sr.transform, to * k, duration, ease);
             FadeOut(sr, duration * 0.55f, duration * 0.45f);
             return sr;
+        }
+
+        // Follows the actor above health/Crown. The lifetime belongs to the transient FX root,
+        // so replay/round cancellation also cancels its follow, pop and fade.
+        public void AbilityIndicator(Transform follow, string key, float seconds)
+        {
+            if (_abilityIndicators.TryGetValue(follow, out var previous) && previous != null)
+            {
+                Tween.StopAll(previous); Tween.StopAll(previous.transform);
+                previous.gameObject.SetActive(false); Destroy(previous.gameObject);
+            }
+            var sr = Burst(key, PlaceholderArt.Star, Color.white,
+                follow.localPosition + Vector3.up * 2.35f, 0.65f, 0.85f, seconds);
+            _abilityIndicators[follow] = sr;
+            sr.gameObject.name = "ability-indicator";
+            Tween.StopAll(sr.transform);
+            Tween.Scale(sr.transform, 0.85f * SizeOf(sr.sprite), 0.14f, Ease.OutBack);
+            Tween.Custom(sr, 0f, 1f, seconds, (self, t) =>
+            {
+                if (self != null && follow != null)
+                    self.transform.localPosition = follow.localPosition + Vector3.up * (2.35f + 0.08f * t);
+            });
         }
 
         // Muzzle flash pointing along `dir` from the barrel tip.
@@ -181,6 +205,7 @@ namespace Musketeers.Presentation
 
         public void ClearTransient()
         {
+            _abilityIndicators.Clear();
             foreach (Transform child in transform)
             {
                 foreach (var part in child.GetComponentsInChildren<Transform>(true)) Tween.StopAll(part);

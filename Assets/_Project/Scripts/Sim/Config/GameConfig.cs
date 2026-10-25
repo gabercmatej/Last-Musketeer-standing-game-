@@ -53,8 +53,8 @@ namespace Musketeers.Sim
         public int TripleChargeShots = 3;     // §4 Triple Charge: shots per charge (range is FireRange)
         public int TripleChargeMaxDamage = 3; // §4 Triple Charge: max damage any one musketeer takes from one use
         public int TripleChargePush = 1;      // §4 Triple Charge: tiles each hit slides the target
-        public int CrateGritChancePct = 50;   // FIXES_4E §5.2: chance a destroyed crate pays the destroyer Grit
-        public int CrateGrit = 1;             // FIXES_4E §5.2: Grit paid (capped at MaxGrit)
+        public int CrateGritMin = 0;         // §3: uniform inclusive crate reward range
+        public int CrateGritMax = 3;         // capped at MaxGrit
         public int RandomPitsMin = 3;         // FIXES_4E §5.3: random pits per round on '@randompits' maps
         public int RandomPitsMax = 6;
         public int RandomCrates = 3;          // FIXES_4E §5.3: random crates per round on '@randomcrates' maps

@@ -40,23 +40,23 @@ namespace Musketeers.UI
             _scroll.schedule.Execute(() => _scroll.scrollOffset = new UnityEngine.Vector2(0, float.MaxValue));
         }
 
-        public void Turn(TurnPlayback p)
+        public void Turn(TurnPlayback p, bool water = false)
         {
             Line($"Round {p.RoundNumber}, turn {p.RoundTurn}", "log-line--turn");
             for (int t = 0; t < p.TickCount; t++)
             {
                 Line($"Tick {t + 1}", "log-line--tick");
-                Events(p.TickLogs[t], p.Names);
+                Events(p.TickLogs[t], p.Names, p.Before.Board, water);
             }
             if (p.Outcome.TurnStart != null && p.Outcome.TurnStart.Count > 0)
             {
                 Line("Turn start", "log-line--tick");
-                Events(p.Outcome.TurnStart, p.Names);
+                Events(p.Outcome.TurnStart, p.Names, p.Before.Board, water);
             }
         }
 
         // Ring warnings and crumbles produce one event per tile; show each line once.
-        void Events(EventLog log, string[] names)
+        void Events(EventLog log, string[] names, Board board = null, bool water = false)
         {
             string last = null;
             for (int i = 0; i < log.Count; i++)
@@ -64,7 +64,7 @@ namespace Musketeers.UI
                 var e = log[i];
                 if (e.Kind == SimEventKind.ParryRaised)
                     continue;
-                string text = EventText.Describe(e, names);
+                string text = EventText.Describe(e, names, log, board, water);
                 if (text == last)
                     continue;
                 last = text;

@@ -50,7 +50,7 @@ At the start of each round, the player with strictly the most match points wears
 | Floor | `.` | yes | pass | |
 | Bridge | `b` | yes | pass | Plain Floor for the rules. It only looks like a bridge; pushes off its sides drop you into the water. |
 | Pillar | `#` | no | block | Indestructible |
-| Crate | `o` | no | block | Always destructible: by a shot, a **Shove** (the crate breaks instead of moving) or an explosion → becomes Floor. The destroyer has a **50% chance of +1 Grit** (capped at max Grit). |
+| Crate | `o` | no | block | Always destructible: by a shot, a **Shove** (the crate breaks instead of moving) or an explosion → becomes Floor. The destroyer has a **uniform random 0–3 Grit reward (each outcome 25%)** (capped at max Grit). |
 | Pit / moat / water | `~` | deadly | pass | Entering = **ring-out** (instant death). Off-board counts as pit, unless the map has walled edges. |
 | Removed | `x` | no | block | Outside the board (the background shows). Treated exactly like off-board on that map: a wall on walled maps, a deadly drop otherwise. |
 | Spawn | `1`–`4` | Floor | | Player slot spawn |
@@ -348,7 +348,7 @@ Offline (vs bots) the lobby is local; online (Day 5) the same lobby is shared an
 | KegKickDistance | 3 |
 | Costs: Dash / Parry / Keg / Signature | 1 / 1 / 2 / 5 |
 | GrappleRange / BullRushDistance / BullRushPush / BullRushDamage | 5 / 3 / 5 / 1 |
-| CrateGritChancePct / CrateGrit | 50 / 1 |
+| CrateGritMin / CrateGritMax | 0 / 3 |
 | RandomPitsMin / RandomPitsMax / RandomCrates | 3 / 6 / 3 |
 | CrumbleStartTurn / CrumbleEvery | 5 / 2 |
 | PointsToWin / WinPoints / KillPoints / CrownKillPoints | 12 (lobby: 10-30) / 3 / 1 / 2 |

@@ -164,6 +164,7 @@ namespace Musketeers.Presentation
                 _rigs[i] = rig;
 
                 _names[i] = _names[i] ?? _labels.Create("", "stage-name");
+                _names[i].MinimumPanelY = 0f;
                 _names[i].Text = names[i];
                 _names[i].Element.style.color = Color.Lerp(_art.CharacterColor(characters[i]), Color.white, 0.3f);
                 _names[i].Follow = spot.transform;
@@ -344,7 +345,12 @@ namespace Musketeers.Presentation
                 // Points line just over the head (above the Crown for 1st), the name over that.
                 float top = (place == 1 ? 1.9f : 1.58f) * s;
                 if (_tags[i] != null) _tags[i].Offset = new Vector3(0f, top + 0.12f, 0f);
-                if (_names[i] != null) _names[i].Offset = new Vector3(0f, top + 0.42f, 0f);
+                if (_names[i] != null)
+                {
+                    _names[i].Offset = new Vector3(0f, top + 0.30f, 0f);
+                    // Keep podium names below the unchanged top action row at every aspect.
+                    _names[i].MinimumPanelY = 108f;
+                }
             }
         }
     }
