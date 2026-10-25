@@ -8,7 +8,7 @@
 **Spec:** User request dated 2026-10-23; docs/CODEX_HANDOFF.md Day 6; GAME_DESIGN with explicit Oct 23–24 amendments: environmental-death -1, Bridge pillars, Grappin/Parry and four-round spawn rotation.
 
 ## Constraints and review focus
-- Never edit Data/Fits, cosmetic/weapon fit assets, FitDefaults.json; never run reset import. No installs.
+- Never edit Data/Fits, cosmetic/weapon fit assets, FitDefaults.json; never run reset import. Pinned Netlify SDK install explicitly approved on2026-10-25.
 - Humans replace bots; ownership and character uniqueness survive rename/lobby changes.
 - Every fall penalizes its victim exactly once, including forced falls/crumble, without losing attacker credit.
 - Genuine completed matches with >=2 humans and zero bots alone qualify for history; stable IDs deduplicate retries and rematches differ.
@@ -16,35 +16,35 @@
 - Match-point gold resets; interrupted result reveals cancel sounds and animations.
 
 ## Status notation
-Checked implementation items mean the code is present/reviewed, not that browser behavior was observed. Separate runtime/release gates remain unchecked until root records evidence. Shared cross-device history is explicitly deferred to v1.1; shipped fallback is labeled browser-local.
+Checked implementation items mean the code is present/reviewed, not that browser behavior was observed. Separate runtime/release gates remain unchecked until root records evidence. Shared cross-device history is implemented in the final amendment below; earlier deferral entries are historical.
 
 ## A — Simulation, stats, map (worker)
 - [x] Test environmental penalties for self/forced/crumble deaths, duplicate prevention, scoring/ties, snapshot determinism.
 - [x] Implement -1 environmental death points with config/event reasons; preserve attacker kill scoring; reuse existing deaths stats/hash/snapshot serialization.
 - [x] Bridge pillar moves from (7,4) to (2,4) and (12,4), center clear; update only corresponding map expectations, retain appearance.
-- [ ] Lead runs MCP compilation and EditMode regression; review and commit verified files.
+- [x] Lead runs MCP compilation and EditMode regression; review and commit verified files.
 
 ## B — Lobby and online safety (worker)
 - [x] Rename with existing art to right of Change Musketeer; sanitized host-authoritative updates and persisted local name.
 - [x] Bots stepper: offline 3 default, 1–3; online 0 default, 0–3 constrained by human count. Human joins evict bots, never reject due to bots.
 - [x] Lobby chat reuses host ChatRelay; refresh/running-match join gives clear no-rejoin message.
 - [x] Tests for rename ownership, bots replacement and constraints, chat routing. Lead integrates AppFlow wiring where needed.
-- [ ] Lead runs MCP compilation/tests; review and commit verified files.
+- [x] Lead runs MCP compilation/tests; review and commit verified files.
 
 ## C — Presentation and settings (lead)
 - [x] Inspect reveal, match-point reset, round victory cue; fix gaps only.
 - [x] Results placement entrance last to first, badges after standings, sound on appearance; points/round wins/kills/deaths; popup retains lower close and adds upper X.
 - [x] Reuse Change Name and Match Logs artwork. Main scoring instructions include environmental penalty.
-- [ ] Persist mute independently of slider levels. Diagnose existing Batman catalog visibility without touching fits. Character-color default feather/cape preserves custom selections.
+- [x] Persist mute independently of slider levels. Diagnose existing Batman catalog visibility without touching fits. Character-color default feather/cape preserves custom selections.
 - [x] Add Match Logs menu/results entry and compact expandable two-tab browser-local view; immutable start roster eligibility, host-issued match ID, legitimate completion hook, persistence/dedup and leaderboard derived from saved records. Shared implementation deferred explicitly below.
-- [ ] Verify UI in Unity, compile and regression tests; commit verified files.
+- [x] Verify UI in Unity, compile and regression tests; commit verified files.
 
 ## D — Finish
-- [ ] Full MCP EditMode suite excluding Balance; report pass/fail and zero console errors.
-- [ ] Bump version, rebuild reproducible Main scene if necessary; Web build to Builds/Web.
+- [x] Full MCP EditMode suite excluding Balance; report pass/fail and zero console errors.
+- [x] Bump version, rebuild reproducible Main scene if necessary; Web build to Builds/Web.
 - [ ] Separate visible browser windows: full online match, lobby return/rematch, chat/rename/bot replacement; distinguish local-browser verification from another network.
 - [ ] Deploy via tools/deploy-web.sh. Update decisions/handoff/checklist with evidence and exact remaining backend blocker if any.
-- [ ] Explicitly stage relevant files only, commit then push origin main as separate commands.
+- [x] Explicitly stage relevant files only, commit then push origin main as separate commands.
 
 ## Amendments — 2026-10-24 (latest user specification)
 - [x] Required fast chronological round-death montage from snapshots/logs; short lead-ins, simultaneous deaths grouped; existing Killcam badge, thin red frame, restrained focus/zoom, visible Skip. Any human skip is host-authoritative and ends replay for all; repeated clicks/disconnects safe; no sim mutation.
@@ -78,4 +78,16 @@ Checked implementation items mean the code is present/reviewed, not that browser
 - [x] Remove lobby chat interface; retain reusable match chat/emotes.
 - [x] Replace opponents' arena arrows with compact portrait/action/direction rows, resolved plans only, cleared next planning; own preview retained.
 - [x] 589/589 fresh MCP EditMode tests; zero compile errors; Play Mode inset/panel rendered. Web v0.4.1 built successfully in 131s. Commit41c24c2 pushed.
-- [ ] Revised candidate Chrome smoke: global skip, local final results, independent returns and full second match; exact hashes and deployment evidence recorded at completion.
+- [x] Revised candidate Chrome smoke: global skip, local final results, independent returns and full second match; evidence in DAY6_VERIFICATION.md.
+
+## Final shared-history and bug-fix acceptance (2026-10-25)
+- [x] Local gold/opponent spawn rings, fixed to tiles; rotated assignments; pit cleanup. Both maps and offline/online inspected.
+- [x] Netlify Functions + Blobs, JWT/project validation, host registration, immutable deduplication, server timestamps, isolated preview stores. SDK installed with explicit approval.
+- [x] Royal supplied artwork, sliced icons/banners, character-based portraits, live shared wins/recency ties. Both browsers show same records; reload persistence; detailed stats/badges.
+- [x] Two qualifying real-Relay matches saved exactly once each; completed bot match excluded and leaderboard unchanged. Automated production submissions rejected.
+- [x] Own planner preserved through edit/lock/reveal/execution, including offline synchronous submission; independent opponent panel.
+- [x] Replay audio/tween/pose/recoil cleanup; baseline camera; natural/global Skip/local final exit. Cause-aware bounds, simultaneous grouping and no sim mutation.
+- [x] Final595 EditMode +6 service tests;0 compile errors; successful67-second build. Candidate two full matches plus bot completion,0 browser error logs.
+- [ ] Production publish + post-publish URL/version/API verification (append final deployment evidence).
+
+Earlier mixed runtime checkboxes remain conservative: not every cosmetic/disconnect/audio combination was manually exercised. Different-network play and subjective audio remain human acceptance checks, not claimed passes.

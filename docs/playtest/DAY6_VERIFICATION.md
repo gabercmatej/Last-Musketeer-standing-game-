@@ -29,3 +29,12 @@ Retry required: at22:30:04 UTC all three clients reported Relay inactivity/alloc
 ## Morning presentation fix checkpoint
 
 595/595 EditMode tests passed (8.59s, job `04c1d51ce1b445bc96957155736f178b`), zero errors. Added planner icon/direction/label retention through lock/opponent visibility, direct-shot/forced-fall/environmental/old-credit framing checks. PlayMode active audio channels1→0; repeated stop preserved music; reset camera stayed at zero on a later probe. Latest hosted Chrome and rebuild checks pending. The previous0.4.2 qualifying manual match was interrupted before completion.
+
+## Final hosted candidate — passed
+
+- Latest source `fd984f8`, preview deploy `6addae11c28b5f91fdd971ab`, v0.4.2. Full595/595 EditMode again after rig cleanup (8.51s), no skipped/failed; console0 errors, final Web build67s.
+- Two visible Chrome windows, actual Relay/WSS, same network: full Bridge (`0b7e544b`) then Courtyard (`52447920`) in lobby `DCPHPD`. Hashes here are host values in the server records; no guest hash logging in manual mode. Both clients showed matching results and no error logs. Earlier three-client hash comparisons remain separate historical evidence.
+- Local plan visible locked before opponent; own icons/directions/names survived reveal/execution. Offline immediate submission also kept all3 slots (Keg/Catch Breath/Catch Breath). Screenshots final-host-locked / final-bot-planner-reveal.
+- Non-final guest Skip captured with replay then host round scoreboard; next-round arena clean, rings rotated. Final guest See Results captured with guest Results and host still replaying; independent lobby return and natural final completion observed. Self-caused framing inspected; player-shot replay exercised in Bridge; causal bounds regression-tested. Audio channel cancellation/baseline covered by PlayMode probe; no claim of subjective listening.
+- Real client registered/submitted two qualifying matches: shared store exactly2 distinct IDs, Matej2 wins. Matching host/guest illustrated standings; expanded statistics/badges; both matches survived browser reload. Completed bot match afterward produced no record and Matic remained0 shared wins. See final-shared-records.json and screenshots.
+- Final production URL/version/API check recorded after publish below. Another network/device and subjective audio remain friend acceptance checks.

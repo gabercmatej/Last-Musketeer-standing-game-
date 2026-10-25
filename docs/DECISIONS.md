@@ -265,3 +265,5 @@ Format: `YYYY-MM-DD — Decision — Why`
 - 2026-10-25 — User removed lobby chat and replaced opponents' map-wide reveal with a compact resolved-plan panel; local planning preview and match chat/emotes remain. Opponent summaries are cleared at next planning.
 
 - 2026-10-25: Replay framing uses direct causal events in the elimination clip, rather than historical kill credit alone; simultaneous deaths share one framing box. Replay boundaries cancel effects/voices and normalize camera without touching authoritative state.
+
+- 2026-10-25: Shared records use authenticated host-bound Netlify Functions/Blobs conditional writes and server timestamps; previews are isolated by deploy ID, production store persists across deploys. Standings derive from records with recency then character-ID ties; modified hosts remain trusted, not cheat-proof.

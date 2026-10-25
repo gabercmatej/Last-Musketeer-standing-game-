@@ -2,6 +2,18 @@
 
 You (Codex) are taking over from Claude Code. Read this file first, then `AGENTS.md`. **Goal: finish Day 5 (online), then Day 6 and Day 7, within 2 days, so 4 friends can play in their browsers this weekend.**
 
+## Final release candidate verified — 2026-10-25
+
+Version0.4.2, latest code `fd984f8` (planner/replay milestone `e444059`, shared-history/art `935e858`). Candidate deploy `6addae11c28b5f91fdd971ab`, https://day6-final--last-musketeer.netlify.app. Production publish is the remaining immediate step; production is still0.3.0 at this checkpoint.
+
+- Latest source:595/595 EditMode passed,0 failed/skipped,8.51s; console0 errors; Web build67s. Backend6 tests pass, audit0 vulnerabilities; isolated authenticated API/idempotency smoke passed.
+- Chrome two separate visible windows, same machine/network, actual Relay/WSS: completed Bridge then Courtyard in the same session, independently returned and readied, no client errors. Server host final hashes `0b7e544b` and `52447920`; manual mode does not print each guest hash, so none is invented. Earlier three-client identical hashes remain below.
+- Full local plans visibly retained when locking before opponent, at reveal/execution, and in offline immediate resolution (Keg/Catch Breath/Catch Breath). Opponent rows separate.
+- Guest global Skip photographed during non-final replay → host normal round scoreboard; clean next round and rotated rings. Final guest See Results → local Results while host still visibly replaying. Natural completion also passed. Self-caused framing, stationary backdrop, original-aspect badge and red frame visually checked; direct shot framing exercised in Bridge, bounds covered by regression tests. Audio channel cancellation/camera baseline verified via PlayMode probe; subjective sound quality still needs human ears.
+- Two qualifying matches saved exactly once each under distinct IDs. Both clients showed same standings; details contain points/round wins/kills/deaths/badges. Browser reload retained both records. Completed one-human/one-bot match afterward: shared count stayed2, bot winner Matic stayed0 wins. All records are in isolated preview storage, not production.
+- New royal art and both map rings inspected in Chrome; offline bot capes/feathers character-colored. Tile disappearance checked in PlayMode. Protected fits untouched.
+- Evidence: docs/playtest/day6/final-*.png/json and DAY6_VERIFICATION.md. Remaining human acceptance: different-network friend session, subjective audio balance/badge timing, broad roster/disconnect combinations. No further feature work before release.
+
 ## Release-blocking presentation fixes — 2026-10-25 morning
 
 - User added planner retention, replay cleanup and cause-aware framing before final release. Production remains v0.3.0; do not publish before latest candidate checks.
