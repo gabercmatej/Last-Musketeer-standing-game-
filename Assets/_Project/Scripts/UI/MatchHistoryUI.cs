@@ -1,4 +1,5 @@
 using System;
+using System.Globalization;
 using Musketeers.Data;
 using Musketeers.Game;
 using Musketeers.Net;
@@ -126,11 +127,21 @@ namespace Musketeers.UI
                 _list.Add(MatchCard(history.Matches[i], i + 1));
         }
 
+        public static string FormatCompletedTime(string utc)
+        {
+            if (!DateTimeOffset.TryParse(utc, CultureInfo.InvariantCulture, DateTimeStyles.AssumeUniversal, out var instant))
+            {
+                if (!DateTimeOffset.TryParseExact(utc, "yyyy-MM-dd HH:mm 'UTC'", CultureInfo.InvariantCulture,
+                    DateTimeStyles.AssumeUniversal, out instant)) return utc ?? "";
+            }
+            return instant.ToLocalTime().ToString("dd MMM yyyy '·' HH:mm", CultureInfo.InvariantCulture);
+        }
+
         VisualElement MatchCard(MatchHistoryRecord match, int number)
         {
             var card = new VisualElement();
-            card.style.marginBottom = 12;
-            card.style.paddingBottom = 8;
+            card.style.marginBottom = 7;
+            card.style.paddingBottom = 4;
             card.style.borderBottomWidth = 1;
             card.style.borderBottomColor = new Color(1, 1, 1, 0.2f);
             var summary = new Button { focusable = false, tooltip = "Expand match details" };
@@ -138,7 +149,13 @@ namespace Musketeers.UI
             summary.style.height = StyleKeyword.Auto;
             summary.style.flexDirection = FlexDirection.Column;
             summary.style.alignItems = Align.Stretch;
-            summary.Add(new Label($"#{number} · {match.MapId} · {match.CompletedUtc}"));
+            var header = new VisualElement();
+            header.style.flexDirection = FlexDirection.Row; header.style.justifyContent = Justify.SpaceBetween;
+            header.style.flexWrap = Wrap.Wrap; header.style.paddingBottom = 3;
+            string map = match.MapId == "bridge" ? "The Bridge" : match.MapId == "courtyard" ? "The Courtyard" : match.MapId;
+            var heading = new Label($"#{number} · {map}"); heading.AddToClassList("history-card-heading");
+            var date = new Label(FormatCompletedTime(match.CompletedUtc)); date.AddToClassList("history-card-date");
+            header.Add(heading); header.Add(date); summary.Add(header);
             var compact = new VisualElement();
             compact.style.flexDirection = FlexDirection.Row;
             compact.style.flexWrap = Wrap.Wrap;
@@ -147,12 +164,20 @@ namespace Musketeers.UI
                 var chip = new VisualElement();
                 chip.style.flexDirection = FlexDirection.Row;
                 chip.style.alignItems = Align.Center;
-                chip.style.marginRight = 18;
+                chip.style.flexBasis = Length.Percent(match.Players.Count == 3 ? 100f / 3f : 50f);
+                chip.style.flexShrink = 0; chip.style.minWidth = 0; chip.style.minHeight = 34;
+                chip.style.paddingRight = 8;
                 var character = Character(player.CharacterId);
                 var icon = UiArt.Image("total-swatch", character?.Portrait, character != null ? character.Color : Color.white);
-                icon.style.width = icon.style.height = 30;
+                icon.style.width = icon.style.height = 26; icon.style.flexShrink = 0;
                 chip.Add(icon);
-                chip.Add(new Label($"{ResultsLayout.Ordinal(player.Place)} {player.Name}"));
+                var place = new Label(ResultsLayout.Ordinal(player.Place));
+                place.AddToClassList("history-place"); place.AddToClassList("history-place--" + player.Place);
+                chip.Add(place);
+                var name = new Label(player.Name) { tooltip = player.Name };
+                name.AddToClassList("history-player-name");
+                name.style.color = character != null ? Color.Lerp(character.Color, Color.white, 0.5f) : Color.white;
+                chip.Add(name);
                 compact.Add(chip);
             }
             summary.Add(compact);
@@ -226,19 +251,34 @@ namespace Musketeers.UI
                 row.style.height = 84; row.style.minHeight = 84; row.style.marginBottom = 7;
                 var banner = new Image { sprite = UiArt.Get("UI/leaderboard/rank-" + rank), scaleMode = ScaleMode.ScaleToFit, pickingMode = PickingMode.Ignore };
                 banner.StretchToParentSize(); row.Add(banner);
+                // Overlay coordinates follow the image's fitted rectangle, including letterboxing.
+                var content = new VisualElement { pickingMode = PickingMode.Ignore };
+                content.style.position = Position.Absolute; row.Add(content);
+                row.RegisterCallback<GeometryChangedEvent>(e =>
+                {
+                    var sprite = banner.sprite;
+                    float aspect = sprite != null ? sprite.rect.width / sprite.rect.height : 2070f / 160f;
+                    float width = Mathf.Min(e.newRect.width, e.newRect.height * aspect);
+                    float height = width / aspect;
+                    content.style.left = (e.newRect.width - width) * 0.5f;
+                    content.style.top = (e.newRect.height - height) * 0.5f;
+                    content.style.width = width; content.style.height = height;
+                });
                 string portraitId = total.CharacterId == "aljaz" ? "aljaž" : total.CharacterId;
                 var portrait = new Image { sprite = UiArt.Get("UI/leaderboard/" + portraitId + "_leaderboard") ?? character?.Portrait,
                     scaleMode = ScaleMode.ScaleToFit, pickingMode = PickingMode.Ignore };
-                portrait.style.position = Position.Absolute; portrait.style.left = Length.Percent(12);
-                portrait.style.width = Length.Percent(26); portrait.style.height = 84; row.Add(portrait);
+                portrait.style.position = Position.Absolute; portrait.style.left = Length.Percent(13);
+                portrait.style.width = Length.Percent(24); portrait.style.height = Length.Percent(100); content.Add(portrait);
                 var name = new Label(character != null ? character.DisplayName : total.CharacterId);
-                name.style.position = Position.Absolute; name.style.left = Length.Percent(41); name.style.top = 23;
-                name.style.fontSize = 28; name.style.color = new Color(1f, 0.88f, 0.55f);
-                name.style.unityFontStyleAndWeight = FontStyle.Bold; row.Add(name);
+                name.AddToClassList("leaderboard-character-name");
+                name.style.position = Position.Absolute; name.style.left = Length.Percent(41); name.style.right = Length.Percent(22);
+                name.style.top = name.style.bottom = 0;
+                name.style.fontSize = 30; name.style.unityTextAlign = TextAnchor.MiddleLeft; content.Add(name);
                 var wins = new Label(total.Wins.ToString());
-                wins.style.position = Position.Absolute; wins.style.right = Length.Percent(4); wins.style.top = 8;
-                wins.style.width = Length.Percent(14); wins.style.fontSize = 30;
-                wins.style.color = Color.white; wins.style.unityTextAlign = TextAnchor.MiddleCenter; row.Add(wins);
+                wins.style.position = Position.Absolute; wins.style.left = Length.Percent(84.9f); wins.style.top = Length.Percent(13);
+                wins.style.width = Length.Percent(12); wins.style.height = Length.Percent(55);
+                wins.style.fontSize = Mathf.Min(30f, 90f / Mathf.Max(1, total.Wins.ToString().Length));
+                wins.style.color = Color.white; wins.style.unityTextAlign = TextAnchor.MiddleCenter; content.Add(wins);
                 _list.Add(row);
             }
         }

@@ -57,5 +57,22 @@ namespace Musketeers.Sim.Tests
             Assert.That(labels[0].text, Does.StartWith("Next"));
         }
 
+        [Test]
+        public void HistoryDate_EquivalentOffsetsAndLegacyUtcShowSameLocalTime()
+        {
+            string formatted = MatchHistoryUI.FormatCompletedTime("2026-10-25T07:28:00Z");
+            Assert.That(formatted, Is.EqualTo(MatchHistoryUI.FormatCompletedTime("2026-10-25T09:28:00+02:00")));
+            Assert.That(formatted, Is.EqualTo(MatchHistoryUI.FormatCompletedTime("2026-10-25 07:28 UTC")));
+            Assert.That(formatted, Does.Contain(" Oct 2026 · "));
+            Assert.That(formatted, Does.EndWith(":28"));
+        }
+
+        [Test]
+        public void HistoryDate_UnknownOrMissingTimestampRemainsSafe()
+        {
+            Assert.That(MatchHistoryUI.FormatCompletedTime("Unknown"), Is.EqualTo("Unknown"));
+            Assert.That(MatchHistoryUI.FormatCompletedTime(null), Is.Empty);
+        }
+
     }
 }

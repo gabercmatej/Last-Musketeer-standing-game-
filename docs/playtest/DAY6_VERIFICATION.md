@@ -46,3 +46,11 @@ Published v0.4.2 through tools/deploy-web.sh; deploy `6addb2d00a0f2854f7e1d6e0`,
 Production Chrome: menu starts with no client error logs. Netlify public badge initially overlapped the lower-right action area; disabled the official per-site setting (`built_with_badge_enabled:false`), verified injected hud script absent on the next HTTP request. No rebuild required. [Official setting documentation](https://docs.netlify.com/manage/projects/powered-by-netlify-badge/).
 
 Final production Chrome check passed:0.4.2 menu, working shared leaderboard status, all four illustrated rows and0 wins,0 error logs, no badge overlay. Screenshot: day6/production-leaderboard.png. No production match was created during verification.
+
+## v0.4.3 presentation-only polish
+
+597/597 EditMode tests passed,0 failed/skipped (8.64s), job `4c4e0695801e4dccae0564f55873d4ee`. Zero compile errors; Web build82s. No sim/network/ranking/persistence/backend changes.
+
+Actual Chrome Web UI at1280×720 game area plus850×500: ivory Pirata One character names, smaller contained portraits, counts0/7/12/128 centered within fitted laurels, caption alignment, compact2–4-player cards, character-name colors distinct from placement pills, long24-character names without overlap, local timestamps08:28/01:28 across DST, click-to-expand still working. Screenshots ui-polish-*-fixtures.png are visual fixtures, not real standings.
+
+Fixtures supplied through temporary preview-tab GET response interception only; no server writes. Disabled interception, reloaded and fetched actual empty preview history to replace fixture cache, cleared viewport override and closed test tab. Production remained0 records/0 wins. Candidate `6addb6aec562111ed66fd32d`; production publish recorded next.
